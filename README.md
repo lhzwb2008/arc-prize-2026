@@ -89,8 +89,14 @@ python3 scripts/run_demo.py
 
 1. 打开比赛页，登录后点 **Join Competition**，同意规则。  
    https://www.kaggle.com/competitions/arc-prize-2026-arc-agi-2
-2. 创建 API token：https://www.kaggle.com/settings → Create New Token，把 `kaggle.json` 放到 `~/.kaggle/kaggle.json`（不要提交进 git）。
-3. 安装 CLI：`pip3 install kaggle`
+2. 本仓库已带 `.venv`。在项目目录执行：
+
+```bash
+source .venv/bin/activate   # Windows 请用 .venv\Scripts\activate
+kaggle auth login           # 浏览器授权；或把 API token 放到 ~/.kaggle/
+```
+
+3. `kaggle.json` / token **不要**提交进 git。
 4. 本地确认 notebook 能写出 json：
 
 ```bash
