@@ -1,0 +1,15 @@
+{
+  "id": "wenbozhang2026/arc-agi-2-non-ml-solver-v2",
+  "title": "ARC-AGI-2 non-ML solver v2",
+  "code_file": "kaggle_baseline.ipynb",
+  "language": "python",
+  "kernel_type": "notebook",
+  "is_private": true,
+  "enable_gpu": false,
+  "enable_tpu": false,
+  "enable_internet": false,
+  "competition_sources": ["arc-prize-2026-arc-agi-2"],
+  "dataset_sources": [],
+  "kernel_sources": [],
+  "model_sources": []
+}

@@ -10,7 +10,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 
-from arc_solver.baseline import predict_task, score_task  # noqa: E402
+from arc_solver.solver import predict_task, score_task  # noqa: E402
 from arc_solver.visualize import grid_html, pair_html, write_report  # noqa: E402
 
 EXAMPLES = ROOT / "data" / "examples"

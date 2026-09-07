@@ -20,7 +20,30 @@ Kaggle 比赛：https://www.kaggle.com/competitions/arc-prize-2026-arc-agi-2
 2. 用公开样例跑通一套 **demo → 本地打分 → 生成 submission.json → Kaggle notebook** 管道。
 3. 先交一个弱但真实的 baseline，看排行榜分数，再迭代。
 
-当前 baseline 不是要冲奖金的方案。它只在训练集上拟合一小撮固定变换（旋转、翻转、平移、填洞、按物体大小涂色等）。公开的 13 道示例里本地解出了 **11/13**；Kaggle 隐藏题会难得多，首次分数很可能接近 0。这正是我们要看到的基线。
+当前求解器（v2，`src/arc_solver/solver.py`）是纯算法、不含任何模型：在示范对上搜索能完全复现全部示范的程序，再用投票选出两次猜测。它不是冲奖金的方案，只是一个真实的起点。
+
+## 求解器 v2 怎么工作
+
+每道题独立求解，只用该题的 `train` 示范：
+
+1. **整图变换搜索**：约 150 个基础算子（旋转/翻转、放大/缩小、平铺/镜像拼接、裁剪、按物体选取/保留/删除、重力、填洞、描边、分隔线网格压缩等），做深度 ≤ 2 的组合，每个组合还可再接一层从示范里学出的颜色映射。
+2. **逐格规则归纳**（输入输出同尺寸时）：把每个格子的「颜色 + 局部上下文」（四/八邻域、四方向射线首个非背景色、所在行列特征、连通块大小、位置奇偶…）作为键，学一张键→输出色的表；表必须在全部示范上无冲突，且覆盖测试输入的所有格子。另有一组不看颜色只看「是否背景」的键，可泛化到示范里没出现过的颜色。
+3. **逐物体重涂**：按物体属性（大小、大小排名、是否最大/最小、孔洞数、形状、是否贴边…）学属性→颜色表。
+4. **补全**：对称补全（自动找镜像轴/对角线/旋转中心）和周期补全，用来填掉「遮挡色」区域；支持输出整图或只输出补好的那块。
+5. **分块合成**：把输入按 2/3/4 等分（可带分隔线）拆开，学各块颜色（或是否非背景）→输出色的真值表，覆盖 AND/OR/XOR 一类题。
+6. **变换拼贴**、**常量输出**。
+
+所有能复现全部示范的程序都参与**投票**，权重按程序复杂度衰减，票数最高的两个不同输出作为 `attempt_1` / `attempt_2`。没有任何程序拟合时，退回到覆盖率最高的局部规则，再不行原样输出输入。
+
+本地结果（2026-09-07，Apple Silicon 单进程平均 0.8 秒/题）：
+
+| 数据 | 解出 |
+|---|---|
+| `data/examples/` 13 题 | 12 |
+| 官方训练集 1000 题 | 159（15.9%） |
+| 官方公开评测集 120 题 | **1**（0.8%） |
+
+评测集是专门剔除了「能被暴力搜索解出的题」的，所以训练集和评测集之间差距巨大。诊断过：120 道评测题里只有 1 道存在任何能拟合全部示范的程序，也就是说瓶颈是 DSL 表达力，不是排序。要往上走得换思路（更强的程序合成 / 测试时训练），不是继续堆算子。
 
 ---
 
@@ -53,12 +76,24 @@ Kaggle 是 **Code Competition**：必须提交 notebook，在 **断网**、12 �
 
 ```
 data/examples/          公开样例（含官方指南最小题 + ARC-AGI-2 训练集若干题）
-src/arc_solver/         本地求解器（仅标准库）
-scripts/run_demo.py     跑样例、出 HTML 报告
+data/full/              官方 ARC-AGI-2 完整数据（不进 git，见下文「官方数据」）
+data/kaggle/            Kaggle 比赛数据原样下载（不进 git）
+src/arc_solver/solver.py     求解器 v2（仅标准库，整个文件会被嵌进 notebook）
+src/arc_solver/baseline.py   v1，只留作对照
+scripts/run_demo.py          跑样例、出 HTML 报告
+scripts/eval_full.py         在官方训练/评测集上多进程打分
 scripts/make_submission.py
-scripts/build_kaggle_notebook.py
-notebooks/kaggle_baseline.ipynb   给 Kaggle 用的 notebook
-demo/report.html        最近一次本地 demo 报告
+scripts/build_kaggle_notebook.py   生成 notebooks/kaggle_baseline.ipynb 及同内容的 .py
+notebooks/kaggle_baseline.ipynb    给 Kaggle 用的 notebook
+notebooks/kernel-metadata.json     kaggle kernels push 用的元数据（断网、挂比赛数据）
+demo/output/                 本地产物（不进 git）
+```
+
+打分：
+
+```bash
+python3 scripts/eval_full.py --split evaluation --show-solved
+python3 scripts/eval_full.py --split training --workers 8
 ```
 
 ---
@@ -79,40 +114,82 @@ python3 scripts/run_demo.py
 
 用浏览器打开 `demo/report.html` 或 `demo/output/report.html`。
 
-首次跑通时（2026-09-07）本地结果：**13 题中解出 11 题**（测试格子 12/14）。未解出的是 `017c7c7b`（变色后再纵向拼接）和 `0520fde7`（左右半图做 AND）。这不代表排行榜分数。
+v2 在示例上解出 12/13，唯一没解的是 `017c7c7b`（变色后再纵向延展）。这不代表排行榜分数。
 
 ---
 
-## 首次提交 Kaggle
+## 提交 Kaggle
 
-本机目前没有 `~/.kaggle/kaggle.json`，所以仓库只能把 notebook 准备好，**真正点 Submit 需要你在 Kaggle 登录并同意比赛规则**。
+整条链路走 CLI，不用在网页里贴代码（Kaggle 编辑器是 iframe，浏览器自动化进不去）。
 
-1. 打开比赛页，登录后点 **Join Competition**，同意规则。  
+1. 比赛页登录后点 **Join Competition**，同意规则。  
    https://www.kaggle.com/competitions/arc-prize-2026-arc-agi-2
-2. 本仓库已带 `.venv`。在项目目录执行：
+2. 登录 CLI（OAuth，浏览器里点 Approve 后把页面上的验证码贴回终端）：
 
 ```bash
-source .venv/bin/activate   # Windows 请用 .venv\Scripts\activate
-kaggle auth login           # 浏览器授权；或把 API token 放到 ~/.kaggle/
+python3 -m venv .venv && source .venv/bin/activate && pip install kaggle
+kaggle auth login
 ```
 
-3. `kaggle.json` / token **不要**提交进 git。
-4. 本地确认 notebook 能写出 json：
+   凭据缓存在 `~/.kaggle/`，**不要**提交进 git。
+3. 拉比赛数据并在本地把 notebook 完整跑一遍（用的是真实的 240 题占位测试文件，只验证格式和耗时）：
 
 ```bash
+kaggle competitions download -c arc-prize-2026-arc-agi-2 -p data/kaggle && (cd data/kaggle && unzip -qo '*.zip')
 python3 scripts/build_kaggle_notebook.py
-python3 -c "import json; json.load(open('notebooks/kaggle_baseline.ipynb'))"
+ARC_INPUT_DIR=data/kaggle ARC_OUTPUT=demo/output/kaggle_submission.json python3 notebooks/kaggle_baseline_as_script.py
 ```
 
-5. 到 Kaggle 新建 Notebook，挂上比赛数据，把 `notebooks/kaggle_baseline.ipynb` 贴进去（或上传）。**Internet 关掉**，Save Version → 选 Save & Run All → 完成后点 **Submit to Competition**。
+4. 推 notebook 到 Kaggle 跑（断网、挂比赛数据，都在 `notebooks/kernel-metadata.json`），等状态变 COMPLETE：
 
-首次分数只是基线。排行榜用的是你没见过的隐藏题；这个变换搜索在隐藏集上大概率很低。
+```bash
+kaggle kernels push -p notebooks
+kaggle kernels status wenbozhang2026/arc-agi-2-non-ml-solver-v2
+kaggle kernels output wenbozhang2026/arc-agi-2-non-ml-solver-v2 -p /tmp/kaggle_out   # 看日志、确认 submission.json
+```
+
+5. 提交该版本（每天只有 1 次，交前想清楚）：
+
+```bash
+kaggle competitions submit arc-prize-2026-arc-agi-2 -k wenbozhang2026/arc-agi-2-non-ml-solver-v2 -v <版本号> -f submission.json -m "说明"
+kaggle competitions submissions arc-prize-2026-arc-agi-2
+```
+
+注意：比赛数据在 Kaggle 上挂在 `/kaggle/input/competitions/arc-prize-2026-arc-agi-2/`，不是老的 `/kaggle/input/<slug>/`，notebook 里已改成递归查找。Kaggle CPU 上 240 题约 5 分钟。
+
+### 提交记录
+
+| 日期 | 版本 | 本地训练集 | 本地评测集 | 公开榜 |
+|---|---|---|---|---|
+| 2026-09-07 | v2（kernel 版本 2） | 159/1000 | 1/120 | 见下方更新 |
+
+隐藏榜是另外 120 道题，分布与公开评测集一致，所以预期与本地评测集同量级。每天提交一次只会得到一个总分，看不到题目和逐题对错；最终名次只看你赛末选出的最多 2 份提交，中途的低分不会拖累。
 
 ---
+
+## 官方数据
+
+完整数据放在 `data/full/`（已在 `.gitignore`，不进版本库），来自 [arcprize/ARC-AGI-2](https://github.com/arcprize/ARC-AGI-2) 的 `main` 分支：
+
+```
+data/full/data/training/     1000 题，公开训练集，用来开发求解器
+data/full/data/evaluation/    120 题，公开评测集，只用来本地打分
+```
+
+每题一个 `<task_id>.json`，结构与上文「输入 / 输出」一致；评测集的 `test` 里带 `output`，方便本地对答案。
+
+下载方式（本机直连 `github.com` 的 git clone 会超时，走 zip 更稳）：
+
+```bash
+curl -L -o /tmp/ARC-AGI-2-main.zip https://codeload.github.com/arcprize/ARC-AGI-2/zip/refs/heads/main
+unzip -q /tmp/ARC-AGI-2-main.zip -d data && mv data/ARC-AGI-2-main data/full
+```
+
+Kaggle 上榜用的是另外两套各 120 题的隐藏集（半私有 / 私有），与这里的评测集不重合。**不要人工看评测题后把答案写进规则**，那只会在本地虚高。
 
 ## 数据版权
 
-`data/examples/` 里除 `demo_fill_color.json` 外，任务文件来自 [arcprize/ARC-AGI-2](https://github.com/arcprize/ARC-AGI-2)，Apache 2.0。完整 1000/120 题请自己 clone 官方仓库，不要把评测集人工看题后写进规则。
+`data/examples/` 里除 `demo_fill_color.json` 外，任务文件与 `data/full/` 一样来自 [arcprize/ARC-AGI-2](https://github.com/arcprize/ARC-AGI-2)，Apache 2.0。
 
 ---
 

@@ -11,7 +11,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 
-from arc_solver.baseline import build_submission, flatten_challenges  # noqa: E402
+from arc_solver.solver import build_submission, flatten_challenges  # noqa: E402
 
 
 def load_challenges(path: Path) -> dict[str, dict]:
