@@ -1,0 +1,2 @@
+# Core solver is stdlib-only. These are optional helpers.
+kaggle>=1.6.0
