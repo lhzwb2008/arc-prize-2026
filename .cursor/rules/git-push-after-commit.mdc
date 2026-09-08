@@ -1,0 +1,15 @@
+---
+description: After a user-requested git commit, push to origin by default
+alwaysApply: true
+---
+
+# Git: commit 后默认 push
+
+用户要求提交（commit）时，在 commit 成功后**默认立刻** `git push` 到已跟踪的远程分支（通常 `git push -u origin HEAD`）。
+
+仍须遵守：
+
+- 只有用户明确要求提交时才 commit；不要主动 commit。
+- 不要 force push 到 main/master；不要 `--no-verify`。
+- 不要 push 含密钥的文件。
+- 用户明确说「先不要 push / 只 commit」时，以当次指令为准。
