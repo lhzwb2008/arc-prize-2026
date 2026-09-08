@@ -1,5 +1,9 @@
 # ARC Prize 2026（ARC-AGI-2）独立工程
 
+**人工试做（10 道训练 + 5 道评测，官方 10 色）：** [本机浏览器打开](file:///Users/Wezhang/workspace/arc-prize-2026/reports/human_preview.html) · [仓库内页面](reports/human_preview.html)
+
+点「本机浏览器打开」即可画格子、检查答案。先看示范，再画测试输出。
+
 GitHub：https://github.com/lhzwb2008/arc-prize-2026  
 本地目录：`/Users/Wezhang/workspace/arc-prize-2026`  
 Kaggle 比赛：https://www.kaggle.com/competitions/arc-prize-2026-arc-agi-2
