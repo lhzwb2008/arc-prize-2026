@@ -82,14 +82,19 @@ Kaggle 是 **Code Competition**：必须提交 notebook，在 **断网**、12 �
 data/examples/          公开样例（含官方指南最小题 + ARC-AGI-2 训练集若干题）
 data/full/              官方 ARC-AGI-2 完整数据（不进 git，见下文「官方数据」）
 data/kaggle/            Kaggle 比赛数据原样下载（不进 git）
+data/rules/             BARC/LARC 规则文本（SFT 用，不含评测题答案）
 src/arc_solver/solver.py     求解器 v2（仅标准库，整个文件会被嵌进 notebook）
 src/arc_solver/baseline.py   v1，只留作对照
 scripts/run_demo.py          跑样例、出 HTML 报告
 scripts/eval_full.py         在官方训练/评测集上多进程打分
 scripts/make_submission.py
 scripts/build_kaggle_notebook.py   生成 notebooks/kaggle_baseline.ipynb 及同内容的 .py
-notebooks/kaggle_baseline.ipynb    给 Kaggle 用的 notebook
-notebooks/kernel-metadata.json     kaggle kernels push 用的元数据（断网、挂比赛数据）
+scripts/nvarc/                 NVARC 原版 TTT 的本地单卡端口（3090 跑公开 120 评测）
+scripts/kaggle_preflight.py    提交前核对 kernel 日志：L4 + Py3.11 + 非空解码
+scripts/ensemble_submit.py     模型 attempt_1 + DSL attempt_2
+notebooks/kaggle_baseline.ipynb    DSL baseline notebook
+notebooks/kernel-metadata.json     DSL kernel 元数据
+notebooks/nvarc_2026/              NVARC Qwen3-4B TTT kernel（4×L4，钉 Python 3.11 镜像）
 demo/output/                 本地产物（不进 git）
 ```
 
@@ -165,9 +170,30 @@ kaggle competitions submissions arc-prize-2026-arc-agi-2
 
 | 日期 | 版本 | 本地训练集 | 本地评测集 | 公开榜 |
 |---|---|---|---|---|
-| 2026-09-07 | v2（kernel 版本 2） | 159/1000 | 1/120 | **0.83**（≈1/120） |
+| 2026-09-07 | DSL v2 | 159/1000 | 1/120 | **0.83**（≈1/120） |
+| 2026-09-09/10 | NVARC TTT（P100 / Py3.12 环境失败） | — | — | 0.00（dummy `[[0]]`，已不选用） |
+| 2026-09-10 | NVARC TTT v5 Save Version（L4×4 + Py3.11） | — | 4 题 Reload **1.0/4** | 隐藏集尚未交；公开复现约 27–33% |
 
-公开榜分数 0.83 与本地评测集 1/120 完全一致，说明公开评测集确实能当隐藏榜的代理。榜首当天为 76.67。
+公开榜 DSL 0.83 与本地评测集 1/120 一致。NVARC 的 0.00 是加速器/镜像弄错，不是模型不行。当前主路线是 NVARC 原版 TTT（先每题 LoRA，再解码），本地 120 题评测在 3090 上跑，Kaggle 只用来确认。
+
+### NVARC 本地 120 题
+
+3090 上独立 venv（`scripts/nvarc/requirements.txt`，torch 2.8 + Unsloth 2025.9.7），权重 `/opt/models/qwen3_4b_grids15_sft139`：
+
+```bash
+# 4 题对齐 Kaggle v5（应接近 Reload 1.0/4）
+bash scripts/nvarc/run_local.sh smoke4 3 --keys 0934a4d8,135a2760,136b0064,13e47133
+# 完整公开评测集（单卡约一晚）
+bash scripts/nvarc/run_local.sh eval120 30
+```
+
+推 Kaggle 必须走 CLI（UI Save Version 会丢掉钉死的 3.11 镜像），加速器选 **GPU L4 ×4**：
+
+```bash
+kaggle kernels push -p notebooks/nvarc_2026 --accelerator NvidiaL4
+python3 scripts/kaggle_preflight.py .venv/bin/kaggle
+# 确认 COMPLETE 且 Reload 非零后，再在网页 Submit to Competition（每天 1 次）
+```
 
 隐藏榜是另外 120 道题，分布与公开评测集一致，所以预期与本地评测集同量级。每天提交一次只会得到一个总分，看不到题目和逐题对错；最终名次只看你赛末选出的最多 2 份提交，中途的低分不会拖累。
 
@@ -201,6 +227,6 @@ Kaggle 上榜用的是另外两套各 120 题的隐藏集（半私有 / 私有�
 
 ## 下一步
 
-- 在公开训练集上扩 DSL / 程序搜索，而不是对着评测集调参。
-- 需要算力时再考虑 test-time 微调；Kaggle 评测断网，闭源 API 路线不可用。
+- 本地 120 题跑通 NVARC 原版 TTT，记下每题耗时和候选解，作为后续加法（DSL 填 `attempt_2`、改选解、压缩耗时）的尺子。
+- 不要在 120 评测题上训练。自研 Qwen3.5 SFT/规则 TTT 在 120 题上是 0，不再作为主路线。
 - 若要冲击奖金，方案需按比赛规则开源（偏 MIT-0 / CC0）。

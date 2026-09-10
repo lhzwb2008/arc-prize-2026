@@ -5,8 +5,12 @@ __pycache__/
 .ipynb_checkpoints/
 .env
 kaggle.json
+credentials.json
 data/full/
 data/kaggle/
 demo/output/
 *.egg-info/
 .pytest_cache/
+*.whl
+# local NVARC TTT pickles live on the GPU box, not this repo
+scripts/nvarc/*.sync/

@@ -1,0 +1,4771 @@
+{
+ "007bbfb7": [
+  {
+   "src": "barc_seed",
+   "concepts": [
+    "repeating patterns",
+    "colors as indicators",
+    "scaling"
+   ],
+   "rule": "In the input you will see a nxm sprite with black background. Construct an output grid with n^2 x m^2 black pixels. Divide the output grid into subgrids, and look at the corresponding pixel in the nxm input grid. If the corresponding pixel is not black, then copy the nxm input grid into the subgrid. Else, the subgrid does not change."
+  }
+ ],
+ "00d62c1b": [
+  {
+   "src": "barc_seed",
+   "concepts": [
+    "topology"
+   ],
+   "rule": "The input grid is a square grid with black and green pixels. The input grid should have regions that are enclosed by the green pixels. To produce the output, you need to find the enclosed regions in the input grid, and then color them yellow."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Look at the color that form the design in the input.Find any empty areas of blocks that are enclosed by the lines that form the main design, fill them yellow.You should end with the same original design from the input, but with the empty areas filled yellow."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Fill each enclosed hole with yellow."
+  }
+ ],
+ "017c7c7b": [
+  {
+   "src": "barc_seed",
+   "concepts": [
+    "translational symmetry",
+    "symmetry detection"
+   ],
+   "rule": "In the input you will see a grid consisting of a blue sprite that is repeatedly translated vertically, forming a stack of the same sprite. To make the output, expand the input to have height 9, and continue to repeatedly translate the sprite vertically. Change color to red."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Keep the original pattern, change the blue to red, and then continue the pattern in the new 3 rows. Output size: Add 3 rows to the bottom."
+  }
+ ],
+ "025d127b": [
+  {
+   "src": "barc_seed",
+   "concepts": [
+    "objects",
+    "pixel manipulation"
+   ],
+   "rule": "In the input you will see a set of objects, each consisting of a horizontal top/bottom and diagonal left/right edges (but that structure is not important) To make the output shift right each pixel in the object *except* when there are no other pixels down and to the right"
+  }
+ ],
+ "045e512c": [
+  {
+   "src": "barc_seed",
+   "concepts": [
+    "sprites",
+    "color change",
+    "collision detection",
+    "repetition",
+    "overlap"
+   ],
+   "rule": "In the input you will see a 3x3 object with a few other objects around it. For each of the other sprites around the central 3x3 object: 1. Slide the central sprite so it completely overlaps the other sprite (slide it as much as you can to do so) 2. Change the color of the central sprite to match the color of the other sprite 3."
+  }
+ ],
+ "0520fde7": [
+  {
+   "src": "barc_seed",
+   "concepts": [
+    "boolean logical operations",
+    "bitmasks with separator"
+   ],
+   "rule": "In the input you will see two blue bitmasks separated by a grey vertical bar To make the output, color teal the red that are set in both bitmasks (logical AND)"
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Look at both the left and right parts of the input grid. You will notice that the left and right parts are 3x3. For each square that is colored on both the left and right parts, color the output grid with red on the new 3x3. Output size: Should be 3x3."
+  }
+ ],
+ "05269061": [
+  {
+   "src": "barc_seed",
+   "concepts": [
+    "diagonal lines",
+    "repetition"
+   ],
+   "rule": "In the input you will see a 7x7 grid, with three diagonal lines that stretch from one end of the canvas to the other Each line is a different color, and the colors are not black The output should be the result of repeating every diagonal line on multiples of 3 offset from the original, which gives an interlacing pattern filling the output canvas"
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Fill the black grid with same pattern of row color, next row need to replace the same pattern of first row one column move shifted left."
+  }
+ ],
+ "05f2a901": [
+  {
+   "src": "barc_seed",
+   "concepts": [
+    "collision detection",
+    "sliding objects"
+   ],
+   "rule": "In the input you will see a teal 2x2 square and a red object (the red object might be irregular in its shape) Slide the red object in any of the four directions until it just touches the teal square"
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Keep the light blue cube in the same exact location. Then copy and move the other shape directly towards the blue cube, until it is touching it. At the end you'll have the light blue cube in the same exact spot as in the input grid and the the other shape will be the same but moved directly towards and touching the blue cube."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Keep the blue cube in the same spot. the red shape needs to move until it is touching the blue cube."
+  }
+ ],
+ "06df4c85": [
+  {
+   "src": "barc_seed",
+   "concepts": [
+    "rectangular cells",
+    "flood fill",
+    "connecting same color"
+   ],
+   "rule": "In the input you will see horizontal and vertical bars that divide the grid into rectangular cells To make the output, find any pair of rectangular cells that are in the same row and column and have the same color, then color all the rectangular cells between them with that color"
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Fill the black 2x2 square grid with same color in between the two same color of 2x2 grid and connect."
+  }
+ ],
+ "08ed6ac7": [
+  {
+   "src": "barc_seed",
+   "concepts": [
+    "sorting",
+    "color change",
+    "size"
+   ],
+   "rule": "In the input you will see a row of exactly 4 grey bars of different heights, each starting at the bottom of the canvas, and each separated by 1 pixel (so they are two pixels apart) Color the tallest one blue, the second tallest one red, the third tallest one green, and the shortest one yellow."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Change the color of the tallest to blue, then second talest to red,third tallest to green,then finally shortest to yellow for both pairs. Output size: Does not change."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Change the color of the tallest to blue, then second talest to red,third tallest to green,then finally shortest to yellow for both pairs. Output size: Does not change."
+  }
+ ],
+ "09629e4f": [
+  {
+   "src": "barc_seed",
+   "concepts": [
+    "rectangular cells",
+    "color guide"
+   ],
+   "rule": "In the input you will see grey horizontal and vertical bars that divide the grid into nine 3x3 rectangular regions, each of which contains 4-5 colored pixels To make the output, find the region that has exactly 4 colored pixels, and use its colors as a guide to fill in all the other cells"
+  }
+ ],
+ "0962bcdd": [
+  {
+   "src": "barc_seed",
+   "concepts": [
+    "pixel manipulation",
+    "growing"
+   ],
+   "rule": "In the input you will see some number of colored crosses, each of which is 3 pixels tall, 3 pixels wide, and has a single pixel in the center of the cross that is a different color. Make the output by growing the cross by 1 pixel north/south/east/west, and growing the center pixel by 2 pixels along each of the 4 diagonals."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Extend the plus sign one square in every direction and then make a 5x5 'X' of the center color through the center square. You should result in nine squares the color of the center and eight the color of the original plus sign."
+  }
+ ],
+ "0a938d79": [
+  {
+   "src": "barc_seed",
+   "concepts": [
+    "repetition",
+    "horizontal/vertical bars"
+   ],
+   "rule": "In the input you will see a pair of colored pixels Make each pixel into a horizontal/vertical bar by connecting it to the other side of the canvas Then, repeat the bars indefinitely in the same direction: either downward (for horizontal bars) or rightward (for vertical bars)"
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Create a pattern of short stripes alternating between the 2 colors. Start from the first colored pixel and create a line that goes to the opposite side using that color. Then go to the second colored pixel and do the same. Continue the pattern of stripes to the RIGHT for a long grid or go DOWN for a tall grid all the way to the end."
+  }
+ ],
+ "0b148d64": [
+  {
+   "src": "barc_seed",
+   "concepts": [
+    "rectangular cells",
+    "color guide"
+   ],
+   "rule": "In the input you will see a pretty big grid divided into four axis-aligned quadrants (but there might be different sizes), each of which is separated by at least 1 row/column of black. All the quadrants contain random pixels, and all quadrants except for one have the same color To make the output, find the quadrant with a different color, and copy only that quadrant to the output, producing a smaller grid"
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Copy the pattern that is a different color. Output size: Becomes the size of the pattern that is a different color."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Make it the area that is a different color. Output size: Become size of the different color area."
+  }
+ ],
+ "0ca9ddb6": [
+  {
+   "src": "barc_seed",
+   "concepts": [
+    "pixel manipulation"
+   ],
+   "rule": "In the input you will see a medium sized grid width individual colored pixels, some of which are red or blue (those ones are special) To make the output: 1. For each red pixel, add yellow pixels in its immediate diagonals (northeast, northwest, southeast, southwest) 2. For each blue pixel, add orange pixels in its immediate neighbors (up, down, left, right)"
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Copy image exactly. Where there's a red square, put yellow squares at it's corners (4 total). Where there's a dark blue square, put orange squares directly above and below it (4 total). Do nothing with light blue or magenta squares."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Add one yellow square diagonally at each corner of the red square. Add one orange square to the top and bottom of the blue square, and one orange square to the left and right of the blue square. Leave the magenta and light blue squares as they are; do not add anything to them if they are present."
+  }
+ ],
+ "0d3d703e": [
+  {
+   "src": "barc_seed",
+   "concepts": [
+    "color mapping"
+   ],
+   "rule": "The input is a grid where each column is of the same color. To make the output, change each color according to the following mapping: green -> yellow, blue -> gray, red -> pink, teal -> maroon, yellow -> green, gray -> blue, pink -> red, maroon -> teal"
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Change the column color to a specific other color. If the original color is dark red, change it to pink. If it is green, change it to yellow. If dark blue, change to grey. If light blue, change to dark red. The opposite is also true (for example if it is light blue, change to dark red). Output size: Is also 3 by 3."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Change the color of the grid column into specific color. grey to dark blue, light blue to dark red, magenta to light red, green to yellow and vice versa."
+  }
+ ],
+ "0dfd9992": [
+  {
+   "src": "barc_seed",
+   "concepts": [
+    "occlusion",
+    "translational symmetry"
+   ],
+   "rule": "In the input you will see a translationally symmetric pattern randomly occluded by black pixels. To make the output, remove the occluding black pixels to reveal the translationally symmetric pattern."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Start by copying the input grid exactly. Fill in all of the black boxes to complete the pattern until there are no more black boxes. To do this notice the pattern of the colored boxes. For example the top row might repeat every 4th row (or 5 rows or whatever the number of rows is before it repeats). Once you've figured out the pattern just fill in the black boxes with the correct colored boxes."
+  }
+ ],
+ "0e206a2e": [
+  {
+   "src": "barc_seed",
+   "concepts": [
+    "symmetries",
+    "objects"
+   ],
+   "rule": "In the input you will see one or two medium-sized multicolor objects, and some multicolor pixels sprinkled around in one or two clusters To make the output, take each of the medium-sized object and move it so that it perfectly covers some of the pixels sprinkled around, matching colors wherever they overlap."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Try to fill up the empty space between the three color boxes as the original object given."
+  }
+ ],
+ "10fcaaa3": [
+  {
+   "src": "barc_seed",
+   "concepts": [
+    "coloring diagonal pixels",
+    "repetition"
+   ],
+   "rule": "Given an input grid of arbitrary size, with some small number of colored pixels on it. To produce the output, replicate the input grid 4 times, 2 on the top and 2 on the bottom. Color all the diagonal pixels adjacent to a colored pixel teal if the diagonal pixels are black."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Resize the output grid to be double the width and height of the input grid. Then, copy and paste each colored square in the input grid 4 times -- once in each \"quadrant\" (if, in the input, the square is in the uppermost and leftmost corner, then it should be in the uppermost and leftmost corner in the output, as well as in the uppermost and leftmost corner of each \"quadrant\"). Output size: Is double the height and width of the input grid."
+  }
+ ],
+ "11852cab": [
+  {
+   "src": "barc_seed",
+   "concepts": [
+    "symmetry detection",
+    "occlusion"
+   ],
+   "rule": "In the input you will see an object that is almost rotationally symmetric, except that some of it has been removed (covered in black pixels) To make the output fill in the missing parts of the object to make it rotationally symmetric"
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Complete the pattern that is not there by color each side with the color that is not there to complete the pattern."
+  }
+ ],
+ "1190e5a7": [
+  {
+   "src": "barc_seed",
+   "concepts": [
+    "horizontal/vertical bars",
+    "counting"
+   ],
+   "rule": "In the input, you will see horizontal and vertical bars, dividing the input into a grid of rectangular regions, on a non-black background. To make the output produce a monochromatic image whose width is the number of background-colored regions going left-to-right, and whose height is the number of regions going top-to-bottom. The output should have the same background."
+  }
+ ],
+ "137eaa0f": [
+  {
+   "src": "barc_seed",
+   "concepts": [
+    "objects",
+    "alignment by color"
+   ],
+   "rule": "In the input you will see some objects scattered around on a black grid. Each object has a single grey pixel, but everything else is a single other color. To make the output, place each object into the output grid such that the grey pixel is in the center of the output. Equivalently, move the objects to line up all their grey pixels so they overlap."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Move each pattern so that the gray square in each pattern occupies the center square of the output 3x3 grid."
+  }
+ ],
+ "150deff5": [
+  {
+   "src": "barc_seed",
+   "concepts": [
+    "decomposition",
+    "color change"
+   ],
+   "rule": "In the input you will see grey-colored regions on a medium sized black canvas. These regions are comprised of 2x2 squares and 1x3/3x1 rectangles, but this might be hard to see because regions might be touching. To make the output, decompose the input into 2x2 squares and 1x3/3x1 rectangles, and color them as follows: 1. Color teal the 2x2 squares 2. Color red the 1x3/3x1 rectangles"
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Copy pattern and change 2x2 areas to light blue and 1x3 to red."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Copy the input grid. Find any blocks of four squares which make a 2x2 square and change them to LIGHT blue. Change the other grey squares to red. In the end, the shapes should be made only out of 2x2 light blue sections and 1x3 red sections."
+  }
+ ],
+ "178fcbfb": [
+  {
+   "src": "barc_seed",
+   "concepts": [
+    "vertical lines",
+    "growing"
+   ],
+   "rule": "In the input you will see individual pixels sprinkled on a black background that are either red, green, or blue Turn each red pixel into a vertical bar, and each green or blue pixel into a horizontal bar"
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Draw a vertical red line through any red squares. Then draw lines, left to right, for the green and blue squares. Go over any red squares from before."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Extend the green and blue squares into horizontal lines that go all the way to the edges of the grid. The red square extend as a vertical line that is behind the green and blue squares so the place where the lines cross over each other, the blue or green square should show."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Draw a vertical red line of squares through any red squares, then make left to right green lines through green squares and left to right blue lines through blue squares. Go over any red squares from before."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Green color row bag in the box."
+  }
+ ],
+ "1a07d186": [
+  {
+   "src": "barc_seed",
+   "concepts": [
+    "collision detection",
+    "sliding objects",
+    "horizontal/vertical bars"
+   ],
+   "rule": "In the input you will see horizontal/vertical bars and individual coloured pixels sprinkled on a black background Move each colored pixel to the bar that has the same colour until the pixel touches the bar. If a colored pixel doesn't have a corresponding bar, it should be deleted."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Remove the different color that does not match the rest. move the single squares so they are in the same horizontal or vertical place depending if it is a vertical or horizontal line and have them touch the same side the single squares were on."
+  }
+ ],
+ "1b2d62fb": [
+  {
+   "src": "barc_seed",
+   "concepts": [
+    "boolean logical operations",
+    "bitmasks with separator"
+   ],
+   "rule": "In the input you will see two maroon bitmasks separated by a blue vertical bar To make the output, color teal the pixels that are not set in either bitmasks (logical NOR)"
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Put both pattern together, if it is red in either pattern make it red in the output. Then turn the black light blue and the red black. Output size: Is 3 wide and 5 up and down."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Change the entire background in black and you have to watch the black space in both input pattern compare them now color the similar black space with light blue color."
+  }
+ ],
+ "1b60fb0c": [
+  {
+   "src": "barc_seed",
+   "concepts": [
+    "symmetry"
+   ],
+   "rule": "In the input you will see an image containing blue pixels that is almost rotationally symmetric, except that it is missing the section either north, south, east, or west that would make it rotationally symmetric Color red all the pixels that would need to be colored in order to make the image rotationally symmetric (when rotating clockwise)"
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Recreate the blue pattern then add another part on the left, in red. Output size: Should match the input."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Recreate one of the sections of the 3-part blue pattern in order to turn it into a 4-part pattern. However the newly created section should be in red and should be placed into the empty section of the grid in a logical orientation in order to create a consistent 4-part pattern."
+  }
+ ],
+ "1bfc4729": [
+  {
+   "src": "barc_seed",
+   "concepts": [
+    "pattern generation"
+   ],
+   "rule": "In the input you will see a grid with two colored pixels. To make the output, you should draw a pattern from the two pixels. step 1: draw a horizontal line outward from the two pixels in their respective colours. step 2: draw a border around the canvas whose top half is colored to match the top pixel and whose bottom half matches the bottom pixel."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Use same color as input. 2 patterns, top and bottom; pattern like a long A stretch horizontally top then upside down on bottom of grid. To made the A and upside down A all side of grid are colored same color as the near color tile from input. Finally, add a 2 horizontal lines; 1 near top, 1 near bottom."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Use the top color to fill in the entire first row, the first and last blocks of the second row, the entire third row, and the first and last blocks of the 4th and 5th rows. Then use the bottom color to fill in the first and last blocks of the 6th and 7th rows, fill in the entire 8th row, the first and last blocks of the 9th row, and the entire bottom (10th) row."
+  }
+ ],
+ "1c786137": [
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Copy the squares inside of the same colored squares."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Copy the grid inside the rectangle. Output size: Will be the size of the area inside the rectangle."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Copy the grid inside the rectangle. Output size: Will be the size of the area inside the rectangle."
+  }
+ ],
+ "1caeab9d": [
+  {
+   "src": "barc_seed",
+   "concepts": [
+    "alignment",
+    "objects"
+   ],
+   "rule": "In the input you will see a red, blue, and yellow shape. Each are the same shape (but different color). They occur left to right in the input grid on a black background, but at different vertical heights. The output is the same as the input, but with the vertical heights of the red and yellow shapes adjusted to match the height of the blue shape."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Keep the blue shape where it is, and move the red and yellow shapes up or down so that they are at the same level as the blue-colored shape."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Keep the blue pattern where it is and bring the yellow and red patterns up or down onto the same level as the blue one."
+  }
+ ],
+ "1cf80156": [
+  {
+   "src": "barc_seed",
+   "concepts": [
+    "cropping"
+   ],
+   "rule": "In the input you will see a single colored shape, around 4x6 in size, floating in a 12x12 grid of black. To make the output, crop the background out of the image - so the output grid has the same dimensions as the shape."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "You just need to make sure the colored image is exactly (top, bottom, left, right) in the new grid. No color change. Output size: It becomes the size of the colored image."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "You have to you need to make sure the colored image is exactly. Output size: If becomes the size of the colored image."
+  }
+ ],
+ "1e0a9b12": [
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Move all pixels down. The colors do not change. Simply move all pixels down until they sit on top of each other. There should not be any black pixels between the same color in a column. Output size: Does not change."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Think of the grid as a black field and as the colored squares as being objects floating in space. Gravity is suddenly turned on and all of the block fall vertically to the bottom. That produces the correct output grid. Output size: Doesn't change from the input."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Move the squares downward toward the bottom of the grid. All squares of the same color should rest on top of the other squares of the same color in a column, with the bottom of each column on the bottom row of the grid. The rest of the squares remain black. Output size: Remains 5 by 5."
+  }
+ ],
+ "1e32b0e9": [
+  {
+   "src": "barc_seed",
+   "concepts": [
+    "pattern reconstruction"
+   ],
+   "rule": "In the input you will see 9 squares seperated by 4 lines. The top-left square contains the original pattern. Each square contains either a small portion of pattern or remains empty. To make the output, you should detect the pattern on the top-left square and fill each square"
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Use the shape that's in the top left box and replicate that in all the other boxes, but leave the color that is already there, and use the other color, the one that is dividing the 9 boxes, to complete the shapes in the rest of the boxes."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Replicate what is inside of the top left 5x5 grid throughout the rest of the 8 grid left. The color of these additional blocks should match the color of the block cut line."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Take what is in the up left space and put that pattern in all 9 spaces but in the same color as the grid. If a space has a pattern in it already, leave those blocks the same color as you fill in the rest of the first pattern around it in the grid color."
+  }
+ ],
+ "1f642eb9": [
+  {
+   "src": "barc_seed",
+   "concepts": [
+    "alignment",
+    "copy to object border"
+   ],
+   "rule": "In the input you will see a teal object on a black background, and several colored pixels on the border of canvas. To make the output grid, you should copy the colored pixels horizontally/vertically so that they are just barely overlapping/colliding with the teal object."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Make a copy of each of the colored small squares and put those copy into the blue shape into the same line near to the same block."
+  }
+ ],
+ "1f85a75f": [
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Copy only the biggest shape into the output grid. Output size: Is the size of the height and width of the biggest colored shape."
+  }
+ ],
+ "1f876c06": [
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Copy the input grid. Then, form a diagonal line by connecting the two of the same color blocks. The diagonal line between each set of matching color blocks should be the same color as the two blocks you are connecting. Do this for each set of matching blocks."
+  }
+ ],
+ "1fad071e": [
+  {
+   "src": "barc_seed",
+   "concepts": [
+    "counting"
+   ],
+   "rule": "In the input you will see multiple 2x2 blue squares, multiple 2x2 red squares, and some red or blue dots sprinkled about. To make the output, fill a 1x5 grid with blue pixels from left to right for each 2x2 blue square in the input (counting the number of blue 2x2 squares)."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Fill single blue grid from the left for every 2x2 blue grids available. Output size: 5x1 grid."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Choose 5x1 grid size and fill the color of grid as blue as how many 2x2 blue color grid in input and leave others as black. Output size: Be 5x1 grid size."
+  }
+ ],
+ "2013d3e2": [
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Fill the grid with the upper left corner of the colored shape. The output should look like the top left corner of the colored shape."
+  }
+ ],
+ "2204b7a8": [
+  {
+   "src": "barc_seed",
+   "concepts": [
+    "proximity",
+    "color change",
+    "horizontal/vertical bars"
+   ],
+   "rule": "In the input you will see a pair of lines on the edge of the canvas that are either horizontal or vertical, and also green pixels randomly placed in between the lines Change the color of each green pixel to match the color of the line it is closest to"
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Change the color of the block in the middle of the grid to match the color of the side they are closest to."
+  }
+ ],
+ "22168020": [
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Fill in the area above the four square base until you get to the top of the colored area."
+  }
+ ],
+ "22233c11": [
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "On each of the center line direction of the green pattern, draw blue color pattern, and the blue color pattern is half of the green pattern."
+  }
+ ],
+ "228f6490": [
+  {
+   "src": "barc_seed",
+   "concepts": [
+    "holes",
+    "objects",
+    "distracters",
+    "topology",
+    "puzzle piece"
+   ],
+   "rule": "In the input you will see multiple grey rectangular objects, each with a black hole inside of it. There are also monochromatic objects somewhere exactly the same shape as each hole, and random other distracter objects (distracters all the same color). To make the output, check to see if each non-distracter object perfectly fits inside the black hole inside of a gray object, like it is a puzzle piece."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Fill in the shapes within the gray area with the color shapes that represent the space."
+  }
+ ],
+ "22eb0ac0": [
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Copy the input. If two blocks across from each other are the same color, fill in the rest of that horizontal row with that color. Don't do anything with the blocks across from each other that are different colors."
+  }
+ ],
+ "234bbc79": [
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Make any grey boxes the same color as the blocks to which it is connected. Remove columns of black boxes. Align the middle and right shapes so that the former grey squares are connected. Output size: Changes in length by removed any black columns that separate the shapes."
+  }
+ ],
+ "23581191": [
+  {
+   "src": "barc_seed",
+   "concepts": [
+    "lines",
+    "intersection"
+   ],
+   "rule": "In the input, you will see a grid with a single orange pixel and a single teal pixel. To make the output, draw an orange vertical line and an orange horizontal line that intersect at the orange pixel, and draw a teal vertical line and a teal horizontal line that intersect at the teal pixel. The lines should go from edge to edge of the grid. Lastly, draw a red pixel where the teal and orange lines intersect."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Continue both lines in their color both left to right and up and down. where the two lines cross each other make that square red."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Make a vertical and horizontal line through each square to the edge of the grid. Make each line the same color as its input square. Where the two colors cross put a red square."
+  }
+ ],
+ "239be575": [
+  {
+   "src": "barc_seed",
+   "concepts": [
+    "connectivity"
+   ],
+   "rule": "In the input image you will see several teal pixels and two 2x2 red squares on the black background. If the 2x2 red squares are connected by a path of teal pixels, then output a 1x1 teal grid, otherwise, output a 1x1 black grid."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Make the color of the square the same color as the square that is five down and three across of the input. Output size: 1 grid square."
+  }
+ ],
+ "23b5c85d": [
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Change the grid size with the colored object with the smallest area and fill the same color. Output size: Should be the one colored object with the smallest area."
+  }
+ ],
+ "253bf280": [
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Use green lines to connect blue dots that are in the same line."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Add green blocks between the light blue blocks. Do not add green blocks if the light blue blocks are not on the same row."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Use green lines to connect blue dots that are in the same horizontal or vertical point on the grid."
+  }
+ ],
+ "25d487eb": [
+  {
+   "src": "barc_seed",
+   "concepts": [
+    "patterns",
+    "growing",
+    "horizontal/vertical bars"
+   ],
+   "rule": "In the input you will see a colored triangle with a single pixel centered in the base of the triangle that is a different color. Grow a bar out of and away from the triangle, as if shot out of the tip opposite the differently colored pixel. This bar is the same color as that base pixel."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Take the smaller color and shoot it out the top. Output size: Does not change."
+  }
+ ],
+ "25d8a9c8": [
+  {
+   "src": "barc_seed",
+   "concepts": [
+    "patterns",
+    "horizontal bars"
+   ],
+   "rule": "In the input you will see a colored pattern in a 3x3 grid. For each row of the input, if that row is a single color, color that row in the output grey. Otherwise, output black."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Fill the row with grey if the row has the same colors in the input. color the row with black if the row contain different colors."
+  }
+ ],
+ "25ff71a9": [
+  {
+   "src": "barc_seed",
+   "concepts": [
+    "sliding objects"
+   ],
+   "rule": "In the input you will see a 3x3 grid with a contiguous shape on it. Slide the shape down by one pixel."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Move all the blue color move down by one grid."
+  }
+ ],
+ "264363fd": [
+  {
+   "src": "barc_seed",
+   "concepts": [
+    "patterns",
+    "growing",
+    "horizontal/vertical bars"
+   ],
+   "rule": "In the input you will see a 30x30 grid with at least two rectangles, each with at least one special pixel of a different color, and a crosshair-type pattern outside these rectangles. For each of these special pixels, apply the crosshair pattern and extend the points inside the rectangle that special pixel is in, until it reaches the edge."
+  }
+ ],
+ "272f95fa": [
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Copy the input. Fill the top row middle shape (between the lines) in red. For the second (center) row, fill the first shape with yellow, the middle with pink, and the last (right) in green. Then fill the middle shape of the bottom row with blue. The four corner shapes will still be black."
+  }
+ ],
+ "27a28665": [
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "See which design you have. if you have two black lines that are 2 squares long, one coming down from the top left, and one going left from the bottom right, your output will be a green square.If you have a grey cross that is filled in, your output is a magenta square. If you have a black cross, with the middle square filled in with a different color, your output will be an orangey red. Output size: Will change to a 1 by 1 square."
+  }
+ ],
+ "28bf18c6": [
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Copy the figure two times in that grid size. Output size: 3 up and 6 to the sides."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Copy the figure two times in that grid size. Output size: 3 up and 6 to the sides."
+  }
+ ],
+ "28e73c20": [
+  {
+   "src": "barc_seed",
+   "concepts": [
+    "geometric pattern",
+    "repetition",
+    "spiral"
+   ],
+   "rule": "In the input you will see an empty black grid. To make the output, you should draw a spiral pattern of green pixels starting from the top left corner and going to the right."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Make a green \"spiral.\" Begin in the upper left corner and work clockwise around the outer edges of the grid. Turn clockwise one cell short of making a complete border of green. Continue coloring green until you reach the center of the grid."
+  }
+ ],
+ "29623171": [
+  {
+   "src": "barc_seed",
+   "concepts": [
+    "counting",
+    "dividers",
+    "filling"
+   ],
+   "rule": "In the input you will see grey horizontal and vertical bars that divide rectangular regions. Each rectangular region is black with some colored pixels added. To make the output, fill the rectangular region with the most colored pixels. Fill it with is color. Fill the other rectangular regions with black."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Count the number of small colored boxes within the bigger black boxes, the one(s) with the most colored boxes get filled in entirely with that color. The remaining boxes are all black."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Find the black box or boxes with the highest number of colored blocks in the input grid. The corresponding box or boxes in the output grid should be colored entirely that color. The rest of the boxes should be all black."
+  }
+ ],
+ "29c11459": [
+  {
+   "src": "barc_seed",
+   "concepts": [
+    "attraction",
+    "magnetism"
+   ],
+   "rule": "In the input you will individual pixels are the sides of a grid. Each pixel is in a matching pair, which is a different color, but on the opposite side of the grid. To make the output, make each pixel copy its color toward its matching pair until they meet in the middle. Turn the middle point grey."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Add four more blocks of the same color to the right of the block on the left side of the grid. Add a gray block. Then add four blocks of the same color of the block on the right side of the grid to connect the line."
+  }
+ ],
+ "29ec7d0e": [
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Replace the black squares with the correct corresponding colors, using the blocks without black areas as reference."
+  }
+ ],
+ "2bcee788": [
+  {
+   "src": "barc_seed",
+   "concepts": [
+    "mirror symmetry",
+    "non-black background",
+    "indicator pixels"
+   ],
+   "rule": "In the input you will see an object with some red pixels attached to it on one side. To make the output, mirror the object to cover the red pixels. Then change the background to green."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Change the background to green. The object should have 2 colors red and some other color. From the input, take the color that is not red and copy it exactly as it is. You want to make another copy of that color but make it a mirrored image in the direction of the red block."
+  }
+ ],
+ "2bee17df": [
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Copy the input grid into the output. Around the outside of the grid, you will notice some squares are only one square deep around. Take note of these squares. Using green, draw straight lines horizontally and vertically from these squares that are only one deep around the outside, connecting them ONLY to squares on the other side of the grid that also are only one square deep."
+  }
+ ],
+ "2c608aff": [
+  {
+   "src": "barc_seed",
+   "concepts": [
+    "attraction",
+    "objects",
+    "non-black background"
+   ],
+   "rule": "In the input you will see a non-black background with a colored rectangle and some colored pixels sprinkled randomly. To make the output, draw a horizontal or vertical line connecting each colored pixel to the rectangle (whenever possible: the rectangle and pixel have to be lined up). Color the line the same as the pixel."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "If the dots could connect to the central square with a straight line, connect it with the same color as the dot."
+  }
+ ],
+ "2dc579da": [
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "\"zoom in\" on the section with an off-color square. Output size: Is the size of 1 of the 4 sections."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Select the quadrant with the different colored square, then copy and paste the quadrant as the output. Output size: Is the size of one of the quadrants."
+  }
+ ],
+ "2dd70a9a": [
+  {
+   "src": "barc_seed",
+   "concepts": [
+    "path finding"
+   ],
+   "rule": "In the input you will see teal pixels and a short green line and a short red line. Find a path starting from the green line and ending at the red line and color that path green, with the following constraints: You can't go through a teal pixel; you can only change direction when you hit a teal pixel; you have to start in the direction of the green line."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Use green line to connect the red and green parts in straight lines."
+  }
+ ],
+ "2dee498d": [
+  {
+   "src": "barc_seed",
+   "concepts": [
+    "translational symmetry",
+    "symmetry detection",
+    "reflection"
+   ],
+   "rule": "In the input, you will see a sprite repeated horizontally, and some of those repetitions might be reflected top/down/right/left. To make the output, just extract the repeated sprite."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Zoom in on one example of the colored pattern and paste it into the grid of the correct size. Output size: Is the size of one example of the colored block pattern."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Fill the grid up with the singular identified pattern. Output size: Should be set to the equivalent grid size that the singular pattern takes up."
+  }
+ ],
+ "31aa019c": [
+  {
+   "src": "barc_seed",
+   "concepts": [
+    "counting",
+    "uniqueness",
+    "surrounding"
+   ],
+   "rule": "In the input, you will see a grid with a black background and colored pixels sprinkled on it. Exactly one color occurs only one time. To make the output, find the cell whose color is unique (color occurs only one time), and surround that cell with red pixels. Make all the other pixels black."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Make the entire output black. Then, you need to locate a block that is the only color in the input and place it in the same position. Surround the block with red blocks until it forms a square."
+  }
+ ],
+ "321b1fc6": [
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Change the colors of all the single-colored structures to the multi-colors. Then change the original multi-colored structure to all black."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "REPLACE the solid colored patterns with the multi-colored versions, so each pattern has the same coloring. THEN REMOVE the original multi-colored pattern by replacing it entirely with black tiles."
+  }
+ ],
+ "32597951": [
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Change the dark blue boxes to green boxes where they cover parts of the rectangle created by the light blue boxes. Once changed the rectangle shape should be clear with no dark blue boxes within its borders."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Replace the blue squares with green squares to complete a square of a rectangle with the light blue blocks."
+  }
+ ],
+ "3345333e": [
+  {
+   "src": "barc_seed",
+   "concepts": [
+    "symmetry",
+    "occlusion"
+   ],
+   "rule": "In the input you will see a left-right symmetric monochromatic object occluded by a colored rectangle To make the output, remove the colored rectangle and fill in the missing parts of the object to make it left-right symmetric"
+  }
+ ],
+ "3428a4f5": [
+  {
+   "src": "barc_seed",
+   "concepts": [
+    "bitmasks with separator",
+    "boolean logical operations"
+   ],
+   "rule": "Compute the XOR operation of where the two grids are red, turning the output green in those locations. In the input, you should see two 6x5 red patterns on top and bottom separated a horizontal yellow line in the middle of the grid. To make the output, you have to overlap the two patterns. If the overlapping cells are the same color, then the corresponding cell is colored black;"
+  }
+ ],
+ "3618c87e": [
+  {
+   "src": "barc_seed",
+   "concepts": [
+    "color",
+    "falling"
+   ],
+   "rule": "In the input, you should see a gray baseline at the bottom. For each gray baseline pixel, there may or may not be gray pixels above it. If there are gray pixels above it, you can see a blue pixel above the gray pixels. To make the output, make the blue pixels fall downward, falling through the gray baseline until they hit the bottom."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Change blue grids to black background, count two steps below each grid's initial placement and fill with blue. Output size: The two blue grids have been moved two steps downwards."
+  }
+ ],
+ "3631a71a": [
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Replace the large shapes with the mirrored version of what is on the opposite side of the pattern."
+  }
+ ],
+ "363442ee": [
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Copy the pattern on the left and recreate the same pattern over each blue square on the right side, such that the center of the pattern is where the blue square was."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Use the blue square as the middle square and recreate the same pattern replacing the blue square with the same color in the middle as the pattern."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Copy the pattern on the left of the grey bar and paste it so that it is directly over each blue square such that the center square of the pattern is located exactly where the blue square was."
+  }
+ ],
+ "36d67576": [
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Repeat pattern shown on single yellow pattern onto others. Output size: Copy grid size."
+  }
+ ],
+ "36fdfd69": [
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Copy the input grid. Connect the red squares with yellow to create yellow and red rectangles or squares. Only connect red squares that are close together. Do not turn any black squares yellow - only connect red squares that you can connect by making the other color in the grid yellow. The output grid will have more than one yellow and red rectangle or square."
+  }
+ ],
+ "3906de3d": [
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Imagine the blue is a vacuum and sucks the red up into the open spaces. Move all red straight up."
+  }
+ ],
+ "39a8645d": [
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Count the number of copies of each shape. Zoom in on the shape with the most copies."
+  }
+ ],
+ "39e1d7f9": [
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Copy the input grid, replicate the main pixel placement within the grid and replicate half at the top right corner."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Complete the small part as the same as the complete pattern."
+  }
+ ],
+ "3aa6fb7a": [
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Fill in the missing corners with a blue square. Output size: Is identical."
+  }
+ ],
+ "3ac3eb23": [
+  {
+   "src": "barc_seed",
+   "concepts": [
+    "pixel pattern generation",
+    "falling downward"
+   ],
+   "rule": "In the input you will see a grid with several colored pixels at the top. To make the output, you should draw a pattern downward from each pixel: Color the diagonal corners, and then color downward with a vertical period of 2 from those corners and from the original pixel, making the pattern fall downward."
+  }
+ ],
+ "3af2c5a8": [
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Imagine grid is cut in half vertical. Copy pattern to top and below left half. Mirror pattern to right half of grid to top and below. Output size: Change to 8x6."
+  }
+ ],
+ "3bd67248": [
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Copy the input grid. Fill in all of the squares on the bottom row of the grid with yellow. Then draw a red line diagonal from the black square in the bottom left up to the top right of the grid. Do not change the bottom left color when you draw the yellow and red lines; the yellow and red lines each begin in the second column of the grid."
+  }
+ ],
+ "3bdb4ada": [
+  {
+   "src": "barc_seed",
+   "concepts": [
+    "punching holes",
+    "geometric pattern"
+   ],
+   "rule": "In the input you will see a grid with some rectangles. Each rectangle is three pixels along its short side, and is monochromatic. To make the output, you should draw black pixels along the middle of each rectangle with a period of 2 starting one pixel in. Effectively punching holes in the middle of each rectangle, skipping alternating pixels."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Put black squares in the middle of the rectangle shapes so that the pattern is colored square, black square, colored square, black square and so on in the middle of each rectangle."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Form multiple holes within the formed shapes, like as windows on an airplane, train or a bus. Output size: Does not change from the input size."
+  }
+ ],
+ "3befdf3e": [
+  {
+   "src": "barc_seed",
+   "concepts": [
+    "growing",
+    "color change"
+   ],
+   "rule": "In the input you will see square(s) with a single pixel border around them in a different color. To make the output, swap the color between the square and the border, and then put rectangles on the edges of the border whose width is the same as the length of the inner square, and whose color is the same as the border in the input image."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Inverse the colors used in the original shape then add adjacent 4x2 shapes to the outer square on all four sides in the color of the new center square if it had a 2x2 center in the input, or a 3x1 shape on all four sides if the center had a 1x1 shape."
+  }
+ ],
+ "3c9b0459": [
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Create the same pattern as the input, just rotated 180 degrees. Done."
+  }
+ ],
+ "3de23699": [
+  {
+   "src": "barc_seed",
+   "concepts": [
+    "pattern extraction",
+    "color matching"
+   ],
+   "rule": "In the input you will see a grid with a central pattern with four differently-colored pixels at the corners. To make the output, you should extract the central pattern (removing the differently-colored corners), and change the color of the central pattern to match the corner pixels."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Use the color of the single 4 boxes and replicate the shapes from the input grid."
+  }
+ ],
+ "3e980e27": [
+  {
+   "src": "barc_seed",
+   "concepts": [
+    "pattern recognition",
+    "rotation",
+    "color correspondence",
+    "pattern reconstruction"
+   ],
+   "rule": "In the input you will see one or two color pattern with a red or green pixel as an indicator and a set of red and green pixels. To make the output, you should reconstruct the pattern with the red and green pixels indicates the pattern's position. If the indicator is red, the pattern should be flipped by x-axis before reconstructing."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Copy the input. For the green blocks that have nothing around them, make the same placement of blocks around them as the green block from the input that has blocks around it. If there are red blocks with nothing around them in the end result you want to make them be a mirrored image of the input red block, making the colors around the red block go in the opposite direction in on the horizontal."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Copy the placement and color of the pixels surrounding the red or green pixels that are not alone to the pixels that are alone. If the pixel is green the placement and color of the surrounding pixels should be the same as the surrounded green pixel. This should be applied to all solo green pixels. The same should be done with the red pixels, but the placement of the surrounding pixels should be mirrored horizontally."
+  }
+ ],
+ "3eda0437": [
+  {
+   "src": "barc_seed",
+   "concepts": [
+    "rectangle detection"
+   ],
+   "rule": "In the input you will see a grid with random pixels on it (mostly blue pixels). To make the output, you should find the largest rectangular area (of height/width >= 2, i.e. not a line) of black cells and turn it into pink."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Find in the input the biggest square or rectangle that can be created with only black boxes. Then make that box area in the output pink instead of black."
+  }
+ ],
+ "3f7978a0": [
+  {
+   "src": "barc_seed",
+   "concepts": [
+    "boundary detection",
+    "object extraction"
+   ],
+   "rule": "In the input you will see several teal pixels and two vertical parallel gray lines with four teal pixels indicates the boundary of the output grid. To make the output grid, you should extract the part of grid that is bounded by the two vertical parallel gray lines and four teal pixels in each corner."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "IDENTIFY the \"central\" pattern in the input grid. This is includes the two grey columns with light blue tiles at the top, AND EVERYTHING in-between those two columns. Create an output grid size to match the size of the central pattern, and fill it with that pattern. It's like taking a part of the input grid and enlarging it onto the output grid. Output size: Changes based on the size of the central pattern in the input grid."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Recreate the position of the black space and any blue squares that are between your gray lines. The four corners of your output will be the blue ends of the gray lines in the input. Make sure that the exact amount of black space between the two lines matches the input, and the placement of any blue squares in the black space also matches the exact location in the input."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Identify the four light blue squares that form a quadrant shape of either a rectangle or a square and then replicate everything inside that shape using the same light blue, gray and black colors."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "IDENTIFY the \"central\" pattern in the input grid. This is includes the two grey columns with light blue tiles at the top, AND EVERYTHING in-between those two columns. Create an output grid size to match the size of the central pattern, and fill it with that pattern. It's like taking a part of the input grid and enlarging it onto the output grid. Output size: Changes based on the size of the central pattern in the input grid."
+  }
+ ],
+ "40853293": [
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Connect similar colors with that color. where they overlap you should use the vertical color."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Join the lines, red with red, green with green and the same with the other colors, lines cross each other but up to down lines are on top."
+  }
+ ],
+ "4093f84a": [
+  {
+   "src": "barc_seed",
+   "concepts": [
+    "attraction",
+    "magnetism",
+    "color change"
+   ],
+   "rule": "In the input you will see a grey rectangle and colored pixels scattered around it. To make the output, move each colored pixel toward the grey rectangle until it touches, then turn its color to gray. If multiple colored pixels collide, they stack."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "First copy the gray rows or columns exactly. Now imagine that the non-gray boxes are attracted to the gray rows like magnets. Move the non-gray boxes until they are touching the gray rows. Now, every box should be touching the gray rows. The last step is to change all of the non-gray boxes to be gray. The final result should be only gray boxes, all of them connected by the original gray rows/columns."
+  }
+ ],
+ "41e4d17e": [
+  {
+   "src": "barc_seed",
+   "concepts": [
+    "non-black background",
+    "occlusion"
+   ],
+   "rule": "In the input you will see a non-black background (teal background) and the outlines of 5x5 blue rectangles To make the output, draw pink horizontal/vertical bars at the center of each rectangle. The bars should be underneath the rectangles, and they should reach the edges of the canvas."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Copy the grid. color each of the centers of the outlined squares pink. Continue creating a pink line vertically up and down from this pink center cell. DO NOT color the dark Blue outline. Create a pink horizontal line left and right from the pink center cell. DO NOT color the dark Blue outline. Do this for all outlined squares. you should be done."
+  }
+ ],
+ "4258a5f9": [
+  {
+   "src": "barc_seed",
+   "concepts": [
+    "surrounding"
+   ],
+   "rule": "surround every gray pixel with blue pixels"
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Surround each of the grey boxes with a blue border."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Surround each grey box with blue."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Surround each of the grey boxes with a 3x3 blue border."
+  }
+ ],
+ "4290ef0e": [
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Copy the background color and place all of the shapes in order of size within each other. Square will be in the center, box around that, then corners until all shapes fit exactly in the size of the grid. Keep all shapes their original color."
+  }
+ ],
+ "42a50994": [
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Copy the input grid, identify which pixels are connected or touching any other and change background colors of single pixels to the background color or black. Done."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Find the single colored dots that have not connect with others. you have to remove the dots that is not connected with others and leave it as black."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Copy the input grid. Identify which pixels are connected or touching another pixel and which are singletons not touching any other. Change the color of each singleton pixel to the color of the background. Done."
+  }
+ ],
+ "4347f46a": [
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Make black squares in the square."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Replace all colored blocks inside the rectangular shapes with black so there is only a colored outline of the shapes."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Remove the center of the blocks with black and have a single block wide line for each square."
+  }
+ ],
+ "444801d8": [
+  {
+   "src": "barc_seed",
+   "concepts": [
+    "cups",
+    "filling"
+   ],
+   "rule": "In the input you will see several blue \"cups\", meaning an almost-enclosed shape with a small opening at the top, and empty space (black pixels) inside, as well as a single colored pixel inside. To make the output grid, you should fill the interior of each cup with the same color as the colored pixel inside it. Also, put a single layer of colored pixels above the cup with the same color as what's inside."
+  }
+ ],
+ "445eab21": [
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Fill the entire 2x2 grid with the same color of the biggest square pattern that is in the original."
+  }
+ ],
+ "44d8ac46": [
+  {
+   "src": "barc_seed",
+   "concepts": [
+    "filling",
+    "topology"
+   ],
+   "rule": "The input is a black 12x12 grid containing a few grey squares. Each square has a \"hole\" in it, a contiguous black region of pixels. To create the output, fill in the hole of each grey object with red if the hole is a square. Otherwise, leave the hole as is."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Fill the black area within the gray with red if it is a square; otherwise, leave it alone."
+  }
+ ],
+ "44f52bb0": [
+  {
+   "src": "barc_seed",
+   "concepts": [
+    "symmetry detection",
+    "boolean indicator"
+   ],
+   "rule": "In the input you will see a 3x3 grid with red pixels scattered randomly. To make the output grid, you should recognize if the input grid has mirror symmetry along the x-axis. If the input grid has mirror symmetry along the x-axis, output a 1x1 grid with a blue pixel. Otherwise, output a 1x1 grid with an orange pixel."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "If input has 3 or 4 red tiles output is orange. if in put has 2, 5, or 6 red tiles output is blue. Output size: 1x1 grid."
+  }
+ ],
+ "4522001f": [
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Make grid 9x9. Note the diagonal that the red square is in in the input. The green square in the diagonal will indicate which corner in the output you should put a 4x4 green square in the output. The red square indicates which corner another 4x4 green square will touch it your new square in the output grid. So you will have two green 4x4 squares touching each other corner to corner."
+  }
+ ],
+ "4612dd53": [
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Fill in the black squares with red. Output size: Copy the grid size."
+  }
+ ],
+ "46442a0e": [
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "You have to follow the same pattern, but rotate it 180 degrees clockwise, and copy the result throughout the quadrant until you have final it. Every time you copy the result, you have to keep turn it."
+  }
+ ],
+ "469497ad": [
+  {
+   "src": "barc_seed",
+   "concepts": [
+    "counting",
+    "resizing"
+   ],
+   "rule": "In the input, you will see a grid with a row of colored blocks on the bottom and the right. There is also a square in the top left that is not touching the other colors. To make the output: 1. count the number of colors that aren't black 2. enlarge every pixel in the input by a factor of the number of colors 3. add diagonal red lines coming out of the corners of the square in the top left portion of the grid"
+  }
+ ],
+ "46f33fce": [
+  {
+   "src": "barc_seed",
+   "concepts": [
+    "scaling"
+   ],
+   "rule": "In the input you will see a grid with different colors of pixels scattered on the grid To make the output grid, you should first only scale the pixels by 2 times, then scale in whole grid 2 times."
+  }
+ ],
+ "47c1f68c": [
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Think of the new grid like the old grid with the divider removed. recreate the shape from the smaller top left grid of the input in the same color as the divider from the input. Mirror the shape in each of the remaining three quadrants along the x and y axis. for a total of 4 shapes in the same color. you are done. Output size: Subtract 1 from each side. 4x4 becomes 3x3."
+  }
+ ],
+ "48d8fb45": [
+  {
+   "src": "barc_seed",
+   "concepts": [
+    "object extraction",
+    "contact",
+    "cropping"
+   ],
+   "rule": "In the input you will see several objects with same color placed in a 10x10 grid, only one of them contact a gray pixel. To make the output grid, you should select the object contact the gray pixel, crop it, and then output it."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Repeat the colored area that includes a grey square, but do not include the gray square."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Repeat the colored area that includes a grey square, but don't include the grey square. Output size: Is 3x3 grid."
+  }
+ ],
+ "4938f0c2": [
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Correlate the design until you have a pattern on all 4 corners of the cube. Output size: Is similar."
+  }
+ ],
+ "496994bd": [
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Copy the input grid and then mirror the colored lines on the other end of the grid."
+  }
+ ],
+ "49d1d64f": [
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Make input pattern as center for output and colors should be same. The adjacent colors are also same . all four corner colors should be black."
+  }
+ ],
+ "4be741c5": [
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Take the first color, vertically or horizontally, then fill that color in the corresponding square in the output. Then the second and third."
+  }
+ ],
+ "4c4377d9": [
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Copy the pattern as you see it on the bottom half of the grid into 3x4. Once done, flip the pattern up to the top half of the 3x4 grid. Output size: Changes to 4x6."
+  }
+ ],
+ "4c5c2cf0": [
+  {
+   "src": "barc_seed",
+   "concepts": [
+    "symmetry",
+    "reflection"
+   ],
+   "rule": "In the input you will see a small monochromatic pattern with reflectional symmetry (horizontal and vertical), as well as another monochromatic object in one of its quadrants. To make the output, reflect the other object across the axes of reflectional symmetry of the small pattern."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Add shapes to the remaining 3 corners of the cube shaped x. Mirror the separate shape and add it diagonally to adjacent corners of the cube shaped x. That should give you three corners with extending shapes. For the caddy corner, or furthest corner, or last blank corner, rotate the separate shape 180 degrees and add it diagonally to the cube shaped x."
+  }
+ ],
+ "50846271": [
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Imagine that each red shape is 5 cell wide line and 5 cell tall lines. Fill in each of the missing red cell of the shape with light blue to complete the 5x5 shapes."
+  }
+ ],
+ "508bd3b6": [
+  {
+   "src": "barc_seed",
+   "concepts": [
+    "bouncing"
+   ],
+   "rule": "In the input you will see a short diagonal teal line pointing at a red rectangle on a black background. To make the output, shoot outward from the teal line, but change the color to green. Reflect off the red rectangle."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "You have to continue the direction the light blue squares are going until it reaches whatever the red spot it touches. Then it bounces off that spot and goes in that direction. Think of Pong. The line will always be diagonal, reach an edge of the grid and green except for the starting two or three spaces that are light blue."
+  }
+ ],
+ "50cb2852": [
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Color the inside of each colored area with light blue. Leave the outside of the colored shapes the example color one cube deep all the way around."
+  }
+ ],
+ "5117e062": [
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Replace the light blue color with the color that surround it."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Copy the shape with the light blue dot but replace the light blue dot with the shape color. Output size: Must match the size of the shape with the blue dot."
+  }
+ ],
+ "5168d44c": [
+  {
+   "src": "barc_seed",
+   "concepts": [
+    "collision",
+    "translation"
+   ],
+   "rule": "In the input you will see a red object overlaid on a track of green dots. To make the output, move the red object one green dot to the right (if the track is horizontal) or one green dot down (if the track is vertical)."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "If the pattern is vertical, move the red 3x3 block down one 'track'. If the pattern is horizontal, move the red 3x3 block one 'track' to the right. In both instances, only the location of the red blocks should change."
+  }
+ ],
+ "539a4f51": [
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Replicate the pattern in the input box and continue repeating until all the boxes in your 10x10 grid have a color in them (no black around the outside edge). You're making the exact pattern, but miniaturized and repeating. Depending upon input, your pattern will repeat 2-6 times."
+  }
+ ],
+ "53b68214": [
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Copy the input pattern to the original place and then continue the pattern (using the same color) in the new added 4x10 area."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Copy the input pattern exactly and then just continue the pattern (using the same color) till you reach the end. It is just a continuation of the original. Output size: Is 10x10."
+  }
+ ],
+ "543a7ed5": [
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Fill the inside of the pink boxes with yellow and outline each pink box with green. Output size: Is similar."
+  }
+ ],
+ "54d82841": [
+  {
+   "src": "barc_seed",
+   "concepts": [
+    "gravity",
+    "falling"
+   ],
+   "rule": "In the input you will see various monochromatic objects To make the output, make each object drop a single yellow pixel below it, centered with the middle of the object"
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Add a yellow square at the bottom where if the shape or shapes fall they will land on the yellow square."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Add a yellow block on the bottom row of the grid under the black block in the colored shape/shapes."
+  }
+ ],
+ "54d9e175": [
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Replace all 3x3 squares with a specific color. The color to replace is below:Green to Light BlueBlue to PurpleYellow to Dark RedRed to Orange."
+  }
+ ],
+ "5521c0d9": [
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Decide how many rows the object has and move it up that same amount of rows."
+  }
+ ],
+ "5582e5ca": [
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Determine which color is used the most in the input grid and make the entire grid that color."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Determine what color is used the most in the input grid and make the entire output grid that color."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Determine which color is used for the majority of the squares in the input grid, then use that color for the entire output grid."
+  }
+ ],
+ "5614dbcf": [
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Changed the colored squares in the input grid to a single square of the grid. So that an input grid 3x3 colored square is turned into a single filled square of the same color on the input grid. the same color. Output size: Is reduced to 3x3 grid."
+  }
+ ],
+ "56dc2b01": [
+  {
+   "src": "barc_seed",
+   "concepts": [
+    "attraction",
+    "magnetism",
+    "translation5"
+   ],
+   "rule": "In the input you will see a green object and a red bar To make the output, move the green object to touch the red bar. Finally put a teal bar on the other side of the green object."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Take the input green pattern and put it next to(if grid is horizontal) or above/below(if grid is vertical) the red line. then put a LIGHT blue line parallel to the red line creating a box around the green pattern. Make sure the green pattern is touching both lines but not going over them. The green pattern should be on the side of the red line that it is in the input."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Move the green pattern against the red line, then add a blue line against the green pattern parallel with the red line. Output size: Does not change."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Move the green pattern against the red line, then add a blue line against the green pattern parallel with the red line. Output size: Does not change."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Move the green pattern against the red line, then add a blue line against the green pattern parallel with the red line."
+  }
+ ],
+ "56ff96f3": [
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Take the colored as the starting and end point of the rectangle or square assume that the grid make rectangle or square."
+  }
+ ],
+ "57aa92db": [
+  {
+   "src": "barc_seed",
+   "concepts": [
+    "scaling",
+    "puzzle pieces",
+    "indicator pixels"
+   ],
+   "rule": "In the input you will see objects with exactly 2 colors, each with one pixel/rectangle of a different color as an indicator. The indicator color is the same across objects. To make the output, one of those objects is a template shape that you are going to translate/recolor/rescale to match indicators with each other object."
+  }
+ ],
+ "5ad4f10b": [
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Take the color pattern and move to new grid with color 2. The output pattern will be a smaller than the input. Output size: Will be 3x3."
+  }
+ ],
+ "5bd6f4ac": [
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Color the only top right color. Output size: Three row and three coloum."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "You only want the top right corner - the top third and right third of the grid. Output size: Becomes much smaller."
+  }
+ ],
+ "5c0a986e": [
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Use the color blue to extend a 1x1 length of pixels northwest of the 2x2 blue box until there is no more room left. Then extend a 1x1 length of pixels southeast from the 2x2 red box until there is no more room left."
+  }
+ ],
+ "5c2c9af4": [
+  {
+   "src": "barc_seed",
+   "concepts": [
+    "repeating pattern",
+    "connecting colors"
+   ],
+   "rule": "In the input grid, you will see an all black grid with three dots of the same color in a perfect 45 degree diagonal, but equally spaced apart from each other. To create the output grid, connect the outer two of the three dots with a square border shape. The square border contains the two dots as corners, and is centered on the third center dot."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Use the two outer dots to form a square around the dot in the middle, then continue making squares surrounding the last square you created until you can not make any more (do not stop when you can not get an entire square inside the black background, even if you have enough room to make one line and the rest of the square would be outside of the black background then make that line). Output size: Copy and paste the input."
+  }
+ ],
+ "5daaa586": [
+  {
+   "src": "barc_seed",
+   "concepts": [
+    "pattern extraction",
+    "pixel expanding"
+   ],
+   "rule": "In the input you will see four lines of different colors intersecting and forming a rectangle. Few pixels of one specific line's color are scattered in the grid. To make the output, you should cropped out the rectangle and extend the scatterd pixels to the specific line which has same color as the scattered pixels."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Change the grid size to just the square or rectangle formed by the four colored lines. Then look at the random dots in the middle of the square or rectangle. Find the colored border that matches the color of the dots, using that color, you will connect each dot to that border in a straight line. You should have 3 to four straight lines touching the matching border."
+  }
+ ],
+ "60b61512": [
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Complete the squares using the color orange."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Keep the shapes in the same place, but fill the gaps in the shape with the color orange until they form squares."
+  }
+ ],
+ "6150a2bd": [
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Rotate the whole grid two times. Imagine that the entire grid has been flipped vertically and horizontally."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Imagine that the entire grid has been flipped both horizontally and vertically. Once you picture it, you can create the output grid."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Imagine that the entire grid has been flipped both horizontally and vertically. Once you picture that you can create the output grid."
+  }
+ ],
+ "623ea044": [
+  {
+   "src": "barc_seed",
+   "concepts": [
+    "diagonal lines"
+   ],
+   "rule": "In the input you will see one colored pixel on a black background. To make the output, make two diagonal lines that are the same color as the colored pixel and intersect at the location of the colored pixel."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Add squares of the same color as the original square such that each added square extends diagonally in 4 directions from each corner of the original square until each line extending from the original square reaches a side or a corner of the grid. The diagonal lines will form an X pattern that may have one of more long arms or legs."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Add the same colored box on all four corners to form an X. Continue out from those boxes in a straight line to form a cross or t shape."
+  }
+ ],
+ "62c24649": [
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Place the input grid in the top left 3x3. Then, reflect the top left 3x3 and place it in the top right 3x3. Now, reflect the top left and right 3x3 and place in the bottom left and right 3x3."
+  }
+ ],
+ "63613498": [
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Copy the input grid. Find any shapes outside of the border which are exactly the same shape and orientation as the shape inside of the grey border. Turn that shape grey. Do not change the colored shape inside the grey border or any shapes outside of the grey border which do not have the same orientation and shape as the one inside the border."
+  }
+ ],
+ "6430c8c4": [
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Put the two section over top of each other. Then you have to look at each block. A block that does not have any of the pattern from the old blocks is colored green. Any block that has pattern from either of the first blocks is colored black. Output size: Is the size of one of the two section, 4x4."
+  }
+ ],
+ "6455b5f5": [
+  {
+   "src": "barc_seed",
+   "concepts": [
+    "filling"
+   ],
+   "rule": "The input consists of a black grid. The grid is divided with red lines into black rectangles of different sizes. To produce the output grid, fill in the smallest black rectangles with teal, and fillin in the largest black rectangles with blue."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Fill the largest black shape with dark blue. Fill the smallest black shape with light blue. If there is more than one shape with the smallest number of squares, fill all of the smallest shapes with light blue."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Fill in the large black square shape with blue, make sure to fill only the small black squares. Then fill in the smallest black square shape with light blue. If there is more than one small black square shape that is the same size then then fill them also with light blue."
+  }
+ ],
+ "662c240a": [
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Depending on which top you have you will make that 3x3 square. Green/red top, make over the blue/light blue 3x3 area. Grey/blue top, make the green/pink 3x3 area. Light blue/yellow on top, make the light blue/yellow 3x3 area. dark red/light blue top, make the yellow/green 3x3 area. Output size: The output is now 3x3."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Start mimicking one 3x3 grid in the output. Try the 3x3 grid at the top first. If that does not work, try the second 3x3 grid in the middle. If that does not work, try the last one on the bottom. Output size: Is 3x3 or one third the size of the input."
+  }
+ ],
+ "67385a82": [
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Any green colored blocks that are more than 2 connected blocks (1x2, 2x1, 2x2, or other shapes) should be changed to light blue. Output size: Copy the input grid."
+  }
+ ],
+ "673ef223": [
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Change the dot color from blue to yellow, and connect them to the red line using blue dots. Mirror the same design on the bottom but instead of stopping where the yellow dots WOULD be, continue to the edge of the grid."
+  }
+ ],
+ "6773b310": [
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "For each section that hold 2 pink squares, represent that area with a blue box on the new grid. Single squares are shown as black."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Fill blue color where 3x3 grid have 2 pink grid. Output size: 3x3 grid size."
+  }
+ ],
+ "67a3c6ac": [
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Create a right to left mirror image."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Create a left/ right mirror image of the input."
+  }
+ ],
+ "67a423a3": [
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Surround the middle point of the intersection with a 3x3 yellow border, leaving the central block in its original color. Output size: Is identical to the input grid."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Create a yellow square around the point where the two lines meet."
+  }
+ ],
+ "67e8384a": [
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Copy-paste the pattern in each corner. the pattern on the bottoms flips parallel to the top. Output size: 6x6 grid."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Copy-paste the pattern in each corner. The pattern on the bottoms flips parallel to the top. Output size: 6 x 6 grid."
+  }
+ ],
+ "681b3aeb": [
+  {
+   "src": "barc_seed",
+   "concepts": [
+    "puzzle pieces"
+   ],
+   "rule": "In the input you will see two monochromatic objects -- \"puzzle pieces\" To make the output, fit the pieces together so that they form a single tightly-packed rectangular object. The pieces can be translated, but not rotated."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Piece the two shapes together to form a rectangular section. Output size: Should be 3x3."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Place the two colored patterns so they form a rectangular pattern. Output size: Make it 3x3."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Place the shapes together in the 3x3 grid so they form a square. Output size: A small 3x3 grid."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Place both shapes together until they form a 3x3 square. Output size: Should be 3x3."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Fit the the two colored shapes together to form a square. Output size: Should be 3x3."
+  }
+ ],
+ "6855a6e4": [
+  {
+   "src": "barc_seed",
+   "concepts": [
+    "symmetry",
+    "mirror"
+   ],
+   "rule": "In the input you will see two objects on each outer side of two red frames. To make the output, you need to mirror the two objects by flipping them over the symmetry of the red frames, making them inside the red frames. Each object flips over the frame closest to it."
+  }
+ ],
+ "694f12f3": [
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Fill the pattern by red and blue color surrounded by same color, the one with most internal block should be filled with red color."
+  }
+ ],
+ "6a1e5592": [
+  {
+   "src": "barc_seed",
+   "concepts": [
+    "puzzle pieces",
+    "contact"
+   ],
+   "rule": "In the input you will see blue puzzles pieces lying beneath a red shape with holes on its underside. To make the output, move the gray puzzle pieces upward so that they fit into the holes on the underside. They need to fully plug the holes. Finally change the grey puzzle pieces to be blue."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Copy the input grid. Then move each gray shape up into the space where it fits best into the red shape. Finally turn all of the gray shapes dark blue."
+  }
+ ],
+ "6aa20dc0": [
+  {
+   "src": "barc_seed",
+   "concepts": [
+    "puzzle pieces",
+    "rotation",
+    "rescaling"
+   ],
+   "rule": "In the input you will see a non-black background, a small multicolored object, and fragments of that object rescaled and rotated scattered around. To make the output, isolate the small multicolored object and then rescale/rotate/translate to cover the fragments as much as possible, matching color whenever the fragment has that color."
+  }
+ ],
+ "6b9890af": [
+  {
+   "src": "barc_seed",
+   "concepts": [
+    "object detection",
+    "scaling"
+   ],
+   "rule": "In the input you will see a 3x3 object and a red square n times larger than the 3x3 object. To make the output, you should scale the 3x3 object to the size of the red square and place it in the red square. Return just the red square (with the rescaled object put into it)"
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Fill in the red square with the other colored object. Output size: Is identical to the red square."
+  }
+ ],
+ "6c434453": [
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Substitute all the blue squares with red crosses. All other shapes (including the existing blue crosses) remain the same in the output grid."
+  }
+ ],
+ "6cdd2623": [
+  {
+   "src": "barc_seed",
+   "concepts": [
+    "draw lines",
+    "detect objects"
+   ],
+   "rule": "In the input you will see three colors scattered on the grid. One color only have four pixels on the boundary of the grid. To make the output grid, you should connect the four pixels of the color on the boundary of the grid to make two lines."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Draw two lines connecting both pairs of colored squares, all the way across the grid, same color as the squares (for instance, if you noticed that you have 4 green squares on the input, on the output connect the ones on top and bottom edge of the grid with a green line, and the ones on left and right edge of the grid with a green line)."
+  }
+ ],
+ "6cf79266": [
+  {
+   "src": "barc_seed",
+   "concepts": [
+    "rectangle detection",
+    "background shape detection"
+   ],
+   "rule": "In the input you will see a grid with scattered one color pixels To make the output grid, you should detect the 3x3 black square in the random color pattern and replace it with a 3x3 blue square"
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Change all the black 3x3 grids to blue in the output grid."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "FOR EACH identifiable 3x3 black grid within the random pattern, MAKE a 3x3 dark blue square if APPLICABLE and POSSIBLE."
+  }
+ ],
+ "6d0160f0": [
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Take the 3x3 area with a yellow square and move it into a 3x3 area corresponding to where the yellow square is within the 9 squares. Then make all other squares within the other 9 squares black and any grey squares within the 9 squares black. The lines of grey stay."
+  }
+ ],
+ "6d0aefbc": [
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Copy the grid and reflect it on the other half. Output size: Changes to 3 by 6."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Copy the grid and reflect on the other half. Output size: Changes to 3 by 6."
+  }
+ ],
+ "6d58a25d": [
+  {
+   "src": "barc_seed",
+   "concepts": [
+    "sliding objects"
+   ],
+   "rule": "In the input grid, you will see a chevron-shaped object of one color in a black grid, with pixels of another color scattered around the grid. To produce the output grid, take all pixels located underneath the chevron. For each of these pixels, extend a vertical line of the same color up and down, until reaching the bottom of the grid or the boundary of the chevron."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Using the color of the random blocks around the outside, make a row straight down from the arrow head figure to meet any colored blocks below, extending the new row to the end of the grid."
+  }
+ ],
+ "6d75e8bb": [
+  {
+   "src": "barc_seed",
+   "concepts": [
+    "shape completion"
+   ],
+   "rule": "In the input you will see an incomplete teal ractangle To make the output grid, you should use the red color to complete the rectangle."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Fill in the area of the large section with red to make a rectangular section. Background remain the same color."
+  }
+ ],
+ "6e02f1e3": [
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Place 3 grey boxes in various spots based on how many colors there are in the input grid. If there is one color, put 3 grey boxes on the top of the grid. If there are two colors, place a diagonal line of grey boxes form top left to bottom right. If there are 3 colors, place a diagonal line of grey boxes going from bottom left to top right."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Place 3 gray pixels based on how many colors are in the grid. If it is one color place 3 gray pixels along the top of the grid. If there are two colors make a diagonal line from the top left to the bottom right. If there are three colors make a diagonal line from the top right to the bottom left."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Make a black and gray pattern depending on the number of colors in the input. Start with an all black grid. If there is one color, make the top 3 squares gray. If there are two colors, make a diagonal line from top left to bottom right gray, again 3 pixels. If there are three colors, make a diagonal line from top right to bottom left gray, again 3 pixels."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "When three colors are present make a grey diagonal line from top right to bottom left. If there are two colors make a grey diagonal line from top left to bottom right. If there is one color make a grey line across the top three blocks. Output size: Copy the input grid."
+  }
+ ],
+ "6e19193c": [
+  {
+   "src": "barc_seed",
+   "concepts": [
+    "direction",
+    "lines",
+    "pointing"
+   ],
+   "rule": "In the input, you will see several objects of the same color that are in an arrowhead shape and facing different directions. The goal is to find the directions of the arrowheads and draw lines that would represent the path they had been moving in to go in that direction."
+  }
+ ],
+ "6e82a1ae": [
+  {
+   "src": "barc_seed",
+   "concepts": [
+    "objects",
+    "counting",
+    "color"
+   ],
+   "rule": "In the input you will see grey objects on a black background. To make the output, count the number of pixels in each object and color the object green if it has two pixels, red if it has three pixels, and blue if it has four pixels."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Count the 4 grid shape and color it with blue in the output and follow the same for 2 grid with green and 3 grid with red."
+  }
+ ],
+ "6ecd11f4": [
+  {
+   "src": "barc_seed",
+   "concepts": [
+    "objects",
+    "color guide",
+    "masking",
+    "scaling"
+   ],
+   "rule": "In the input you will see a large monochromatic object, and a smaller square object with many colors. To make the output, first downscale the large object so that it is the same size as the small multicolor square, and then use the large object as a binary mask to zero out pixels in the square. Return the resulting masked sprite."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Replicate the smaller grid. Change the colors to black where they are black in the larger rectangle."
+  }
+ ],
+ "6f8cd79b": [
+  {
+   "src": "barc_seed",
+   "concepts": [
+    "borders"
+   ],
+   "rule": "In the input you will see an empty black grid. To make the output, draw a line along the border of the input with a thickness of one pixel. The border should be teal."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "You should create light blue border around the black grid."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Use light blue color to draw the border of the grid with only one cell as width."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Create a light blue border around the grid. So, any tiles that are touching the edges are filled in with light blue. The rest of the tiles remain black."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Create a light blue border around the grid. So, any squares that are touching the edges are filled in with light blue. The rest of the squares inside the light blue border remain black."
+  }
+ ],
+ "6fa7a44f": [
+  {
+   "src": "barc_seed",
+   "concepts": [
+    "reflection"
+   ],
+   "rule": "In the input you will see a square pattern of random colors except black. To make the output, reflect the pattern vertically, and put the reflected pattern beneath the input pattern."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Place the input grid in the top 3x3 space and create a mirror image in the bottom 3x3 space. Output size: Is 3x6 vertical grid."
+  }
+ ],
+ "72322fa7": [
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Copy the input grid. Add colored pixels to the singletons such that they copy the exemplars."
+  }
+ ],
+ "72ca375d": [
+  {
+   "src": "barc_seed",
+   "concepts": [
+    "symmetry",
+    "sprites"
+   ],
+   "rule": "In the input you will see several objects. One object represents a symmetic sprite. All the other objects represent non-symmetric sprites. The goal is to find the symmetric sprite and return it."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Copy one of the shapes by itself and keep the black squares if there are any. Output size: Is the size of one of the shapes by itself."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Copy one of the figures and just that figure."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Copy one of the figures and just that figure."
+  }
+ ],
+ "7447852a": [
+  {
+   "src": "barc_seed",
+   "concepts": [
+    "objects",
+    "flood fill",
+    "connectivity"
+   ],
+   "rule": "In the input, you will see a black grid with a red line that starts in the top left corner and bounces off the borders of the grid until it reaches the right side of the grid. To make the output, find the black regions separated by the red lines, then, starting with the first region from the left, color every third region yellow."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Fill in every third triangle with yellow, starting at the lower-left: yellow, black, black, yellow."
+  }
+ ],
+ "7468f01a": [
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Copy the large colored object with smaller colored object in it. Then mirror the small colored object left to right. Output size: Is the size of the large colored object."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "The output is the colored shape inverted to the side."
+  }
+ ],
+ "746b3537": [
+  {
+   "src": "barc_seed",
+   "concepts": [
+    "line detection",
+    "color extraction"
+   ],
+   "rule": "In the input you will see a grid consisting of stripes that are either horizontal or vertical. To make the output, make a grid with one pixel for each stripe whose color is the same color as that stripe. If the stripes are vertical, the output should be vertical, and if the stripes are horizontal, the output should be horizontal. The colors should be in the order they appear in the input."
+  }
+ ],
+ "74dd1130": [
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Rotate it 90 degree clockwise and mirror the result."
+  }
+ ],
+ "75b8110e": [
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Resize the output grid to 4x4. Copy the top-left (yellow) pattern. Then, superimpose the bottom-right (brown) pattern on top. Then, superimpose the bottom-left pattern (pink) on top. Then, superimpose the top-right (gray) pattern on top. Output size: Becomes 4x4."
+  }
+ ],
+ "760b3cac": [
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Create a mirror image of the top shape and place it to the side of that shape. Output size: Is identical."
+  }
+ ],
+ "776ffc46": [
+  {
+   "src": "barc_seed",
+   "concepts": [
+    "same/different",
+    "color change",
+    "containment"
+   ],
+   "rule": "In the input you will see some monochromatic objects. Some of them will be contained by a grey box, and some of them will not. To make the output, take each shape contained inside a grey box, and find any other shapes with the same shape (but a different color), and change their color to match the color of the shape inside the grey box."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Change the color of the shape or shapes that match the shape inside the complete gray border so that they are the same color. That is the color of the shape that is identical in size to the one in the gray, will change to the same color as the one in the gray."
+  }
+ ],
+ "77fdfe62": [
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Zoom in to the light blue square and change the light blue squares to the color or the exterior corner color that they are closest to. Output size: Changes to the size of the interior light blue square."
+  }
+ ],
+ "780d0b14": [
+  {
+   "src": "barc_seed",
+   "concepts": [
+    "downscaling",
+    "rectangular partitions"
+   ],
+   "rule": "In the input you will see a grid consisting of a chessboard pattern (rectangular partitions) of different colors. Each rectangular partition region is incompletely scattered with a color. Regions are separated by black lines, going all the way top-bottom/left-right. To make the output, make a grid with one color pixel for each colored rectangular region of the input."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Put each color in one square that match their position in the big picture. Output size: That can contain one square of each color."
+  }
+ ],
+ "7837ac64": [
+  {
+   "src": "barc_seed",
+   "concepts": [
+    "downscaling"
+   ],
+   "rule": "In the input you will see horizontal and vertical bars/dividers of a particular color that define rectangular regions, with some of the single-pixel vertices colored differently. Some rectangular regions are have same color on the four vertices, and some are not."
+  }
+ ],
+ "794b24be": [
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Count the number of blue squares in the input. You will need this same number of squares in the output, but the new squares will become red and will be relocated in the following order until you have used the same number of squares that you counted; First red square goes in top left; second red square (if any) goes if top middle;"
+  }
+ ],
+ "7b6016b9": [
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Keep the shape color the same. Fill any areas contained within the shape red and flood the black background with green."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Fill in all holes with red and fill the outside with green."
+  }
+ ],
+ "7b7f7511": [
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Copy one half of the input. Output size: Half the input. Cut the long way in half."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Copy one half of the input. Output size: Will be half of the input."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Get rid off one half of the input, may it be right, left or bottom half. Output size: Half the size of the input."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Cut the grid in half to take away one of the patterns and leave one of the patterns. Output size: Is half of the input."
+  }
+ ],
+ "7c008303": [
+  {
+   "src": "barc_seed",
+   "concepts": [
+    "color correspondence",
+    "object splitting"
+   ],
+   "rule": "In the input you will see a 9x9 grid with a 6x6 green sprite and a 2x2 sprite with 4 different colors separated by two teal lines. To make the output grid, you should separate the 6x6 green sprite into 4 3x3 sub-sprites and color them with the 4 different colors in the 2x2 sprite, with the same relative position."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Fill in the entire grid with black. You then need to use each of the colors from the 2x2 grid to make the same design as the green design shown in the input grid. The colors must be in the same area shown in the 2x2 area. Each area will be a 3x3 grid, so there are a total of 4 3x3 grids. If the upper right square in the input pair is pink, then the design in the upper right 3x3 grid should be pink. Output size: Will be 6x6."
+  }
+ ],
+ "7ddcd7ec": [
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Continue the single block diagonally to the edge with the same color."
+  }
+ ],
+ "7df24a62": [
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Copy and paste the exact same grid. Find all instances of the pattern that is surrounded in blue. Everywhere on the grid where there is the exact yellow pattern, surround it with blue. So, on all sides of the yellow boxes (in the same pattern) will be blue boxes (exactly as shown in the yellow/blue pattern)."
+  }
+ ],
+ "7e0986d6": [
+  {
+   "src": "barc_seed",
+   "concepts": [
+    "denoising",
+    "topology"
+   ],
+   "rule": "In the input you will see a black background with large rectangles of the same color, and random \"noise\" pixels added at random locations sometimes on the rectangles and sometimes not. To make the output, remove the noise pixels to reveal the rectangles."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Replace the blue pixels with pixels of the same color as the majority of surrounding pixels."
+  }
+ ],
+ "7f4411dc": [
+  {
+   "src": "barc_seed",
+   "concepts": [
+    "denoising",
+    "topology"
+   ],
+   "rule": "In the input you will see a black background with large rectangles of the same color, and random \"noise\" pixels added at random locations, in the same color as the rectangles. To make the output, remove the noise pixels, leaving only the big rectangles."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Always remove a single pixel outside of the big blocks. Your output with be big blocks only, no scattered single pixels. Simply remove these single pixels and leave the complete major blocks whether these pixels are right next to or by themselves out in space. That's all."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Remove the single squares so that only the large rectangle group patterns remain."
+  }
+ ],
+ "7fe24cdd": [
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Copy the original 3x3 pattern and replicate it after you rotate it clockwise onto the output. The top left 3x3 section should be a the same as the input. Then replicate and rotate to the right of this in the 3x3 section to the left, continue this until you have replicate and rotate 3 times total."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Imagine the 6x6 output grid is split into four squares. Copy the input pattern onto the top left square, rotate 90 degrees to the right for the top right square, rotate again for the bottom right, then again for the bottom left. Output size: The grid size is doubled to 6x6."
+  }
+ ],
+ "80af3007": [
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Repeat the shape of the design pattern in 3x3 squares and make the same design on the 9x9 grid out of 3x3 squares. Output size: 9x9 or the size of the design pattern."
+  }
+ ],
+ "810b9b61": [
+  {
+   "src": "barc_seed",
+   "concepts": [
+    "objects",
+    "topology"
+   ],
+   "rule": "In the input grid, you will see various blue objects. Some are \"hollow\" and contain a fully-enclosed region, while others do not have a middle that is separate from outside the object, and fully enclosed. To create the output grid, copy the input grid. Then, change the color of all \"hollow\" shapes to be green."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Copy the input grid. Then, any shapes that are closed (like complete squares or rectangles) will be changed from blue to green. Any other shapes that are open (incomplete) or are just lines, stay blue."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Re-color green only the blue figures that form closed boxes. Output size: Is identical to the input grid."
+  }
+ ],
+ "82819916": [
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Copy the input grid. Then, you have to complete each incomplete line. Maintain the lines color scheme while matching the pattern of the single complete line."
+  }
+ ],
+ "83302e8f": [
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "For every black square that has fully solid borders, recolor from black to green. For every square that has broken borders, recolor from black to yellow. Leave border lines in the original color. Output size: Is identical to the input grid."
+  }
+ ],
+ "834ec97d": [
+  {
+   "src": "barc_seed",
+   "concepts": [
+    "geometric pattern"
+   ],
+   "rule": "In the input you will see a grid with a single coloured pixel. To make the output, move the colored pixel down one pixel and draw a yellow line from the pixel to the top of the grid. Finally repeat the yellow line by repeating it horizontally left/right with a period of 2 pixels."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Move the square that's not yellow down one space. Then create a yellow line above the square to the top of the grid. Next, leave a black column on both sides of the yellow. Then, make identical yellow columns using this pattern."
+  }
+ ],
+ "8403a5d5": [
+  {
+   "src": "barc_seed",
+   "concepts": [
+    "pattern generation"
+   ],
+   "rule": "In the input you will see a grid with a single pixel on the bottom of the grid. To make the output, you should draw a geometric pattern starting outward from the pixel: step 1: draw vertical bars starting from the pixel and going to the right with a horizontal period of 2. step 2: put a grey pixel in between the vertical bars alternating between the top / bottom."
+  }
+ ],
+ "846bdb03": [
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "First, create a black grid according to Next, draw the vertical line shapes on the output grid identical to those on the input grid, and the space between the shapes should be the same too. Then, draw the other two shapes that join together in the middle of the grid, making sure that their colors match the colors of the middle part of the vertical line shapes."
+  }
+ ],
+ "855e0971": [
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Make the black tiles into lines that end at the color blocks they are in, if the color blocks appear vertically then the black lines should be horizontally, if the color blocks appear horizontally then the black lines should be vertical."
+  }
+ ],
+ "85c4e7cd": [
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Replace the inner most color with the outer most color and complete the same step with every color until all have been changed. In other words, invert the order of the colors."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Replace the inner most color with the outer most colors and complete the same steps with every color until all have been changed. In other words, invert the order of the colors."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Reverse the order of the colors, so the color in the center of the original grid is now the color of the outermost layer. Continue this pattern."
+  }
+ ],
+ "868de0fa": [
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Fill the squares with an even number grid INSIDE the blue border with red, and the rest (1x1, 3x3, 5x5) squares with the color you get from red yellow."
+  }
+ ],
+ "8731374e": [
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Fill in the entire row and column with the same color of the smaller cell. For example, if you have three single colored cells, you should end up with three columns and three rows."
+  }
+ ],
+ "88a10436": [
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Copy the input. Then, copy the colorful shape and paste it on top of the gray square, making sure the center of the shape is directly above the square."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Copy the input 3x3 multi-colored shape ontop of the gray square, this square comprises the MIDDLE of the 3x3 copy."
+  }
+ ],
+ "88a62173": [
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Replicate one of the patterns in one of the corners. Bottom right, bottom left, top right, or top left. Output size: Will be 2x2."
+  }
+ ],
+ "890034e9": [
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Count the number of black square in the center of the outlined shape. Somewhere else on the grid is a group of black square that has has the same arrangement, though there may be additional black squares as well. Replicate the original shape from the input grid using those black square as the center. There should be two identical shapes when you are done."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "First, copy the input grid and leave it as it is. Then, count the black color grid inside the shape. Next, find another area in the large grid with the same number of black grid as in the first shape, however, it will only be black grid without the shape and the black grid might also be surrounded by black squares or have additional black squares around it."
+  }
+ ],
+ "8a004b2b": [
+  {
+   "src": "barc_seed",
+   "concepts": [
+    "puzzle pieces",
+    "rescaling"
+   ],
+   "rule": "In the input you will see a small multicolored object, and a big region bordered by 4 yellow pixels in the corners. The big region contains some colored things. To make the output, rescale and translate the small multicolored object so that it is in the big region and matches as much as possible the colors of the things in the big region."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Recreate the pattern outside the yellow corner squares within the yellow corner squares with provided starting shapes. Output size: Should be the yellow squares and within only."
+  }
+ ],
+ "8be77c9e": [
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Fill the top of the grid with the same as original. And fill the bottom of the grid with a mirror image of the original."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Mirror the grid on the new grid."
+  }
+ ],
+ "8d5021e8": [
+  {
+   "src": "barc_seed",
+   "concepts": [
+    "flip"
+   ],
+   "rule": "In the input you will see a monochromatic sprite. To make the output, 1. flip the grid horizontally with y-axis on the left side of the grid, making the canvas twice larger. 2. flip it down with x-axis on the bottom side of the grid. 3. concatenate the flipped grid in step 2 to the top and bottom of the grid in step 1. In total the output grid is twice as wide and three times as tall as the input."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Add reverse input on the back then do two more time. Output size: Doubled in back twice in down."
+  }
+ ],
+ "8d510a79": [
+  {
+   "src": "barc_seed",
+   "concepts": [
+    "magnetism",
+    "lines"
+   ],
+   "rule": "In the input, you will see a horizontal grey line on a black background, with red and blue pixels scattered on either side of the line. To make the output, draw vertical lines from each of the blue and red pixels, with lines from the red pixels going toward the grey line and lines from the blue pixels going away from the grey line. These lines should stop when they hit the grey line or the edge of the grid."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Complete a line with the colors. If it's red, fill the line in until you hit the gray bar. If it's blue, fill in until you hit the bottom or top edge."
+  }
+ ],
+ "8e1813be": [
+  {
+   "src": "barc_seed",
+   "concepts": [
+    "color stripe",
+    "fill the square in order"
+   ],
+   "rule": "In the input you will see several vertical or horizontal stripes of different colors and a gray square with length equal the number of the stripes. To make the output, fill the gray square with the colors of the stripes in the order and direction they appear."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Repeat the color lines in the same horizontal or vertical order as they appear in the input. The lines should go all the way across the grid to form stripes that are in the same color order and orientation as the input."
+  }
+ ],
+ "8e5a5113": [
+  {
+   "src": "barc_seed",
+   "concepts": [
+    "rotate",
+    "position"
+   ],
+   "rule": "In the input you will see a grid with 3 regions separated by grey horizontal lines. The leftmost region contains a multicolored sprite and the others are empty (black) To make the output, rotate the leftmost region 90 degree clockwise and place it in the first empty region, then rotate it a further 90 degrees and put it in the second empty region, etc."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Have the first remain the same then the second black square have the same colors just move it 90 degrees and for the third black square change it 90 more degrees."
+  }
+ ],
+ "8eb1be9a": [
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Copy the pattern for the whole grid to match the center pattern."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Copy the input grid, then copy the exact same pattern to fill in the whole black background."
+  }
+ ],
+ "8efcae92": [
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Replicate the pattern of the chosen shape. Output size: Choose the shape with the most red squares and make the grid that size."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Make the grid the same size as the shape and the two colors are just like in the shape. Output size: Choose one shape and make the grid that size."
+  }
+ ],
+ "90c28cc7": [
+  {
+   "src": "barc_seed",
+   "concepts": [
+    "downscaling",
+    "rectangular regions"
+   ],
+   "rule": "In the input you will see a grid consisting of monochromatic rectangular regions/partitions (chessboard pattern) of different colors. Each rectangular region/partition/chessboard cell is filled with a single color, and has a different size. To make the output, make a grid with one pixel for each cell of the chessboard."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Consider only the colored part of the input. Create a similar square or rectangle, using the least number of squares."
+  }
+ ],
+ "90f3ed37": [
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Finish the line so that it is the same as the top line but finish the line in dark blue."
+  }
+ ],
+ "913fb3ed": [
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Surround any green squares with pink squares, surround any light blue squares with yellow squares, and surround any red squares with dark blue squares."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Surround any green squares with pink squares, surround any light blue squares with yellow squares, and surround any red squares with dark blue squares."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Surround green with pink color, light blue with yellow and red with blue."
+  }
+ ],
+ "91714a58": [
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Turn everything black except for the 4x3 box of one color."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Copy the size and position of the solid block, so you have the block on a black background."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Reproduce the large pattern with a black back ground."
+  }
+ ],
+ "9172f3a0": [
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Each tile in the input grid is a 3x3 grid pattern on the output. Keep same color and pattern but increase to a 9x9 grid."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Copy the same colors in the same position. For every single grid in the input, it should be changed to a 3x3 of color each in the output. Output size: Is a 9x9 grid."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Use the same colors in the same position. Output size: Is changed to 9x9."
+  }
+ ],
+ "928ad970": [
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Copy the input grid. Then, using the color of the colored rectangle, make the largest rectangle possible that will fit inside the four grey dots. The outside of the new rectangle should touch the inside of all four grey dots."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Copy the input grid. Then, make the biggest rectangle possible that is enclosed by all 4 gray dots. Make this rectangle the same color as the smaller rectangle. So, the rectangle you draw should be touching the inside of each gray dot."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Copy the input grid .then, make the biggest rectangle possible that is enclosed by all 4 gray dots. make this rectangle the same color as the smaller rectangle . so,the rectangle you draw should be touching the inside of each gray dot."
+  }
+ ],
+ "93b581b8": [
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Copy the input grid. Then, you will add 4 2x2 blocks to the grid, each touching the corner of the 2x2 colored square in the input. The color of each 2x2 block should be the same color as the opposite corner of the 2x2 colored square. If the 2x2 colored square is not in the center of the input, some of the 2x2 blocks you are adding may be off the page."
+  }
+ ],
+ "941d9a10": [
+  {
+   "src": "barc_seed",
+   "concepts": [
+    "objects separated by lines",
+    "color correspond to position"
+   ],
+   "rule": "In the input you will see several gray lines that separate the grid into several parts. To make the output grid, you should color the upper left part with blue, the lower right part with green, and the middle part with red."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Copy the input. Then, use blue flood fill to fill in the upper-left-most section. Then, use green and flood fill to fill in the bottom-right-most section. Then, use red and flood fill to fill in the center-most section."
+  }
+ ],
+ "94f9d214": [
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Overlay the top 4x4 grid of green pixels over the bottom 4x4 grid of blue pixels or vice versa.After you complete the overlay whichever pixels are still black will be changed to red in the output. All the other pixels which are green, blue, or both will be changed to black. Output size: Is a 4x4 grid."
+  }
+ ],
+ "952a094c": [
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Copy the input grid to the output workspace. Move each of the interior corner colored pixels to the exterior corner opposite of their input position. Meaning, move the upper left interior pixel such that its corner is touching the lower left corner of the lower left corner pixel of the monochromatic rectangle or square."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Take the different colored squares from the inside corners of the square and move them to the opposite outside corner of the square. For example if there is a green square on the inside bottom left corner, move it to the outside top right corner. The rest of the squares will be black."
+  }
+ ],
+ "9565186b": [
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Keep the color with the most squares and everything else should be gray."
+  }
+ ],
+ "95990924": [
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Surround each square with the following, connected diagonally to each of the corners: Blue on the top left, Red on the top right, Green on the bottom left, Yellow on the bottom right. The end result should almost resemble a flower, with a gray center and four colored petals."
+  }
+ ],
+ "963e52fc": [
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Repeat the middle colors in the second half of the new grid on the same rows."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Repeat the same pattern of colors in the input pixels to the grid created in the output in the same position."
+  }
+ ],
+ "97999447": [
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Alternate to the RIGHT of the colored tile with light grey and the original color UNTIL it reaches the rightmost side of the grid, REPEAT this for each applicable colored tile."
+  }
+ ],
+ "97a05b5b": [
+  {
+   "src": "barc_seed",
+   "concepts": [
+    "puzzle pieces",
+    "rotation"
+   ],
+   "rule": "In the input you will see a red object with holes in it, and several multicolored 3x3 \"puzzle pieces\" To make the output, crop to just the red object and then put each puzzle piece in the red object so that the red pixels in the puzzle piece perfectly fit into the holes in the red object. You can rotate and translate the puzzle pieces to make them fit."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Fit the red blocks in the small grid blocks where they go on the large red grid with the colored blocks as well. Output size: Changes to the size of the large red grid."
+  }
+ ],
+ "98cf29f8": [
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Remove the colored squares that create a floor to the other pattern. you bring the patterns together by moving the pattern that is the same color as the line you remove."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Remove the single line and move the shape that is the same color as the line square up against the other shape."
+  }
+ ],
+ "995c5fa3": [
+  {
+   "src": "barc_seed",
+   "concepts": [
+    "pattern matching",
+    "color correspondence"
+   ],
+   "rule": "In the input you will see three different 4x4 patterns of gray pixels place horizonlly and seperate by black interval. To make the output grid, you should find out each pattern corresponds to a color: red, teal, yellow, or green, and color the corresponding row in the output grid with the corresponding color in the order from left to right."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Make three rows of three different solid colors corresponding to the grey 4x4 blocks. The first 4x4 block is the color of the top row, and so on.Grey 4x4 with a 2x2 black box in the middle = light blueGrey 4x4 with no black = redGrey 4x4 with black box center bottom = yellowGrey 4x4 with two 1x2 black lines on the left and right = greenIf there are any more, they are a different color. Output size: 3x3 grid."
+  }
+ ],
+ "99b1bc43": [
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Compare the squares in the top and bottom 4x4 square. If they match (both black or both color) make the output square black. If they do not match, make the output square green. Output size: Should be 4x4."
+  }
+ ],
+ "99fa7670": [
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Extend the colored blocks, using their original color, to the right and downward, creating \"L\" shapes. Start with the bottom-most block. Draw a line from the bottom-most block until it touches the right side of the grid, and then draw a line downward from there until it touches the bottom of the grid. This will form an inverted \"L\" shape that is facing left."
+  }
+ ],
+ "9af7a82c": [
+  {
+   "src": "barc_seed",
+   "concepts": [
+    "counting"
+   ],
+   "rule": "The input grid consists of a small grid filled completely with different colors. To create the output grid, take the colors present in the input, and sort them by number of pixels of that color in the input, greatest to least. Then create an output grid of shape (num_colors, max_num_pixels), where num_colors is the number of colors in the input, and max_num_pixels is the max number of pixels of any color in the input"
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "In a black background, fill out the left with the most color. Then the second most third most continue. Start it from the top."
+  }
+ ],
+ "9dfd6313": [
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Take one side and mirror it to the other side."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Rotate the pattern 90 degrees to the right and then flip it over to it's reverse. the output should be an 90 degrees mirror image of the input."
+  }
+ ],
+ "9ecd008a": [
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Fill the black spots with the exact same pattern that need to be filled in the original grid."
+  }
+ ],
+ "9edfc990": [
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Copy the input and fill in any spaces that have with blue that have blue touching black."
+  }
+ ],
+ "9f236235": [
+  {
+   "src": "barc_seed",
+   "concepts": [
+    "downscaling",
+    "mirror",
+    "horizontal/vertical bars"
+   ],
+   "rule": "In the input you will see horizontal and vertical bars separating different regions/cells/partitions with each cell containing different colors, like a chessboard. Each separated region has a single color. To make the output, make a grid with one colored pixel for each region of the chessboard. Finally mirror along the x-axis."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Avoid the lines that create the boxes, and instead focus on the pattern. Copy the pattern so that it is mirrored horizontally (left to right). You should end up with only the design from the input."
+  }
+ ],
+ "a1570a43": [
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Think of the 4 pixels as a picture frame. Reposition the random shape to be centered in that frame."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Move the different color shape so that it is fully inside the square composed by the four colored pixels."
+  }
+ ],
+ "a2fd1cf0": [
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Connect the squares use light blue with a right angle. Output size: No change."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Create a road of light blue squares between the red and green squares. The road should travel up or down from the green square and left or right from the red square until the two meet."
+  }
+ ],
+ "a3325580": [
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Identify the largest shapes by number of squares. This may be one shape or more than one shape, if they have the same number of square. Then create a vertical line for each of those shapes, in the order from left to right of the shapes, each line with the same number of squares as the input shape. If only one shape is largest, there will be one output line. Output size: Will be the size that the output lines require."
+  }
+ ],
+ "a3df8b1e": [
+  {
+   "src": "barc_seed",
+   "concepts": [
+    "bouncing"
+   ],
+   "rule": "In the input you will see a single blue pixel on a black background To make the output, shoot the blue pixel diagonally up and to the right, having it reflect and bounce off the walls until it exits at the top of the grid"
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Draw a blue dot one to the right and one up from the original one, follow that pattern until you reach the side, then draw a blue dot one to the left and one up until you reach the other side, repeat until you reach the top."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Add blue squares in a 45 degree angle pattern back and forward until you reach the top."
+  }
+ ],
+ "a416b8f3": [
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Copy the pattern exactly to the new empty section. There should be two of the same pattern side-by-side."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Place the input design all the way on the left half and then duplicate the exact same design and colors on the right half. The final grid is two of the original grid next to each other."
+  }
+ ],
+ "a48eeaf7": [
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Simply move the gray boxes toward the red boxes taking the most direct route possible. The gray boxes are then placed wherever they touch a red box in some way."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Move the blocks until they touch the red square on the same line."
+  }
+ ],
+ "a5313dff": [
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Color the inside blue but if the border of shape goes outside the grid leave inside black. Output size: Match the output."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Changed the grid and the color. Output size: Fill the inside with blue color."
+  }
+ ],
+ "a5f85a15": [
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Change every other square on each of the diagonal lines to yellow (starting with the 2nd square on each line)."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Change every other square on each of the diagonal lines to yellow."
+  }
+ ],
+ "a61ba2ce": [
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Make a square with the each set of blocks. There should be a smaller black square in the center. Output size: Should be 4x4."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Follow the colored pattern and put them on all the corners exactly how the pattern is placed. Then fill in the middle 4 squares with black. Output size: Changes to 4x4."
+  }
+ ],
+ "a61f2674": [
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Change the shortest colored blocks from gray to red and the tallest colored blocks from gray to blue. Change the remaining gray blocks to black."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Change the shortest group of blocks from gray to red, change the tallest group of blocks from gray to blue. Change the remaining gray blocks to black."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Change the shortest grey line to red and the tallest line to blue. The remaining lines turn black."
+  }
+ ],
+ "a64e4611": [
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Fill not fill area with green, leaving black border."
+  }
+ ],
+ "a65b410d": [
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Copy your red input boxes to the output grid. Make an exact same line (as red) in green, but also add 1 green box. Repeat moving up until your top portion is colored in green with -1 box moving downward. Go to the box(es) just BELOW your red line. Make a new line (or box) in blue, but -1 less blue box than the number of red box(es). Repeat this in blue until you only have ONE black box (row) left on the bottom."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Place the horizontal bar in the exact position in the output. Then add 1 to the number of orange squares and fill in that number of squares directly above the orange bar, but in GREEN, beginning with the leftmost square. Then add another 1, and fill in that number of squares in another green horizontal bar right above. Continue doing that all the way to the top."
+  }
+ ],
+ "a68b268e": [
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Take the upper left 4x4 grid. Nothing will need to be changed from it. Add the upper right grid to the 1st one. Remember not to change any colors only add new ones to black boxes. Next do the bottom left grid the same way. Finish with the bottom right grid. You will not use dark blue squares at all. Output size: The size of one 4x4 grid."
+  }
+ ],
+ "a699fb00": [
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Fill the black sections between two blue sections with red."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Every time you see two blue squares in any line with a single space in between, you fill in that space with a red square Only pay attention to squares going across and not up and down. Do not fill in any squares for any pattern going up and down. Keep all blue squares blue and keep the black squares black."
+  }
+ ],
+ "a740d043": [
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Make the pattern and if there is any more on the sides or any blue, fill in with black. Output size: Is the size of the pattern in the blue grid."
+  }
+ ],
+ "a78176bb": [
+  {
+   "src": "barc_seed",
+   "concepts": [
+    "diagonal lines"
+   ],
+   "rule": "In the input you will see a grid with a diagonal line and gray objects touching it. The grey objects are all right triangles. To make the output grid, draw additional diagonal lines in the same color emanating from the tip of the grey objects. Delete the grey objects."
+  }
+ ],
+ "a79310a0": [
+  {
+   "src": "barc_seed",
+   "concepts": [
+    "translation",
+    "color change"
+   ],
+   "rule": "In the input you will see a grid with a teal object. To make the output grid, you should translate the teal object down by 1 pixel and change its color to red."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Move colored square one line down and change to red."
+  }
+ ],
+ "a85d4709": [
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Make the row green if two blocks appear together on the left, yellow if two blocks are separated by a gray block in the middle, and red if two blocks appear together on the right on each row. Output size: Does not change."
+  }
+ ],
+ "a87f7484": [
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Find the color with the most spaces colored and put that pattern into the 3x3. Output size: Will be 3x3."
+  }
+ ],
+ "a8c38be5": [
+  {
+   "src": "barc_seed",
+   "concepts": [
+    "alignment",
+    "sliding objects"
+   ],
+   "rule": "In the input, you should see a black grid with nine 3x3 grey squares randomly placed in it (some of the squares touch a little bit). Each square contains a colored object of a different color, 3-4 cells in area, except for one which is blank. The colored objects are at the border of the 3x3 shape. To make the output, create a 9x9 grey grid. Now place each of the 3x3 squares from the input grid into the output grid."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Make sure the background is all gray. Then place the colors and shapes you see in the input in the right place. The corners should go in the corners. the t-shape should go at the top in the middle, the upside down t-shape should go at the bottom in the middle, the two side way t-shapes should go on the left and right side in the middle so that the long side is against to the left and right. Output size: A 9x9 grid."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Rearrange each of those squares fully that colors line up along the edge. Start with the fully gray 3x3 in the middle. Then corners should line up in the corners that the color touches the edge.Rearrange the rest of the 3x3 grids that the color remains on the edge. Output size: Changes to a 9x9 grid."
+  }
+ ],
+ "a8d7556c": [
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Make the boxes that have the same color of black shapes that are bigger than 1x1 red."
+  }
+ ],
+ "a9f96cdd": [
+  {
+   "src": "barc_seed",
+   "concepts": [
+    "constant pattern",
+    "diagonal corners"
+   ],
+   "rule": "In the input you will see one red pixel To make the output grid, you should 1. draw a pattern with four different colors centered at the red pixel at its diagonal corners: green in the upper left, pink in the upper right, teal in the lower left, and yellow in the lower right. 2. remove the red pixel (equivalently start with a blank canvas and draw the pattern at the red pixel location)"
+  }
+ ],
+ "aabf363d": [
+  {
+   "src": "barc_seed",
+   "concepts": [
+    "color guide",
+    "filling",
+    "objects"
+   ],
+   "rule": "In the input, you will see a colored object in the middle and a single pixel in the bottom left corner of a different color. To make the output, remove the pixel from bottom left corner and color the object in the middle with the color from the pixel you removed."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Change the pattern to match the one colored square at the bottom and fill in the one square at the bottom to black."
+  }
+ ],
+ "aba27056": [
+  {
+   "src": "barc_seed",
+   "concepts": [
+    "cups",
+    "filling"
+   ],
+   "rule": "In the input you will see a cups, meaning an almost-enclosed shape with a small opening on one of its sides, and empty space (black pixels) inside. To make the output grid, you should fill the interior of each cup with yellow, then shoot yellow out of the opening of the cup both straight out and diagonally from the edges of the opening."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Fill yellow squares in the hole of the rectangle and also add yellow squares on either all of the horizontal or all of the vertical lines out of the hole. Then add more yellow squares on a diagonal starting from the inner corner of each hole and going to the edge of the grid. Some yellow squares will repeat the yellow squares to fill the hole."
+  }
+ ],
+ "ae3edfdc": [
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Create 2 designs using all of the colored boxes in the input grid. One design is focused on the red box and the other one is focused on the blue box. Both the red box and the blue box will be in their exact same positions in the new grid. First put the red box in the same place as it is in the input grid."
+  }
+ ],
+ "ae4f1146": [
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Mirror the square with the most dark blocks. Output size: Is is 3x3."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Copy the 3x3 square from the input grid that has the most blue pixels."
+  }
+ ],
+ "aedd82e4": [
+  {
+   "src": "barc_seed",
+   "concepts": [
+    "object detection",
+    "color change"
+   ],
+   "rule": "In the input you will see a grid with a red pattern To make the output grid, you should find out any single isolated red objects with size of 1x1 and change them to blue."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Copy the input grid. Any shapes which only contain one single square should be colored blue."
+  }
+ ],
+ "af902bf9": [
+  {
+   "src": "barc_seed",
+   "concepts": [
+    "filling",
+    "surrounding"
+   ],
+   "rule": "In the input you will see several yellow pixels arranged in groups of 4 so that each group outlines a rectangular shape. To make the output, fill the corresponding inner rectangular regions with red."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Put red in the middle of the yellow square structure, but not actually next to any of the yellow squares. Output size: Does not change."
+  }
+ ],
+ "b0c4d837": [
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Put blue blocks if empty blocks that are in the grey pattern are added in vertical and that number should be be added blocks in a horizontal shape in a output. Output size: Will be 3x3."
+  }
+ ],
+ "b190f7f5": [
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Replace each of the colored squares on the input grid with the light blue pattern but in the color of the square, then orient the pattern to correspond with the colored squares in the new grid."
+  }
+ ],
+ "b1948b0a": [
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Replace all the purple squares with red."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Turn the not-orange color into light red."
+  }
+ ],
+ "b230c067": [
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Color the two similar shapes the same dark blue color and then change the third shape to the red color."
+  }
+ ],
+ "b27ca6d3": [
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Surround the paired red boxes with green boxes."
+  }
+ ],
+ "b2862040": [
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Make all the closed dark blue patterns light blue."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Change closed patterns to light blue."
+  }
+ ],
+ "b527c5c6": [
+  {
+   "src": "barc_seed",
+   "concepts": [
+    "growing"
+   ],
+   "rule": "In the input you will see a grid with some green rectangles. Each rectangle has one red pixel on one of its borders. To make the output, you should extend the green region of each rectangle to the border of the grid in the direction of the red pixel, with the extent of the line increasing with the extent of the rectangle. Also you should draw a red line from the red pixel to the border of the grid."
+  }
+ ],
+ "b60334d2": [
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Copy entire image over. Add single gray pixels diagonally from each corner of the current gray pixels, should create an X. Add blue pixels above and to the sides of the center original gray pixels, so it's like a plus sign. You will now have a number of 3x3 squares. Replace the very center, where the gray pixels were in the original input, with black."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Place blue to the top, bottom, left, and right of each gray square, change the gray square to black so it looks like a blue plus sign with a black center, and finally add gray squares on each corner of the plus sign to end up with gray, blue, and black squares that are 3x3."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Put a blue square to the top, left, right, and bottom of the grey squares. Then turn the grey squares to black. Then on the 4 corners of your blue plus sign, add grey squares. These new squares should be 3x3."
+  }
+ ],
+ "b6afb2da": [
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Copy the input grid and then make all four corners of the gray squares blue. Fill the rest of the edge of the gray squares with yellow to connect the blue squares. Then fill the inside of each colored square with red."
+  }
+ ],
+ "b7249182": [
+  {
+   "src": "barc_seed",
+   "concepts": [
+    "growing",
+    "connecting"
+   ],
+   "rule": "In the input you will see two pixels of different colors aligned horizontally or vertically. To make the output, you need to connect the two pixels with two lines and a hollow rectangle of size 4x5 in the middle. Half of the rectangle is colored with the color of the one side's pixel, and the other half with the color of the other side's pixel."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Make each color in line go toward the center. Make a black empty space in the center by stop the lines 1 square each before they meet. This should give you 2 black squares in the center. Form a new line on each side with 2 cubes on either side for each color. Put one more colored cube at the end of these lines to make each color connect. This should make an empty space in the center with a size of 2x3. Output size: Will not change."
+  }
+ ],
+ "b775ac94": [
+  {
+   "src": "barc_seed",
+   "concepts": [
+    "symmetry",
+    "mirror"
+   ],
+   "rule": "In the input you will see big objects with a primary color and some single pixels of different colors attached to it. To make the output, mirror the primary colored part of each object over the differently colored pixels attached to it, changing the primary color to match the other color."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Expand the oddly colored cells into a pattern that mimics and mirrors the original set of cells that form the \"fully formed\" pattern. The output will have a snowflake appearance or a half or three-quarters of this \"snowflake\". In other words, 4 different colors bunched together will form a fully symmetrical \"snowflake\", while 3 will produce a \"three-quarters\" one. If that makes any sense."
+  }
+ ],
+ "b782dc8a": [
+  {
+   "src": "barc_seed",
+   "concepts": [
+    "maze",
+    "path finding"
+   ],
+   "rule": "In the input you will see a maze with a path that has two indicator pixels of different colors. To make the output, fill all reachable parts of the maze starting with the indicator pixels and alternating colors."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Fill in the black squares by alternating the colors of the smaller shape."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Finish the pattern only on that area."
+  }
+ ],
+ "b8825c91": [
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Remove the yellow rectangles and replace the color to match the existing pattern."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Remove the yellow rectangles and replace the all of the yellow squares with the appropriate color in order to create a pattern that is both horizontally and vertically symmetrical."
+  }
+ ],
+ "b8cdaf2b": [
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Create a diagonal line from the top to the sides with the less majority color."
+  }
+ ],
+ "b91ae062": [
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Re-create the same pattern with a single pixel becoming a square with sides of length corresponding to the number of colors in the original pattern. In other words, simply increase the resolution of the input by the number of colors it contains. Output size: Is the number of colors in the pattern times 3 for both width and height."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Double the block patterns 2 times the grid size. Output size: Either 6x6 or 12x12."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Just multiply the size of the output grid as stated in the last sentence, but make sure the colors take up as much space as before (if it's a 9x9 grid, each color square will be 3x3, for instance)."
+  }
+ ],
+ "b94a9452": [
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Make an output grid that is the same size as the larger square. The size and placement of the smaller inner square should be the same relative to the input grid. The colors of the two squares should be swapped."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Reverse the colors of the original squares, keeping their original dimensions. Output size: Is the size of the larger colored square."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Copy the colored square pattern, but trade colors. For example: If you have a large blue square with a green center on the input, copy that to make a large green square with a blue center."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Make an output grid that is the same size as the larger square. The size and placement of the smaller inner square should be the same relative input grid The colors of the two squares should be swapped."
+  }
+ ],
+ "b9b7f026": [
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Fill in the new grid with the color of the object that has a hole in it. Output size: Will be 1x1."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Copy the color of the object that has a whole in in the middle."
+  }
+ ],
+ "ba26e723": [
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Start by changing the first set of two blocks to pink. Then skip two pairs and change the next two pink. Complete this pattern to the end of the grid."
+  }
+ ],
+ "ba97ae07": [
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Make the other color line on top."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Copy the input grid. In the output, change the color where the two lines meet so that the other color line is on top."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Make the other color line on top."
+  }
+ ],
+ "bb43febb": [
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Fill the inside of both shapes with red leaving a border the same color as original."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Color in the center of each gray square red, but make sure you leave a 1 square gray border around it (so if it's a 5x5 gray square, you would color a red 3x3 square inside it, leaving a gray border around the red square)."
+  }
+ ],
+ "bbc9ae5d": [
+  {
+   "src": "barc_seed",
+   "concepts": [
+    "counting",
+    "incrementing"
+   ],
+   "rule": "In the input, you will see a row with partially filled with pixels from the one color from left to right. To make the output: 1. Take the input row 2. Copy it below the original row with one more colored pixel added to the sequence if there is space 3. Repeat until there are half as many rows as there are columns"
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Make the top row the same as the row shown in the input grid. Every row that goes down adds one more colored box. So, if the top row has 4 colored boxes, the next row down has 5 and then the next row has 6 etc. This will look like a staircase when you are done. Keep going until the grid is finished."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "The top row is the same as the input. Add one colored block to the row below that, and two blocks to the row below that, etc etc, until it looks like a staircase."
+  }
+ ],
+ "bc1d5164": [
+  {
+   "src": "barc_seed",
+   "concepts": [
+    "patterns",
+    "positioning",
+    "copying"
+   ],
+   "rule": "In the input you will see a pattern of pixels in the top left corner of the grid, the top right corner of the grid, the bottom left corner of the grid, and the bottom right corner of the grid. All the pixels are the same color, and the patterns are in square regions. To make the output, copy the pattern in each corner of the input to the corresponding corner of the output."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Squeeze the color other than black together so that when the section of the color come together the pattern is complete. Output size: Changes to 3x3."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Imagine you are squishing the original grid horizontally and vertically. The colored dots move and overlap on top of the background. Output size: Shrinks to a 3x3 grid."
+  }
+ ],
+ "bd4472b8": [
+  {
+   "src": "barc_seed",
+   "concepts": [
+    "patterns",
+    "lines"
+   ],
+   "rule": "In the input, you will see a top row with a sequence of colored pixels, and right below it is a grey line. To make the output, copy the first two rows of the input. Then, starting below the grey line, draw rows one color at a time in the order of the colors in the top row from left to right, with the color of each row matching the color of the corresponding pixel in the top row."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Filled the black grid from the third row with the colors specified in the first row. For example, fill the third row with the color in the first row and first column, and repeat."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Filled the black grid from the third row with the colors specified in the first row. For example, fill the third row with the color in the first row and first column, and repeat."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Start on the third row (after the row of gray) and make the entire third row the same as the first color in the first row, then make the entire fourth row the same as the second color in the first row and so on for the next color. Once all colors have been done, then repeat the same pattern."
+  }
+ ],
+ "bda2d7a6": [
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Change the color of center black 2x2 grid to that of 4X4 grid color, 4X4 change to 6X6 color, and 6X6 change to old 2X2 color."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Change the color of the center square to the color of the second square, then change the second square to the color of the third square, and continue until you get to the largest square which should take on the color of the input center square."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Change the color of the 6x6 grid to the 2x2 color, the 4x4 change to the 6x6 color and the 2x2 color to the 4x4 color."
+  }
+ ],
+ "bdad9b1f": [
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Continue the pattern of red squares horizontal and continue the blue squares vertical to reach the edge of the grid. On the square that blue and red squares crosses, color that one yellow."
+  }
+ ],
+ "be94b721": [
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Fully copy the pattern of the largest colored shape, zoomed as much as possible. Output size: Is fully zoomed on the pattern with the highest color count."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Fully zoomed pattern of a highest color count among the gird. Output size: Fully zoomed size of a certain pattern."
+  }
+ ],
+ "beb8660c": [
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Rearrange the lines from largest at the bottom of the grid to smallest at the top. The final row need not be at the top of the grid. The lines should be aligned to the right side."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Place them on each other according to their lengths on the grid right side."
+  }
+ ],
+ "c0f76784": [
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Fill the center of the smallest square with pink, the middle square with dark yellow and the biggest square with light blue."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Flood fill the holes within the squares, with pink for the smallest, the largest with light blue and the medium sized with orange."
+  }
+ ],
+ "c1d99e64": [
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Color the black squares that create a line vertical or horizontal all the way across the grid red and only those squares red."
+  }
+ ],
+ "c3e719e8": [
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Notice that you can copy the original 3x3 grid 9 times into the new grid (nine 3x3 patterns) and fill out the new grid in this pattern. Now look at which color is the most common in the input grid and keep that in mind. For example, if blue is the most common color in the input box and the top, left box is blue then copy the entire 3x3 box into the top, left 3x3 area in the new grid. Output size: Needs to be 9x9."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Copy the input pattern. paste in output in a way that's similiar to the most common color in the input. For instance is green is the most common color and the green boxes are diagonal, this pasted pattern would be diagonal as well. Output size: Enlarged to 9x9."
+  }
+ ],
+ "c3f564a4": [
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Fill in the black squares according to the pattern of diagonal colored squares."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Fill in black tiles with the same tile pattern in the diagonal lines."
+  }
+ ],
+ "c444b776": [
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Copy the color in one section to any other section."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Copy the color in one section to other three sections."
+  }
+ ],
+ "c59eb873": [
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Divide each block into a 2x2 square in the same color as the original block. So, each block from the original input grid will become a 2x2 block of 4 squares of the same color as the original block."
+  }
+ ],
+ "c8cbb738": [
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Place all the groups of pixels on top of each other keeping all colors the same. Leave any left over blocks the color of the original background."
+  }
+ ],
+ "c8f0f002": [
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Change the yellow grids into grey one."
+  }
+ ],
+ "c909285e": [
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Copy the entire small square grid without change in the pattern or the colors along with the border."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Count the number of squares in the colored border and resize the output to that number. Then you color all the blocks to match the input."
+  }
+ ],
+ "c9e6f938": [
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Copy the original pattern to the left half of the grid, then mirror it on the right, like an inkblot. Output size: Doubles horizontally, so instead of 3x6 it's now 6x3."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Create a left-right mirror of pattern of the orange shape."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Make the pattern mirror as left-right with the same height and twice the row."
+  }
+ ],
+ "c9f8e694": [
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Fill each gray block with the color from the colored blocks that is on the same horizontal row."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Fill in each box of the grey squares with whichever color from the colored line on the side is on the same row as it."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Color the horizontal blocks the same pattern as the vertical colors."
+  }
+ ],
+ "caa06a1f": [
+  {
+   "src": "barc_seed",
+   "concepts": [
+    "translational symmetry",
+    "symmetry detection",
+    "non-black background"
+   ],
+   "rule": "In the input you will see a a translationally symmetric pattern that does not extend to cover the entire canvas. The background is not black. To make the output, continue the symmetric pattern until it covers the entire canvas, but shift everything right by one pixel."
+  }
+ ],
+ "cce03e0d": [
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Visualize the output grid as nine 3x3 blocks. The red squares on your input indicate which 'blocks' in your 9x9 grid you should work in. Copy the 3x3 input pattern to the 'blocks' indicated by the location of the red squares."
+  }
+ ],
+ "ce22a75a": [
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Change every gray square and the 9 squares around it into blue."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Change every gray square and the 9 squares that go all around it into blue."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Change the gray blocks to blue and the squares that go around it to turn it into a blue block of 9."
+  }
+ ],
+ "ce4f8723": [
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Consider the long input as two sections as 4x4 grids, consider that the two sections as one then the leave that black spaces as black then point the colored blocks as green. Output size: Must be 4x4."
+  }
+ ],
+ "ce602527": [
+  {
+   "src": "barc_seed",
+   "concepts": [
+    "scaling",
+    "shape matching",
+    "non-black background"
+   ],
+   "rule": "In the input you should see three objects, two of which are the same shape but different sizes and colors. The third object is a different shape. To make the output, you need to find the two objects that are the same shape but different sizes and colors. Return the smaller object in the same shape."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Copy the design just as it is. Output size: The size of one of the designs."
+  }
+ ],
+ "ce9e57f2": [
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Change the lower half of the red bars to light blue and the upper half remain red. If there are an even number of squares in the bar, the red squares and light blue squares should be even. If there are an odd number of squares in a bar, there should be one more upper red squares than there are lower blue squares."
+  }
+ ],
+ "cf98881b": [
+  {
+   "src": "barc_seed",
+   "concepts": [
+    "occlusion"
+   ],
+   "rule": "In the input you will see three regions separated by red vertical bars. Each region is rectangular and the regions are arranged horizontally, so there is a left region, middle region, and a right region. The regions display a yellow pattern, a maroon pattern, and a blue pattern from left to right."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Over lay the dark red and blue areas and fill in the black squares where possible. Output size: Is like the left section with the yellow squares."
+  }
+ ],
+ "d037b0a7": [
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Wherever you see a color other than black make squares below that color the same color down to the border."
+  }
+ ],
+ "d06dbe63": [
+  {
+   "src": "barc_seed",
+   "concepts": [
+    "staircase pattern"
+   ],
+   "rule": "In the input you will see a single teal pixel. To make the output, draw a staircase from the teal pixel to the upper right and lower left with a step size of 2."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Use just grey blocks add blocks to the top of the blue box, add two up, and then two to the right. Below the blue box add grey blocks, two down and then two to the left. Repeat this pattern to the edge of the grid."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Place two gray pixels above the light blue square. Then make three gray squares (total) to the right, then three more (total) going up, etc to the end of the border. Do the same thing going down, except the squares should go to the left instead of to the right. It should look like stairs, sort of."
+  }
+ ],
+ "d0f5fe59": [
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Take the same color as the shapes in the input grid and create a line from the top left corner to the base right corner."
+  }
+ ],
+ "d10ecb37": [
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Copy the colors used in the top left corner of four squares of the grid and make them the corresponding colors on the output 2x2 grid. So if the top left has a red square, then a yellow square with a blue square below the red square and a green square below the yellow square, then those would be placed in the corresponding squares on the output grid. Output size: Is reduced to a 2x2 grid."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Take the pattern on the top left and put it in the 2x2 grid. Output size: Will be 2x2."
+  }
+ ],
+ "d23f8c26": [
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Keep the vertical middle line of squares the same, and color the rest of the squares black."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Turn everything black, but keep the middle vertical line of colored squares."
+  }
+ ],
+ "d2abd087": [
+  {
+   "src": "barc_seed",
+   "concepts": [
+    "counting"
+   ],
+   "rule": "The input consists of several grey objects in a 10x10 grid. To create the output, change the color of all objects of area 6 to red, and all other objects to blue."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Copy the input grid. Then count how many gray squares make up each of the individual shapes. If the shape uses (6) gray squares, change those gray squares to red. If the shape has any other number of gray squares, change the gray squares to blue."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Item with 6 red and the other blue."
+  }
+ ],
+ "d364b489": [
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Place a orange square to the space left of any blue square, a red square in the space above any blue square, a purple square to the space on the right of any blue square and a light blue square to the space below any blue square."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Put purple squares on the right side, red squares on the top, orange squares on the left, light blue squares on the bottom. Output size: Do not change."
+  }
+ ],
+ "d43fd935": [
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Copy the input grid. Then, connect the 2x2 green square to any and all other colored squares which you can reach with a straight line. Use the color of the square to which you are connecting the 2x2 green square. Fill in all of the black squares between that square and the 2x2 green square. Leave the rest of the grid - including any colored square you can't reach with a straight line - as they are."
+  }
+ ],
+ "d4469b4b": [
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Make a gray grid with four black corner squares if the input is blue squares. If the input is red squares, make a make a gray grid with the bottom right and bottom left black and the middle left and middle right black. If the input is green squares, make a gray grid with a 2x2 black square in the top left."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Make a 3x3 grid. If the input grid has blue shapes, the output should be light grey with black in the four corners (making a grey plus sign). If the input grid has red shapes, the output should be light grey with black on the lower left, middle left, middle right and lower right (making a grey T shape)."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Make a gray grid with four black corner squares if the input is blue squares.if the input is red squares,make a make a gray grid with the bottom right and bottom left black and the middle left and middle right black. if the input is green squares,make a gray with a 2x2 black square in the top left."
+  }
+ ],
+ "d4a91cb9": [
+  {
+   "src": "barc_seed",
+   "concepts": [
+    "lines",
+    "color"
+   ],
+   "rule": "In the input you will see a red pixel and a teal pixel. To make the output, draw a horizontal yellow line from the red pixel to the column of the teal pixel, then draw a vertical yellow line from there to the teal pixel."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Draw a down line with yellow to which the red grid's row meet. and continue the yellow grid to the side of the red grid."
+  }
+ ],
+ "d4f3cd78": [
+  {
+   "src": "barc_seed",
+   "concepts": [
+    "cups",
+    "filling"
+   ],
+   "rule": "In the input you will see grey cups, meaning an almost-enclosed shape with a small opening on one of its sides, and empty space (black pixels) inside. To make the output grid, you should fill the interior of each cup with teal, then shoot teal out of the opening of the cup straight out in a line."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Fill in the square with light blue. Make the single black square that should be gray in the input light blue as well. Then you want to continue with light blue to make a line going to the edge of the grid. So it is like a line is going out of the square to the edge like a stop sign (but in any direction)."
+  }
+ ],
+ "d511f180": [
+  {
+   "src": "barc_seed",
+   "concepts": [
+    "colors"
+   ],
+   "rule": "To create the output grid, swap the teal and grey colors in the grid."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Change all gray squares to light blue and all light blue squares to gray. Everything else keep the same as input."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Change all the gray squares to light blue and all the light blue squares to gray. Everything else keep same as input."
+  }
+ ],
+ "d5d6de2d": [
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Fill in the holes of the boxes with green, then black out the outlines of the boxes."
+  }
+ ],
+ "d631b094": [
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Color the whole output grid the color of the colored input grid blocks so there is a horizontal line of colored blocks."
+  }
+ ],
+ "d687bc17": [
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Copy grid. If any of the boxes on the inside match any of the outline colors move them so they are adjoined to it, without changing the row/column it's in. Do this with every color. If a box on the inside doesn't match with an outside color then just remove it. At the end the middle area should be black and the blocks are adjoined to their respective colors."
+  }
+ ],
+ "d6ad076f": [
+  {
+   "src": "barc_seed",
+   "concepts": [
+    "connected components"
+   ],
+   "rule": "In the input you will see two rectangles separated by a gap. To make the output, you need to connect the two rectangles with a teal line."
+  }
+ ],
+ "d89b689b": [
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Replace 2x2 same grid color with all other four different colors that in input grid. each 2x2 grid color are different in output grid 2x2."
+  }
+ ],
+ "d90796e8": [
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "If the red and green pixels are touching (not including diagonal touching) remove the red pixel (change it the same color as the background) and make the green pixel that it was touching light blue. Leave gray pixels and single green and red pixels alone."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Copy the exact entire image. Where ever a green and red pixel touch on their sides (not diagonal/corners), replace the green pixel with light blue, and replace the red pixel with black (remove it)."
+  }
+ ],
+ "d9f24cd1": [
+  {
+   "src": "barc_seed",
+   "concepts": [
+    "line drawing",
+    "obstacle avoidance"
+   ],
+   "rule": "In the input you will see several red pixels on the bottom row of the grid, and some gray pixels scattered on the grid. To make the output grid, you should draw a red line upward from each red pixel, but avoiding the gray pixels. To avoid touching the gray pixels, go right to avoid them until you can go up again."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Extend each red dot straight up so it forms a vertical line. The red pixel must change direction as it reaches the grey pixel to the right and continue straight up."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Extend each red dot straight up so it forms a line to the top of the grid. If the red line would go through a gray square, the line must go to the right of it and then continue going straight up, making it a bent line."
+  }
+ ],
+ "d9fac9be": [
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Zoom into the light blue center block. Output size: The size of one single block."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Zoom into the different colored center block from the input grid and make it the only colored block. Output size: Is the size of one block from the input grid."
+  }
+ ],
+ "dae9d2b5": [
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Copy and paste the left-side of the input (the yellow side) onto the output grid. Then, draw the green pattern on the output grid on top of the yellow (do not copy and paste because the black will overwrite the yellow). Your output grid should now have green and yellow on a black background. Then, recolor each green and yellow square pink, so your output is only pink and black."
+  }
+ ],
+ "db3e9e38": [
+  {
+   "src": "barc_seed",
+   "concepts": [
+    "pixel patterns",
+    "pyramid",
+    "color alternation"
+   ],
+   "rule": "In the input you will see a single orange line that connects to the top of the grid. To make the output, you should draw a pyramid pattern outward from the orange line. The pattern is expanded from the orange line to the left and right of the grid. Each line of the pattern is one cell shorter than the previous one, and the color alternates between orange and teal."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Copy-paste the input. starting on each side, alternate colors between orange and light blue, and decreasing the line by one block. So the colors should be orange in middle, then light blue, then orange, then light blue. Output size: Does not change."
+  }
+ ],
+ "db93a21d": [
+  {
+   "src": "barc_seed",
+   "concepts": [
+    "expanding",
+    "framing",
+    "growing"
+   ],
+   "rule": "In the input you will see some squares of different sizes and colors. To make the output, you need to: 1. Expand the squares down to the bottom of the grid using the color BLUE. 2. Draw a green frame around the squares. The green square should be twice as long as the original square. 3. Put the original square back to the center of the green square."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Put a green border around each red square. The thickness of the green border should equal one half of the thickness of the red square (if the square is 6 squares across then the green border should be three squares deep around it). Fill the black squares below the red and green squares with a vertical line of blue squares."
+  }
+ ],
+ "dbc1a6ce": [
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Draw a light blue line to connect any dark blue squares that are on the same line or row."
+  }
+ ],
+ "dc0a314f": [
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Paint the green square to match the patten of the mosaic, like the missing puzzle piece."
+  }
+ ],
+ "dc1df850": [
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Draw a blue border around the red pixels. Fill in each pixel around the red pixel with blue. If the red pixel is near the border of the grid, fill in the pixels around it against the border."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Surround only the red squares with a blue border that is one square wide."
+  }
+ ],
+ "dc433765": [
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Move the green square one block closer to the yellow square, no matter if it is horizontal, diagonal, or vertical."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Make the two squares one space closer to each other by moving the green square so it is one space closer to the yellow while keeping the same relationship whether horizontal vertical or diaganal."
+  }
+ ],
+ "ddf7fa4f": [
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Color the gray box the color of the square above it."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Fill the gray area with the colors corresponding with the colored block in the first row."
+  }
+ ],
+ "de1cd16c": [
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Look for the colored area with the largest number of pink squares and use that color."
+  }
+ ],
+ "ded97339": [
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Connect the magenta boxes that are directly vertical and horizontal to each other."
+  }
+ ],
+ "e179c5f4": [
+  {
+   "src": "barc_seed",
+   "concepts": [
+    "bouncing"
+   ],
+   "rule": "In the input you will see a single blue pixel on a black background To make the output, shoot the blue pixel diagonally up and to the right, having it reflect and bounce off the walls until it exits at the top of the grid. Finally, change the background color to teal."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Add the same color dark blue pixel in a zig-zag pattern moving up the grid. Each pixel should be filled in on a diagonal going up and to the right until you read the edge of the grid. Then you should keep moving on the diagonal up and to the left until you reach the left side of the grid. Keep repeating until you reach the top of the grid. Then fill in the rest of the spaces with the light blue color."
+  }
+ ],
+ "e21d9049": [
+  {
+   "src": "barc_seed",
+   "concepts": [
+    "pixel patterns",
+    "expansion",
+    "color sequence"
+   ],
+   "rule": "In the input you will see a grid with a cross pattern. Each pixel in the cross has a different color. To make the output, you should expand the cross right/left/top/bottom following the original color sequence of the cross."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Continue the lines to all edges, using alternating the color pattern."
+  }
+ ],
+ "e26a3af2": [
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Eliminate all the random color squares and replace them with the color of the bar they are in."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Make color rows and columns even with filled squares in the color to maintain the pattern. Common sense fill. Output size: Keep input size."
+  }
+ ],
+ "e3497940": [
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Take the right side section and turn it to the left rotating two times until all colored boxes start on the right. The image will be the overlap of the two sides. Output size: Is equal to the size of one of the original black section."
+  }
+ ],
+ "e40b9e2f": [
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Copy the outside color to the opposite corners of each side of the inside shape to make a square pattern. Then for the inside shape you have to visualize the pattern clockwise 90 degree, 180 degree, 270 degree, and fill in the grid with all of these overlay on top of each other."
+  }
+ ],
+ "e48d4e1a": [
+  {
+   "src": "barc_seed",
+   "concepts": [
+    "counting"
+   ],
+   "rule": "In the input, you will see a 10x10 black grid. The grid has one row and one column colored solidly in a single color, forming a cross of that color across the grid. The grid also has H grey pixels in the rightmost column at the top of the grid. To create the output, convert the H grey pixels to be black. Then shift the \"cross\" H pixels to the left and H pixels down."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "First, copy the input grid but make the background all black, with no grey grid. Then, count the grey grid at the top right corner in the input grid. Next, move the horizontal line down according to the number of the grey grid and move the vertical line according to the number of the grey grid and draw it on the output grid (for example, if the grey grid is 1, then move the lines down or to the left by 1 grid)."
+  }
+ ],
+ "e5062a87": [
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Find any black squares that are in the same pattern as the red squares, then change the black squares in each pattern to red."
+  }
+ ],
+ "e509e548": [
+  {
+   "src": "barc_seed",
+   "concepts": [
+    "topology",
+    "counting"
+   ],
+   "rule": "In the input you will see a grid with several green objects with different number of bends. To make the output, color the objects with one bend with blue, two bends with pink, three bends with red."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Change design color to blue if the design only has one 90 degree edge , pink if it has two, and red if it has three."
+  }
+ ],
+ "e50d258f": [
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Create the pattern with the most red squares inside. Output size: The size of the pattern with the most red squares."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Copy the rectangular shape with the most red squares exactly. Output size: Is the size of the rectangular shape with the most red squares."
+  }
+ ],
+ "e6721834": [
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Copy the grid that has the individual colored squares only. Look at the grid that was not used and create the same colored shapes around the individual squares on the grid. They should be the same colors, shapes, and number of squares."
+  }
+ ],
+ "e73095fd": [
+  {
+   "src": "barc_seed",
+   "concepts": [
+    "filling"
+   ],
+   "rule": "The input consists of a black grid containing a few hollow grey rectangles. Each rectangle has 1-3 grey horizontal or vertical lines emanating off of it (at most one per side), either travelling to the border or stopping at another rectangle. To create the output, fill in the hollow grey rectangles with yellow."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Fill in gray squares with yellow."
+  }
+ ],
+ "e76a88a6": [
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Copy the color pattern into the other gray grids."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Copy the color pattern into the other gray shapes. Output size: 10x10 grid."
+  }
+ ],
+ "e8593010": [
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Change single pixels to green,two pixels lines to red,and three pixels shapes to blue.The background stays gray."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Change the single black pixels to green, two black pixel lines to red, and three black pixel shapes to blue. The background stays gray."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Change single pixels to green, two pixels lines to red, and three pixels shapes to blue. The background stays gray."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Fill any single black squares with green. Fill any two-square black shapes with red. Fill any three-square black shapes with blue. The background remains grey."
+  }
+ ],
+ "e8dc4411": [
+  {
+   "src": "barc_seed",
+   "concepts": [
+    "repeated translation",
+    "indicator pixels",
+    "non-black background"
+   ],
+   "rule": "In the input you will see a non-black background with a black object and an indicator pixel touching it of a different color. To make the output, repeatedly translate the black object in the direction of the indicator pixel and make the color of these repeated translations match the indicator."
+  }
+ ],
+ "e9614598": [
+  {
+   "src": "barc_seed",
+   "concepts": [
+    "object detection",
+    "pattern drawing"
+   ],
+   "rule": "In the input you will see two blue pixels To make the output grid, you should place a 3x3 green cross pattern between the two blue pixels exactly halfway between them."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Imagine the line that would be formed by the blue squares and fill in the middle square with green. Then using the green square as a starting place fill in the block above, below, and on each side with green. It should look like a plus sign."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Replicate the location of the two blue squares. Then color the half way point of the two with a green square. From that green square, also color the top, bottom, left, and right square from it green to make a plus sign. Output size: Remains a 10x10 grid."
+  }
+ ],
+ "e98196ab": [
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Mesh together both patterns from above and below the gray line. Output size: An 11x5 grid."
+  }
+ ],
+ "e9afcf9a": [
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Start with the color that is on the top. Fill in that line with that color every other square, begin with first square. Fill in the rest in that line with the second color. For the next line, start with the color that is already there (the second color) and fill in in the same every other square pattern. It should look like a game board. The first color in every line is the color of the input grid."
+  }
+ ],
+ "ea32f347": [
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Change the color of the lines. The longest line needs to be colored blue. The middle length line needs to be colored yellow. The shortest line needs to be colored red."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Color the lines based on their length: longest is blue, medium is yellow, and smallest is red."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Copy the input grid then simply change the color into the long gray line into blue middle grey color into yellow short line into red. Output size: Don't change."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Change the shortest rectangle to red, the middle rectangle to yellow, and the longest rectangle to blue."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Copy the input grid, but make the longest line blue, the middle length line yellow, and the shortest line red."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Change the color of the lines. The longest line should be blue. The middle length should be colored yellow. The shortest line should be red."
+  }
+ ],
+ "ea786f4a": [
+  {
+   "src": "barc_seed",
+   "concepts": [
+    "non-black background",
+    "diagonal lines"
+   ],
+   "rule": "In the input you will see a grid there's all the same color except for a single black pixel in the middle. Equivalently, a black pixel on a non-black background. To make the output, draw black diagonal lines outward from the single black pixel in all 4 diagonal directions."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Use the same color as the center block, and starting at each corner of the center block, make a diagonal line that continues to each corner."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Create an X by filling in the diagonal tiles until the edge of each corner is reached."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Starting at each corner of the center block, make a black diagonal line toward each corner."
+  }
+ ],
+ "eb281b96": [
+  {
+   "src": "barc_seed",
+   "concepts": [
+    "pattern generation",
+    "flipping"
+   ],
+   "rule": "In the input you will see a grid with wave patterns. To make the output, you should flip the input grid horizontally and place it in the output grid. And then place the flipped input grid in the output grid again."
+  }
+ ],
+ "eb5a1d5d": [
+  {
+   "src": "barc_seed",
+   "concepts": [
+    "downscaling",
+    "nesting"
+   ],
+   "rule": "In the input you will see a grid consisting of nested shapes of different colors. To make the output, make a grid with one pixel for each layer of the shapes, with the color from outermost layer to the innermost layer in the same order they appear in the input."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Color the outside border the same color as the outside border of the input grid. Continue to color the output grid using the next color until it is filled."
+  }
+ ],
+ "ec883f72": [
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Extend a diagonal line from each visible corner of the outer square. This diagonal line should match the color of the inner square."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Extend squares of the color of the smaller square from the corners of the border box on a diagonal until you touch the edge of the grid. Output size: Copy the input grid size to the output."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Add diagonal lines from the corner of the larger box to the end of the grid, using the color of the inner box."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Replicate the input image and add diagonal lines moving from each corner of the border to the edge of the output image. Diagonal line should be the same color as the inner rectangle."
+  }
+ ],
+ "ecdecbb3": [
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Copy the input grid. Make perpendicular lines from the dots of y color to touch the closest lines of x color. The point of touch should be the y color. If the dot of y color is between 2 lines of y color you should make one lines of y color going through the dot of y color and connecting the lines of x colors. Surround each dot of y color (point of touch) on the line of x color with a square of x color."
+  }
+ ],
+ "ed36ccf7": [
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Turn the pattern in the input grid counter-clockwise."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Rotate the shape 90 degrees to the left."
+  }
+ ],
+ "ef135b50": [
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Put dark red squares in between the space that the light red squares across from each other only left to right squares."
+  }
+ ],
+ "f15e1fac": [
+  {
+   "src": "barc_seed",
+   "concepts": [
+    "magnetism",
+    "direction",
+    "lines"
+   ],
+   "rule": "In the input, you will see a black grid with teal pixels scattered along one edge and red pixels scattered along an edge perpendicular to the teal one. To make the output, make the teal pixels flow from the edge they are on to the opposite edge. Whenever there is a red pixel in the same column or row as the flow of teal pixels, push the teal pixel's flow one pixel away from the red pixel."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "First, copy the input grid and leave it as it is. The blue squares act as a starting point for you to draw lines, so if the blue squares are on the left, you have to draw lines horizontally to the right and if the blue squares are at the top, you have to draw the line vertically down. Next, after copying the grid, draw lines from each blue squares and stop just before the grid with the first red square."
+  }
+ ],
+ "f25fbde4": [
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Copy the colored shape but make it twice the size as the input shape. Output size: Twice the size of the colored shape."
+  }
+ ],
+ "f25ffba3": [
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Reflect the pattern upside down like it was up against a mirror."
+  }
+ ],
+ "f2829549": [
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Combine the orange and grey into one pattern that take up a 4x3 space. Fill each black space with green. Fill the old pattern with black. You should only have green spaces."
+  }
+ ],
+ "f35d900a": [
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Copy the input grid, identify the colors of the colored grids. we will call it color A and color B. Around the grids with color A, create a 3x3 square with color B, surrounding the color A grids. Around the grids with color B, create a 3x3 square with color A, surrounding the color B grids. Now we should have four 3x3 squares, in which two squares are A color with B colored grid in their centers."
+  }
+ ],
+ "f5b8619d": [
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Use the in put grid as 4 sections of the out put so that there is a pattern of the first colored squares, then using light blue make lines up and down from the colored squares to until you reach another colored square or the end of the out put grid."
+  }
+ ],
+ "f76d97a5": [
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Replace the grey boxes to the color and replace the color boxes with black."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Replace all grey to color and replace other color with black."
+  }
+ ],
+ "f8a8fe49": [
+  {
+   "src": "barc_seed",
+   "concepts": [
+    "symmetry",
+    "mirror"
+   ],
+   "rule": "In the input you will see two patterns close by two frames. To make the output, you need to split the inner pattern into two parts by the symmetry of the framework. Then, mirror the two parts according to each frame's line and place them in the output grid."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Flip the grey pattern over the red one like an mirror image. The resulting output should now have the grey pattern outside of the orange one."
+  }
+ ],
+ "f8b3ba0a": [
+  {
+   "src": "barc_seed",
+   "concepts": [
+    "rectangular cells",
+    "counting"
+   ],
+   "rule": "In the input you will see monochromatic rectangles arranged into an array. To make the output, find the most common color of the 2x1 rectangles, second most common color, etc. Then, make the output a vertical stripe colored with the second common color, then the third most common color, etc., starting at the top, and skipping the most common color."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Order the color boxes. avoid a large number of the color box."
+  }
+ ],
+ "f8c80d96": [
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Change the background color from black to light gray, then continue the pattern of lines, with the same spacing and bends."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Add more lines using the same color and same spacing. Change the background from black to grey."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Change all black to grey and continue the patterns keeping in mind the spacing."
+  }
+ ],
+ "f8ff0b80": [
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Place the colors in order from most to least. For example the color that has the most squares should be the top square color in the output. You then just go down from there. Second most color will go below that. Output size: Is only 3 squares placed vertically."
+  }
+ ],
+ "f9012d9b": [
+  {
+   "src": "barc_seed",
+   "concepts": [
+    "symmetry detection",
+    "occlusion"
+   ],
+   "rule": "In the input you will see a translationally symmetric pattern that has been partially occluded by a black rectangle The output should be what the black rectangle should be in order to make it perfectly symmetric. In other words, the output should be the missing part of the pattern, and it should be the same dimensions as the black rectangle."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Fill in the grid so you that you finish the colored pattern that should go where the black squares are located."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Make the part of the colored pattern that should go where the black squares are. Output size: The size of the black squares."
+  }
+ ],
+ "fcb5c309": [
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Copy the largest squared border including colored squares inside but make all colored squares the same color as interior squares. Output size: The size of the largest squared border."
+  }
+ ],
+ "fcc82909": [
+  {
+   "src": "barc_seed",
+   "concepts": [
+    "counting"
+   ],
+   "rule": "In the input, you will see a 10x10 black grid containing a few 2x2 squares. Each square contains 1-4 colors. To create the output, draw a green 2xL rectangle just below each 2x2 square, where L is the number of colors in the square."
+  }
+ ],
+ "feca6190": [
+  {
+   "src": "barc_seed",
+   "concepts": [
+    "pixel patterns",
+    "counting",
+    "expanding",
+    "diagonal lines"
+   ],
+   "rule": "In the input you will see a line with several colored pixels. To make the output, create a square grid and place the input line at the bottom-left. Each colored pixel shoots a diagonal line outward toward the upper right. The length of the output grid is the product of the number of colored input pixels and the length of the input line."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Copy the pattern of the input grid to the bottom left corner of the output grid. On the next row up, copy the pattern of the input grid, but move it to the right by 1 block. Continue this all the way to the top row. Output size: He height and width will be the number of colored dots in the input times 5."
+  }
+ ],
+ "ff28f65a": [
+  {
+   "src": "barc_seed",
+   "concepts": [
+    "counting",
+    "object detection",
+    "alternating pattern"
+   ],
+   "rule": "In the input you will see several 2 x 2 red squares on the grid. To make the output grid, you should count the number of red squares Then place the same number of 1 x 1 blue squares on the output grid following this pattern in the output: First fill the top row, then the next row, but skip every other column."
+  }
+ ],
+ "ff805c23": [
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Fill in the blue square with the missing piece of the pattern from the input grid, using the correct colors from the original. Output size: Becomes the size of the blue square."
+  },
+  {
+   "src": "larc",
+   "concepts": [],
+   "rule": "Fill the blue square with the same pattern with the input grid (that is the original pattern that need be there in the input)."
+  }
+ ],
+ "template": [
+  {
+   "src": "barc_seed",
+   "concepts": [
+    "<list of concepts",
+    "separated by commas>"
+   ],
+   "rule": "<a couple sentences describing how to solve the problem, including what you'll see in the input>"
+  }
+ ]
+}

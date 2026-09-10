@@ -9,6 +9,12 @@ Two prompt formats:
       leave-one-out over the demos; matches scripts/sft_qwen.py.
   --format single: legacy, one input->output pair per sample, no demos shown.
 
+--rule-mode ("state the rule, then draw the grid"; see rule_text.py): the final
+answer starts with 'Rule: ...' then 'Output:' and the grid. At test time the model
+proposes a few rules, each is scored by the NLL of the held-out demos with that
+rule forced as prefix, the best one is kept as a fixed prefix for TTT and decoding.
+Needs an adapter trained by sft_qwen.py --rule-mode.
+
 Usage:
     python scripts/ttt_qwen.py --split evaluation --limit 8 --device cuda --model /opt/models/Qwen3.5-4B
     python scripts/ttt_qwen.py --split evaluation --sft-adapter /opt/work/sft/adapter --device cuda
@@ -36,6 +42,16 @@ from transformers import (
     AutoTokenizer,
     Trainer,
     TrainingArguments,
+)
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from rule_text import (  # noqa: E402
+    OUTPUT_MARK,
+    RULE_REQUEST,
+    format_rule_block,
+    parse_rule_block,
+    rewrite_rule,
+    split_rule_output,
 )
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -144,6 +160,7 @@ def random_color_table(rng: random.Random):
 
 
 def augment_pairs(pairs, rng: random.Random, n_color: int = 4):
+    """Return [(view_name, mapped_pairs, color_table_or_None)]."""
     out = []
     for name, fn in GEOM:
         mapped = []
@@ -155,17 +172,25 @@ def augment_pairs(pairs, rng: random.Random, n_color: int = 4):
                 ok = False
                 break
         if ok:
-            out.append((name, mapped))
+            out.append((name, mapped, None))
     for i in range(n_color):
         table = random_color_table(rng)
         mapped = [(color_perm(a, table), color_perm(b, table)) for a, b in pairs]
-        out.append((f"col{i}", mapped))
+        out.append((f"col{i}", mapped, table))
     return out
 
 
 SYSTEM_PROMPT = (
     "You solve ARC abstraction puzzles. "
     "Reply with only the output grid: digits 0-9, one row per line, no other text."
+)
+# --rule-mode: demos are still answered with a bare grid; the final query asks the
+# model to first articulate the transformation, then draw the grid.
+RULE_SYSTEM_PROMPT = (
+    "You solve ARC abstraction puzzles. Reply to each demonstration with only the output grid: "
+    "digits 0-9, one row per line. When asked to state the rule, first write the transformation "
+    "in one or two sentences after 'Rule:' (optionally list 'Concepts:' before it), then write "
+    "'Output:' on its own line followed by the grid."
 )
 
 
@@ -193,21 +218,33 @@ IM_END = "<|im_end|>"
 ASSISTANT_HEAD = f"{IM_START}assistant\n<think>\n\n</think>\n\n"
 
 
-def _segments(ctx_pairs, inp, oup=None, loss: str = "all"):
-    """Return [(text, supervised)] for one conversation."""
-    segs = [(f"{IM_START}system\n{SYSTEM_PROMPT}{IM_END}\n", False)]
+def _segments(ctx_pairs, inp, oup=None, loss: str = "all", rule: str | None = None,
+              rule_mode: bool = False, rule_sup: bool = True):
+    """Return [(text, supervised)] for one conversation.
+
+    rule_mode: final user turn ends with RULE_REQUEST; if `rule` (a block from
+    format_rule_block, ending in 'Output:\\n') is given it precedes the answer grid
+    and is supervised iff rule_sup.
+    """
+    sys_prompt = RULE_SYSTEM_PROMPT if rule_mode else SYSTEM_PROMPT
+    segs = [(f"{IM_START}system\n{sys_prompt}{IM_END}\n", False)]
     for ci, co in ctx_pairs:
         segs.append((f"{IM_START}user\n{grid_to_text(ci)}{IM_END}\n{ASSISTANT_HEAD}", False))
         segs.append((f"{grid_to_text(co)}{IM_END}", loss == "all"))
         segs.append(("\n", False))
-    segs.append((f"{IM_START}user\n{grid_to_text(inp)}{IM_END}\n{ASSISTANT_HEAD}", False))
+    query = grid_to_text(inp)
+    if rule_mode:
+        query += f"\n\n{RULE_REQUEST}"
+    segs.append((f"{IM_START}user\n{query}{IM_END}\n{ASSISTANT_HEAD}", False))
     if oup is not None:
+        if rule_mode and rule:
+            segs.append((rule, rule_sup))
         segs.append((f"{grid_to_text(oup)}{IM_END}", True))
     return segs
 
 
-def render_prompt(ctx_pairs, inp) -> str:
-    return "".join(t for t, _ in _segments(ctx_pairs, inp))
+def render_prompt(ctx_pairs, inp, rule_mode: bool = False) -> str:
+    return "".join(t for t, _ in _segments(ctx_pairs, inp, rule_mode=rule_mode))
 
 
 def _tokenize_segments(tokenizer, segs):
@@ -219,14 +256,17 @@ def _tokenize_segments(tokenizer, segs):
     return ids, labels
 
 
-def fit_context(tokenizer, ctx_pairs, inp, oup, max_len: int, loss: str = "all", min_ctx: int = 0):
+def fit_context(tokenizer, ctx_pairs, inp, oup, max_len: int, loss: str = "all", min_ctx: int = 0,
+                rule: str | None = None, rule_mode: bool = False, rule_sup: bool = True):
     """Drop context pairs (from the end) until the conversation fits max_len.
 
     Returns (ctx_pairs_used, ids, labels) or None if even min_ctx pairs do not fit.
     """
     ctx = list(ctx_pairs)
     while True:
-        ids, labels = _tokenize_segments(tokenizer, _segments(ctx, inp, oup, loss))
+        ids, labels = _tokenize_segments(
+            tokenizer, _segments(ctx, inp, oup, loss, rule, rule_mode, rule_sup)
+        )
         if len(ids) <= max_len:
             return ctx, ids, labels
         if len(ctx) <= min_ctx:
@@ -235,12 +275,16 @@ def fit_context(tokenizer, ctx_pairs, inp, oup, max_len: int, loss: str = "all",
 
 
 def encode_conversation(tokenizer, ctx_pairs, inp, oup, max_len: int, loss: str = "all",
-                        min_ctx: int = 0, allow_truncate: bool = False):
-    fitted = fit_context(tokenizer, ctx_pairs, inp, oup, max_len, loss, min_ctx)
+                        min_ctx: int = 0, allow_truncate: bool = False,
+                        rule: str | None = None, rule_mode: bool = False, rule_sup: bool = True):
+    fitted = fit_context(tokenizer, ctx_pairs, inp, oup, max_len, loss, min_ctx,
+                         rule, rule_mode, rule_sup)
     if fitted is None:
         if not allow_truncate:
             return None
-        ids, labels = _tokenize_segments(tokenizer, _segments([], inp, oup, loss))
+        ids, labels = _tokenize_segments(
+            tokenizer, _segments([], inp, oup, loss, rule, rule_mode, rule_sup)
+        )
         ids, labels = ids[-max_len:], labels[-max_len:]
     else:
         _ctx, ids, labels = fitted
@@ -441,7 +485,13 @@ def attach_lora(model, r: int, device: str):
 
 
 def generate_grid(model, tok, inp, device: str, max_new: int = 384, ctx_pairs=None,
-                  max_len: int = 0):
+                  max_len: int = 0, rule_mode: bool = False, prefix: str = "",
+                  do_sample: bool = False, temperature: float = 1.0, stop_strings=None):
+    """Generate for one query. Returns (grid_or_None, text) where text includes `prefix`.
+
+    rule_mode: prompt asks for 'Rule: ... Output: grid'; `prefix` (a rule block) can be
+    forced as the start of the assistant answer so the model only fills in the grid.
+    """
     if ctx_pairs is None:
         msgs = build_messages(inp)
         try:
@@ -454,32 +504,44 @@ def generate_grid(model, tok, inp, device: str, max_new: int = 384, ctx_pairs=No
         ctx = list(ctx_pairs)
         if max_len:
             # Leave room for the answer; drop demos from the end until it fits.
-            budget = max(max_len - max_new, 256)
-            fitted = fit_context(tok, ctx, inp, None, budget, min_ctx=0)
+            n_prefix = len(tok(prefix, add_special_tokens=False)["input_ids"]) if prefix else 0
+            budget = max(max_len - max_new - n_prefix, 256)
+            fitted = fit_context(tok, ctx, inp, None, budget, min_ctx=0, rule_mode=rule_mode)
             ctx = fitted[0] if fitted is not None else []
-        prompt = render_prompt(ctx, inp)
+        prompt = render_prompt(ctx, inp, rule_mode=rule_mode)
+    prompt += prefix
     inputs = tok(prompt, return_tensors="pt", add_special_tokens=False)
     dev = model.device if hasattr(model, "device") else device
     inputs = {k: v.to(dev, non_blocking=True) for k, v in inputs.items()}
     eos = [i for i in (tok.eos_token_id, tok.convert_tokens_to_ids("<|im_end|>")) if isinstance(i, int) and i >= 0]
     eos = list(dict.fromkeys(eos)) or tok.eos_token_id
+    gen_kwargs = dict(
+        max_new_tokens=max_new,
+        do_sample=do_sample,
+        use_cache=True,
+        pad_token_id=tok.pad_token_id,
+        eos_token_id=eos,
+    )
+    if do_sample:
+        gen_kwargs.update(temperature=temperature, top_p=0.95)
+    if stop_strings:
+        gen_kwargs.update(stop_strings=list(stop_strings), tokenizer=tok)
     was_cache = getattr(model.config, "use_cache", False)
     model.config.use_cache = True
     try:
         with torch.inference_mode():
-            out = model.generate(
-                **inputs,
-                max_new_tokens=max_new,
-                do_sample=False,
-                use_cache=True,
-                pad_token_id=tok.pad_token_id,
-                eos_token_id=eos,
-            )
+            try:
+                out = model.generate(**inputs, **gen_kwargs)
+            except (TypeError, ValueError):
+                gen_kwargs.pop("stop_strings", None)
+                gen_kwargs.pop("tokenizer", None)
+                out = model.generate(**inputs, **gen_kwargs)
     finally:
         model.config.use_cache = was_cache
     gen = out[0][inputs["input_ids"].size(1) :]
-    text = tok.decode(gen, skip_special_tokens=True)
-    return parse_grid(text), text
+    text = prefix + tok.decode(gen, skip_special_tokens=True)
+    grid_text = split_rule_output(text)[1] if rule_mode else text
+    return parse_grid(grid_text), text
 
 
 def invert_geom(name, g):
@@ -502,8 +564,19 @@ def invert_geom(name, g):
     return g
 
 
+def rule_prefix_for_view(rule_text: str | None, concepts, geom: str, table=None):
+    """(rule block for this augmented view, whether the text is faithful to the view)."""
+    if not rule_text:
+        return None, False
+    rw = rewrite_rule(rule_text, geom, table)
+    if rw is None:
+        return format_rule_block(rule_text, concepts), False
+    return format_rule_block(rw, concepts), True
+
+
 def predict_with_vote(model, tok, test_inp, device: str, vote: bool = True, max_new: int = 384,
-                      ctx_pairs=None, max_len: int = 0):
+                      ctx_pairs=None, max_len: int = 0, rule_mode: bool = False,
+                      rule_text: str | None = None, concepts=None):
     votes = []
     raws = []
     geoms = GEOM if vote else [GEOM[0]]
@@ -511,10 +584,14 @@ def predict_with_vote(model, tok, test_inp, device: str, vote: bool = True, max_
         ctx = None
         if ctx_pairs is not None:
             ctx = [(fn(a), fn(b)) for a, b in ctx_pairs]
+        prefix = ""
+        if rule_mode and rule_text:
+            prefix, _faithful = rule_prefix_for_view(rule_text, concepts, name)
         g, text = generate_grid(
-            model, tok, fn(test_inp), device, max_new=max_new, ctx_pairs=ctx, max_len=max_len
+            model, tok, fn(test_inp), device, max_new=max_new, ctx_pairs=ctx, max_len=max_len,
+            rule_mode=rule_mode, prefix=prefix,
         )
-        raws.append((name, text[:200]))
+        raws.append((name, text[:600 if rule_mode else 200]))
         back = invert_geom(name, g)
         if back is not None:
             votes.append(tuple(tuple(r) for r in back))
@@ -522,6 +599,63 @@ def predict_with_vote(model, tok, test_inp, device: str, vote: bool = True, max_
         return None, raws
     best = Counter(votes).most_common(1)[0][0]
     return [list(r) for r in best], raws
+
+
+# ---------------------------------------------------------------------------
+# --rule-mode at test time: propose rules, score them against the demos, keep one.
+# ---------------------------------------------------------------------------
+def propose_rules(model, tok, pairs, test_inp, args, device: str):
+    """Greedy + sampled rule candidates, deduplicated. Returns [(concepts, rule)]."""
+    model.eval()
+    cands, seen = [], set()
+    for k in range(1 + max(0, args.rule_samples)):
+        _g, text = generate_grid(
+            model, tok, test_inp, device, max_new=args.rule_max_new, ctx_pairs=pairs,
+            max_len=args.max_len, rule_mode=True, do_sample=k > 0,
+            temperature=args.rule_temp, stop_strings=[OUTPUT_MARK],
+        )
+        rule_part, _ = split_rule_output(text)
+        concepts, rule = parse_rule_block(rule_part or text)
+        if not rule or "Rule" not in (rule_part or text):
+            continue
+        key = rule.lower()
+        if key in seen:
+            continue
+        seen.add(key)
+        cands.append((concepts, rule))
+    return cands
+
+
+@torch.inference_mode()
+def rule_nll(model, tok, pairs, concepts, rule, args, device: str) -> float:
+    """Mean NLL of each held-out demo grid given the other demos + this rule forced as prefix."""
+    model.eval()
+    block = format_rule_block(rule, concepts)
+    total, count = 0.0, 0
+    for i in range(min(len(pairs), args.rule_verify_demos)):
+        ctx = pairs[:i] + pairs[i + 1 :]
+        ex = encode_conversation(
+            tok, ctx, pairs[i][0], pairs[i][1], args.max_len, loss="last",
+            allow_truncate=True, rule=block, rule_mode=True, rule_sup=False,
+        )
+        if ex is None:
+            continue
+        batch = {k: v.unsqueeze(0).to(device) for k, v in ex.items()}
+        total += float(sparse_ce_loss(model, batch))
+        count += 1
+    return total / max(count, 1)
+
+
+def choose_rule(model, tok, pairs, test_inp, args, device: str):
+    cands = propose_rules(model, tok, pairs, test_inp, args, device)
+    if not cands:
+        return None, []
+    scored = []
+    for concepts, rule in cands:
+        nll = rule_nll(model, tok, pairs, concepts, rule, args, device) if len(cands) > 1 else 0.0
+        scored.append({"nll": round(nll, 4), "concepts": concepts, "rule": rule})
+    scored.sort(key=lambda d: d["nll"])
+    return scored[0], scored
 
 
 def ttt_train_loop(model, examples, args, device: str):
@@ -557,12 +691,22 @@ def ttt_train_loop(model, examples, args, device: str):
             last_loss = step_once(step, bs)
         except torch.cuda.OutOfMemoryError:
             torch.cuda.empty_cache()
-            if bs == 1:
-                raise
-            print(f"  OOM at batch={bs}, falling back to 1", flush=True)
             opt.zero_grad(set_to_none=True)
-            bs = 1
-            last_loss = step_once(step, bs)
+            if bs > 1:
+                print(f"  OOM at batch={bs}, falling back to 1", flush=True)
+                bs = 1
+                last_loss = step_once(step, bs)
+            elif not args.grad_ckpt:
+                print("  OOM at batch=1, enabling gradient checkpointing", flush=True)
+                args.grad_ckpt = True
+                model.gradient_checkpointing_enable(
+                    gradient_checkpointing_kwargs={"use_reentrant": False}
+                )
+                if hasattr(model, "enable_input_require_grads"):
+                    model.enable_input_require_grads()
+                last_loss = step_once(step, bs)
+            else:
+                raise
         if (step + 1) % accum == 0:
             opt.step()
             opt.zero_grad(set_to_none=True)
@@ -582,11 +726,43 @@ def ttt_train_loop(model, examples, args, device: str):
 def ttt_one_task(base_model, tok, task, args, device: str):
     rng = random.Random(args.seed)
     pairs = [(ex["input"], ex["output"]) for ex in task["train"]]
+    in_context = args.format == "context"
+    rule_mode = bool(args.rule_mode) and in_context
+
+    # Rule first: let the (SFT'd) model articulate the transformation, keep the
+    # candidate under which the held-out demos are most likely, then fine-tune
+    # with that rule forced as the answer prefix.
+    chosen, scored = (None, [])
+    rule_text, concepts = None, []
+    oracle = args.oracle_rules.get(task.get("id", "")) if rule_mode else None
+    if rule_mode and args.rule_override:
+        chosen = {"nll": None, "concepts": [], "rule": args.rule_override, "src": "override"}
+        rule_text, concepts = chosen["rule"], []
+        print(f"  rule[override]: {rule_text[:160]!r}", flush=True)
+    elif oracle:
+        chosen = {"nll": None, "concepts": oracle[0], "rule": oracle[1], "src": "oracle"}
+        rule_text, concepts = oracle[1], oracle[0]
+        print(f"  rule[oracle]: {rule_text[:160]!r}", flush=True)
+    elif rule_mode:
+        t_rule = time.time()
+        chosen, scored = choose_rule(base_model, tok, pairs, task["test"][0]["input"], args, device)
+        if chosen:
+            rule_text, concepts = chosen["rule"], chosen["concepts"]
+            print(f"  rule[{len(scored)} cands, {time.time() - t_rule:.0f}s] nll={chosen['nll']}: "
+                  f"{rule_text[:160]!r}", flush=True)
+        else:
+            print("  rule: no candidate parsed, falling back to plain generation", flush=True)
+
     views = augment_pairs(pairs, rng, n_color=args.color_augs)
     examples = []
-    in_context = args.format == "context"
-    for _name, mapped in views:
+    n_rule_sup = 0
+    for name, mapped, table in views:
         if in_context:
+            view_rule, faithful = (None, False)
+            if rule_mode and rule_text:
+                geom = name if name in GEOM_FN else "id"
+                view_rule, faithful = rule_prefix_for_view(rule_text, concepts, geom, table)
+                n_rule_sup += int(faithful)
             # Leave-one-out: every demo becomes the query once, the rest are context.
             for i in range(len(mapped)):
                 ctx = mapped[:i] + mapped[i + 1 :]
@@ -594,6 +770,7 @@ def ttt_one_task(base_model, tok, task, args, device: str):
                 ex = encode_conversation(
                     tok, ctx, mapped[i][0], mapped[i][1], args.max_len,
                     loss=args.ttt_loss, allow_truncate=True,
+                    rule=view_rule, rule_mode=rule_mode, rule_sup=faithful,
                 )
                 if ex is not None:
                     examples.append(ex)
@@ -601,10 +778,11 @@ def ttt_one_task(base_model, tok, task, args, device: str):
             for inp, oup in mapped:
                 examples.append(encode_example(tok, inp, oup, args.max_len))
     if not examples:
-        return [None] * len(task["test"]), []
+        return [None] * len(task["test"]), [], {"chosen": chosen, "candidates": scored}
 
     n_sup = sum(int((ex["labels"] != -100).sum()) for ex in examples)
-    print(f"  train_pairs={len(examples)} supervised_tokens={n_sup}", flush=True)
+    extra = f" rule_supervised_views={n_rule_sup}/{len(views)}" if rule_mode and rule_text else ""
+    print(f"  train_pairs={len(examples)} supervised_tokens={n_sup}{extra}", flush=True)
 
     model = attach_lora(base_model, args.lora_r, device)
     ttt_train_loop(model, examples, args, device)
@@ -614,6 +792,7 @@ def ttt_one_task(base_model, tok, task, args, device: str):
         grid, raws = predict_with_vote(
             model, tok, t["input"], device, vote=not args.no_vote, max_new=args.max_new,
             ctx_pairs=pairs if in_context else None, max_len=args.max_len,
+            rule_mode=rule_mode, rule_text=rule_text, concepts=concepts,
         )
         preds.append(grid)
         debug.append(raws)
@@ -624,7 +803,9 @@ def ttt_one_task(base_model, tok, task, args, device: str):
         except Exception:
             pass
     gc.collect()
-    return preds, debug
+    if device == "cuda":
+        torch.cuda.empty_cache()
+    return preds, debug, {"chosen": chosen, "candidates": scored}
 
 
 def grids_equal(a, b) -> bool:
@@ -641,7 +822,7 @@ def main() -> int:
     p.add_argument("--steps", type=int, default=32)
     p.add_argument("--lora-r", type=int, default=16)
     p.add_argument("--lr", type=float, default=2e-4)
-    p.add_argument("--batch", type=int, default=2)
+    p.add_argument("--batch", type=int, default=1)
     p.add_argument("--grad-accum", type=int, default=1)
     p.add_argument("--grad-ckpt", action="store_true",
                    help="activation checkpointing (saves VRAM, slows TTT a lot)")
@@ -661,7 +842,30 @@ def main() -> int:
     p.add_argument("--ttt-loss", default="all", choices=["all", "last"],
                    help="context format: supervise every assistant turn or only the query answer")
     p.add_argument("--sft-adapter", default="", help="offline SFT LoRA dir to merge into the base first")
+    p.add_argument("--tasks-dir", default="",
+                   help="evaluate every *.json under this dir instead of --split (e.g. ConceptARC/corpus)")
+    p.add_argument("--rule-mode", action="store_true",
+                   help="'state the rule, then draw the grid' format (needs an SFT adapter trained with it)")
+    p.add_argument("--rule-samples", type=int, default=3, help="sampled rule candidates besides greedy")
+    p.add_argument("--rule-temp", type=float, default=0.8)
+    p.add_argument("--rule-max-new", type=int, default=160, help="token budget for the rule text")
+    p.add_argument("--rule-verify-demos", type=int, default=4,
+                   help="score each rule by held-out NLL on up to this many demos")
+    p.add_argument("--rules-json", default="",
+                   help="oracle rules {task_id: [{concepts, rule}]} (data/rules/task_rules.json): "
+                        "skip proposal and use the given rule for tasks that have one")
+    p.add_argument("--rule-override", default="", help="debug: force this rule text for every task")
+    p.add_argument("--ids-file", default="", help="only evaluate task ids listed in this file")
     args = p.parse_args()
+    if args.rule_mode and args.format != "context":
+        p.error("--rule-mode requires --format context")
+    args.oracle_rules = {}
+    if args.rules_json:
+        raw = json.loads(Path(args.rules_json).read_text())
+        for tid, lst in raw.items():
+            lst = sorted(lst, key=lambda e: e.get("src") != "barc_seed")  # curated seeds first
+            if lst:
+                args.oracle_rules[tid] = (lst[0].get("concepts", []), lst[0]["rule"])
 
     if args.device == "auto":
         args.device = "cuda" if torch.cuda.is_available() else "cpu"
@@ -671,15 +875,24 @@ def main() -> int:
             if free < 6 * 1024**3:
                 print("GPU < 6GiB; 4B TTT will not fit. Use --device cpu or a smaller model.", flush=True)
 
-    if args.split == "examples":
+    if args.tasks_dir:
+        folder = Path(args.tasks_dir)
+        args.split = folder.name
+        globber = folder.rglob
+    elif args.split == "examples":
         folder = ROOT / "data" / "examples"
+        globber = folder.glob
     else:
         folder = ROOT / "data" / "full" / "data" / args.split
+        globber = folder.glob
     files = sorted(
         p
-        for p in folder.glob("*.json")
+        for p in globber("*.json")
         if p.name != "README.md" and not p.name.startswith("._")
     )
+    if args.ids_file:
+        keep = {ln.strip() for ln in Path(args.ids_file).read_text().splitlines() if ln.strip()}
+        files = [f for f in files if f.stem in keep]
     files = files[args.offset :]
     if args.limit:
         files = files[: args.limit]
@@ -693,11 +906,39 @@ def main() -> int:
     Path(args.work_dir).mkdir(parents=True, exist_ok=True)
     results = []
     solved = 0
+    hits_total = inputs_total = 0
+    groups: dict[str, dict] = {}
     t0 = time.time()
+
+    def write_summary(done: int):
+        elapsed = time.time() - t0
+        summary = {
+            "model": args.model,
+            "device": args.device,
+            "split": args.split,
+            "solved": solved,
+            "total": done,
+            "planned": len(files),
+            "acc": solved / max(done, 1),
+            "hits": hits_total,
+            "inputs": inputs_total,
+            "input_acc": hits_total / max(inputs_total, 1),
+            "seconds": round(elapsed, 1),
+            "args": {k: getattr(args, k) for k in vars(args) if k != "oracle_rules"},
+            "results": results,
+        }
+        if groups:
+            summary["groups"] = groups
+        out = Path(args.out) if args.out else Path(args.work_dir) / f"ttt_{args.split}.json"
+        out.write_text(json.dumps(summary, indent=2))
+        return summary, out
+
     for i, fp in enumerate(files, 1):
         task = json.loads(fp.read_text())
+        task["id"] = fp.stem
         golds = [t.get("output") for t in task["test"]]
         t1 = time.time()
+        rule_info = None
         if args.zero_shot:
             preds, debug = [], []
             model.eval()
@@ -712,16 +953,31 @@ def main() -> int:
                     max_new=args.max_new,
                     ctx_pairs=ctx if args.format == "context" else None,
                     max_len=args.max_len,
+                    rule_mode=bool(args.rule_mode),
                 )
                 preds.append(g)
                 debug.append(raws)
+            if args.rule_mode and debug and debug[0]:
+                # rule the model wrote on the identity view of the first test input
+                rule_part, _ = split_rule_output(debug[0][0][1])
+                concepts, rule = parse_rule_block(rule_part)
+                rule_info = {"chosen": {"concepts": concepts, "rule": rule}, "candidates": []}
         else:
             if isinstance(model, PeftModel):
                 model = model.get_base_model()
-            preds, debug = ttt_one_task(model, tok, task, args, args.device)
+            preds, debug, rule_info = ttt_one_task(model, tok, task, args, args.device)
         hits = [grids_equal(pred, gold) for pred, gold in zip(preds, golds)]
         ok = all(hits) and golds and all(g is not None for g in golds)
         solved += int(ok)
+        hits_total += sum(map(int, hits))
+        inputs_total += len(golds)
+        group = fp.parent.name if fp.parent != folder else ""
+        if group:
+            g = groups.setdefault(group, {"tasks": 0, "solved": 0, "inputs": 0, "hits": 0})
+            g["tasks"] += 1
+            g["solved"] += int(ok)
+            g["inputs"] += len(golds)
+            g["hits"] += sum(map(int, hits))
         rec = {
             "id": fp.stem,
             "ok": ok,
@@ -729,53 +985,35 @@ def main() -> int:
             "seconds": round(time.time() - t1, 1),
             "pred": preds,
             "raw": [
-                [(name, txt[:240]) for name, txt in item]
+                [(name, txt[:(700 if args.rule_mode else 240)]) for name, txt in item]
                 for item in debug[:2]
             ],
         }
+        if group:
+            rec["group"] = group
+        if rule_info and rule_info.get("chosen"):
+            rec["rule"] = rule_info["chosen"]
+            rec["rule_candidates"] = rule_info.get("candidates", [])
         results.append(rec)
         print(
             f"[{i}/{len(files)}] {fp.stem} ok={ok} hits={hits} {rec['seconds']}s  "
-            f"running={solved}/{i}",
+            f"running={solved}/{i} inputs={hits_total}/{inputs_total}",
             flush=True,
         )
         if debug and debug[0]:
             print(f"  raw={debug[0][0][1][:160]!r}", flush=True)
-        elapsed = time.time() - t0
-        summary = {
-            "model": args.model,
-            "device": args.device,
-            "split": args.split,
-            "solved": solved,
-            "total": i,
-            "planned": len(files),
-            "acc": solved / max(i, 1),
-            "seconds": round(elapsed, 1),
-            "args": {k: getattr(args, k) for k in vars(args)},
-            "results": results,
-        }
-        out = Path(args.out) if args.out else Path(args.work_dir) / f"ttt_{args.split}.json"
-        out.write_text(json.dumps(summary, indent=2))
+        write_summary(i)
 
-    elapsed = time.time() - t0
-    summary = {
-        "model": args.model,
-        "device": args.device,
-        "split": args.split,
-        "solved": solved,
-        "total": len(files),
-        "acc": solved / max(len(files), 1),
-        "seconds": round(elapsed, 1),
-        "args": {k: getattr(args, k) for k in vars(args)},
-        "results": results,
-    }
-    out = Path(args.out) if args.out else Path(args.work_dir) / f"ttt_{args.split}.json"
-    out.write_text(json.dumps(summary, indent=2))
+    summary, out = write_summary(len(files))
     print(
         f"\n{args.split}: {solved}/{len(files)} ({100 * summary['acc']:.1f}%)  "
-        f"wall {elapsed:.0f}s  wrote {out}",
+        f"inputs {hits_total}/{inputs_total} ({100 * summary['input_acc']:.1f}%)  "
+        f"wall {time.time() - t0:.0f}s  wrote {out}",
         flush=True,
     )
+    if groups:
+        for name, g in sorted(groups.items()):
+            print(f"  {name:20s} tasks {g['solved']}/{g['tasks']}  inputs {g['hits']}/{g['inputs']}", flush=True)
     return 0
 
 

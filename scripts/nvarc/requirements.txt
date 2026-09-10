@@ -1,0 +1,28 @@
+# Python 3.11, CUDA 12.8. Matches the Kaggle NVARC notebook
+# (Unsloth 2025.9.7 on torch 2.8). Install into a dedicated venv.
+#
+#   python3.11 -m venv /opt/venv_nvarc
+#   /opt/venv_nvarc/bin/pip install -r requirements.txt
+#   /opt/venv_nvarc/bin/pip install --no-deps --no-build-isolation \
+#     flash_attn-2.8.2+cu128torch2.8-cp311-cp311-linux_x86_64.whl
+#   patch --binary $VENV/lib/python3.11/site-packages/unsloth/models/qwen3.py qwen3.patch
+#
+# Do not let pip upgrade torch past 2.8 or peft past 0.17.1.
+# torchao>=0.16 needs torch 2.9 (ScalingType); uninstall it if pulled in.
+torch==2.8.0
+torchvision==0.23.0
+torchaudio==2.8.0
+triton==3.4.0
+xformers==0.0.32.post2
+transformers==4.55.4
+unsloth==2025.9.7
+unsloth_zoo==2025.9.9
+peft==0.17.1
+numpy==2.2.6
+scikit-learn==1.7.2
+matplotlib==3.10.6
+datasets>=3.4.1,<4.0.0
+accelerate>=0.34.1
+trl>=0.7.9,!=0.9.0,!=0.9.1,!=0.9.2,!=0.9.3,!=0.15.0,!=0.19.0
+bitsandbytes
+sentencepiece>=0.2.0

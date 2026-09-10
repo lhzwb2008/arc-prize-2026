@@ -9,9 +9,21 @@ Data sources
   * optional RE-ARC dump: <dir>/tasks/<id>.json, a list of {"input","output"}
     (michaelhodel/re-arc; 400 ARC-1 tasks x 1000 verified examples)
 
+  * optional BARC-Heavy jsonl (barc0/200k_HEAVY_...): {"source": code with
+    "# concepts:"/"# description:" header, "examples": [[in, out], ...]}
+
 Each SFT sample = one augmented mini-task rendered as a multi-turn chat
 (shared renderer in ttt_qwen.py): random dihedral transform, random colour
 permutation, shuffled pair order, loss on every assistant grid.
+
+--rule-mode: "state the rule, then draw the grid". Only tasks that have a
+natural-language rule are used (data/rules/task_rules.json for ARC/RE-ARC ids,
+the description header for BARC-Heavy); the final answer is
+'Concepts: ..\\nRule: ..\\nOutput:\\n<grid>'. Rule text is rewritten to follow the
+colour permutation, and the dihedral transform is restricted to those the text
+can follow (rule_text.rewrite_rule).
+--strip-rules: identical sample selection/augmentation but plain grid answers ->
+the control arm of the ablation.
 
 Usage:
     python scripts/sft_qwen.py --model /opt/models/Qwen3.5-4B \
@@ -34,6 +46,7 @@ import torch
 from peft import LoraConfig, get_peft_model
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
+from rule_text import allowed_geoms, format_rule_block, parse_barc_source, rewrite_rule  # noqa: E402
 from ttt_qwen import (  # noqa: E402
     GEOM,
     color_perm,
@@ -45,8 +58,18 @@ from ttt_qwen import (  # noqa: E402
 
 ROOT = Path(__file__).resolve().parents[1]
 
+# A task is (task_id, pairs, rules) with rules = [(concepts, rule_text), ...] (may be empty).
 
-def load_arc_tasks(folder: Path):
+
+def load_rules(path: str):
+    if not path or not Path(path).exists():
+        return {}
+    raw = json.loads(Path(path).read_text())
+    return {tid: [(e.get("concepts", []), e["rule"]) for e in lst if e.get("rule")] for tid, lst in raw.items()}
+
+
+def load_arc_tasks(folder: Path, rules=None):
+    rules = rules or {}
     tasks = []
     for fp in sorted(folder.glob("*.json")):
         if fp.name.startswith("._"):
@@ -54,12 +77,13 @@ def load_arc_tasks(folder: Path):
         t = json.loads(fp.read_text())
         pairs = [(ex["input"], ex["output"]) for ex in t["train"] + t["test"] if ex.get("output")]
         if len(pairs) >= 2:
-            tasks.append((fp.stem, pairs))
+            tasks.append((fp.stem, pairs, rules.get(fp.stem, [])))
     return tasks
 
 
-def load_rearc_tasks(folder: Path):
+def load_rearc_tasks(folder: Path, rules=None):
     """RE-ARC dump: tasks/<id>.json -> list of {"input","output"}."""
+    rules = rules or {}
     tasks_dir = folder / "tasks" if (folder / "tasks").exists() else folder
     tasks = []
     for fp in sorted(tasks_dir.glob("*.json")):
@@ -69,31 +93,78 @@ def load_rearc_tasks(folder: Path):
             continue
         pairs = [(ex["input"], ex["output"]) for ex in data if ex.get("output")]
         if len(pairs) >= 2:
-            tasks.append((f"rearc_{fp.stem}", pairs))
+            tasks.append((f"rearc_{fp.stem}", pairs, rules.get(fp.stem, [])))
     return tasks
 
 
-def augment_view(pairs, rng: random.Random, color_prob: float):
-    name, fn = rng.choice(GEOM)
-    mapped = [(fn(a), fn(b)) for a, b in pairs]
-    if rng.random() < color_prob:
-        table = random_color_table(rng)
-        mapped = [(color_perm(a, table), color_perm(b, table)) for a, b in mapped]
-    return name, mapped
+def _grid_ok(g) -> bool:
+    return (
+        isinstance(g, list) and 0 < len(g) <= 30 and isinstance(g[0], list) and 0 < len(g[0]) <= 30
+        and all(len(r) == len(g[0]) for r in g)
+        and all(isinstance(v, int) and 0 <= v <= 9 for r in g for v in r)
+    )
 
 
-def make_sample(tok, pairs, rng: random.Random, args):
-    """One augmented mini-task -> encoded conversation, or None if it doesn't fit."""
+def load_barc_heavy(path: Path, max_records: int, skip: int = 0):
+    """Stream the BARC-Heavy jsonl; each record is a synthetic task with ~30 pairs + a description."""
+    tasks = []
+    with path.open() as f:
+        for li, line in enumerate(f):
+            if li < skip:
+                continue
+            if max_records and len(tasks) >= max_records:
+                break
+            try:
+                rec = json.loads(line)
+            except Exception:
+                continue
+            concepts, rule = parse_barc_source(rec.get("source", ""))
+            pairs = []
+            for ex in rec.get("examples", []):
+                if isinstance(ex, dict):
+                    a, b = ex.get("input"), ex.get("output")
+                else:
+                    a, b = ex[0], ex[1]
+                if _grid_ok(a) and _grid_ok(b):
+                    pairs.append((a, b))
+            if len(pairs) >= 2 and rule:
+                tasks.append((f"barc_{li}", pairs, [(concepts, rule)]))
+    return tasks
+
+
+def make_sample(tok, pairs, rng: random.Random, args, rules=None):
+    """One augmented mini-task -> encoded conversation, or None if it doesn't fit.
+
+    rules: [(concepts, rule_text)]; used when args.rule_mode or args.strip_rules.
+    The random draws are identical in both arms so the ablation sees the same grids.
+    """
     pairs = list(pairs)
     rng.shuffle(pairs)
     n = min(len(pairs), rng.randint(args.min_pairs, args.max_pairs))
     pairs = pairs[:n]
-    _name, mapped = augment_view(pairs, rng, args.color_prob)
+    with_rules = bool(rules) and (args.rule_mode or args.strip_rules)
+    concepts, rule = rng.choice(rules) if with_rules else ([], None)
+    geoms = GEOM
+    if with_rules:
+        ok = set(allowed_geoms(rule))
+        geoms = [g for g in GEOM if g[0] in ok] or [GEOM[0]]
+    name, fn = rng.choice(geoms)
+    mapped = [(fn(a), fn(b)) for a, b in pairs]
+    table = None
+    if rng.random() < args.color_prob:
+        table = random_color_table(rng)
+        mapped = [(color_perm(a, table), color_perm(b, table)) for a, b in mapped]
+    block = None
+    rule_mode = bool(args.rule_mode) and with_rules
+    if rule_mode:
+        # geoms were filtered by allowed_geoms, so the direction rewrite cannot fail
+        rw = rewrite_rule(rule, name, table) or rule
+        block = format_rule_block(rw, concepts)
     query_in, query_out = mapped[-1]
     ctx = mapped[:-1]
     return encode_conversation(
         tok, ctx, query_in, query_out, args.max_len, loss=args.loss,
-        min_ctx=1, allow_truncate=False,
+        min_ctx=1, allow_truncate=False, rule=block, rule_mode=rule_mode,
     )
 
 
@@ -176,9 +247,16 @@ def sft_train_loop(model, encoded, args, device: str, log_path: Path):
             batch = collate([encoded[(cursor + j) % n] for j in range(bs)])
             cursor = (cursor + bs) % n
             batch = {k: v.to(device, non_blocking=True) for k, v in batch.items()}
-            loss = sparse_ce_loss(model, batch) / accum
-            loss.backward()
-            step_loss += float(loss.detach() * accum)
+            try:
+                loss = sparse_ce_loss(model, batch) / accum
+                loss.backward()
+                step_loss += float(loss.detach() * accum)
+            except torch.cuda.OutOfMemoryError:
+                print(f"  OOM at step {step+1}, skipping microbatch seq_len={batch['input_ids'].size(1)}", flush=True)
+                opt.zero_grad(set_to_none=True)
+                if device == "cuda":
+                    torch.cuda.empty_cache()
+                continue
         torch.nn.utils.clip_grad_norm_(params, 1.0)
         opt.step()
         opt.zero_grad(set_to_none=True)
@@ -205,28 +283,44 @@ def main() -> int:
     p.add_argument("--augs-per-task", type=int, default=8)
     p.add_argument("--rearc-dir", default="", help="optional RE-ARC dump (dir with tasks/*.json)")
     p.add_argument("--rearc-per-task", type=int, default=0)
+    p.add_argument("--barc-heavy", default="", help="optional BARC-Heavy jsonl (data_100k.jsonl)")
+    p.add_argument("--barc-heavy-max", type=int, default=0, help="records to read from the jsonl")
+    p.add_argument("--barc-heavy-skip", type=int, default=0)
+    p.add_argument("--barc-heavy-per-task", type=int, default=1)
+    p.add_argument("--rules-json", default=str(ROOT / "data" / "rules" / "task_rules.json"),
+                   help="task_id -> natural-language rules (scripts/build_rule_data.py)")
+    p.add_argument("--rule-mode", action="store_true",
+                   help="'Rule: ... Output: grid' answers; keeps only tasks that have a rule")
+    p.add_argument("--strip-rules", action="store_true",
+                   help="control arm: same tasks/augmentations as --rule-mode, plain grid answers")
+    p.add_argument("--exclude-ids", default="",
+                   help="file with task ids (one per line) to hold out from ARC/RE-ARC sources")
     p.add_argument("--min-pairs", type=int, default=3, help="pairs per mini-task incl. the query")
     p.add_argument("--max-pairs", type=int, default=8)
     p.add_argument("--color-prob", type=float, default=0.8)
     p.add_argument("--loss", default="all", choices=["all", "last"])
-    p.add_argument("--max-len", type=int, default=4096)
+    p.add_argument("--max-len", type=int, default=2048)
     p.add_argument("--pack", action="store_true", default=True,
                    help="concatenate short samples up to max-len (much less padding)")
     p.add_argument("--no-pack", action="store_false", dest="pack")
     p.add_argument("--grad-ckpt", action="store_true", default=True)
     p.add_argument("--no-grad-ckpt", action="store_false", dest="grad_ckpt")
     p.add_argument("--max-samples", type=int, default=0)
+    p.add_argument("--dump-samples", type=int, default=0, help="write N decoded samples to out-dir/samples.txt")
     p.add_argument("--lora-r", type=int, default=64)
     p.add_argument("--lr", type=float, default=1e-4)
     p.add_argument("--epochs", type=float, default=1.0)
-    p.add_argument("--batch", type=int, default=2)
-    p.add_argument("--grad-accum", type=int, default=4)
+    p.add_argument("--batch", type=int, default=1)
+    p.add_argument("--grad-accum", type=int, default=8)
     p.add_argument("--warmup-ratio", type=float, default=0.03)
     p.add_argument("--save-steps", type=int, default=200)
     p.add_argument("--seed", type=int, default=0)
     p.add_argument("--out-dir", default="/opt/work/sft")
     p.add_argument("--merged-dir", default="", help="also save merged full weights here (optional)")
     args = p.parse_args()
+    if args.rule_mode and args.strip_rules:
+        p.error("--rule-mode and --strip-rules are the two arms of the ablation; pick one")
+    need_rules = args.rule_mode or args.strip_rules
 
     rng = random.Random(args.seed)
     out_dir = Path(args.out_dir)
@@ -238,20 +332,36 @@ def main() -> int:
     tok, model = load_base(args.model, args.device)
 
     # ---- build data ------------------------------------------------------
+    rules = load_rules(args.rules_json) if need_rules else {}
     sources = []
-    arc_tasks = load_arc_tasks(Path(args.train_dir))
-    sources.append(("arc_training", arc_tasks, args.augs_per_task))
+    arc_tasks = load_arc_tasks(Path(args.train_dir), rules)
+    if args.augs_per_task > 0:
+        sources.append(("arc_training", arc_tasks, args.augs_per_task))
     if args.rearc_dir and args.rearc_per_task > 0:
-        rearc = load_rearc_tasks(Path(args.rearc_dir))
+        rearc = load_rearc_tasks(Path(args.rearc_dir), rules)
         sources.append(("rearc", rearc, args.rearc_per_task))
+    if args.barc_heavy and args.barc_heavy_max > 0:
+        t_b = time.time()
+        barc = load_barc_heavy(Path(args.barc_heavy), args.barc_heavy_max, args.barc_heavy_skip)
+        print(f"barc_heavy: read {len(barc)} records in {time.time() - t_b:.0f}s", flush=True)
+        sources.append(("barc_heavy", barc, args.barc_heavy_per_task))
+    if need_rules:
+        # both arms train on exactly the tasks that have a rule
+        sources = [(n, [t for t in tasks if t[2]], k) for n, tasks, k in sources]
+    if args.exclude_ids:
+        excl = {ln.strip() for ln in Path(args.exclude_ids).read_text().splitlines() if ln.strip()}
+        before = sum(len(t) for _, t, _ in sources)
+        sources = [(n, [t for t in tasks if t[0].replace("rearc_", "") not in excl], k)
+                   for n, tasks, k in sources]
+        print(f"excluded {before - sum(len(t) for _, t, _ in sources)} tasks via {args.exclude_ids}", flush=True)
     t0 = time.time()
     encoded = []
     stats = {}
     for src_name, tasks, per_task in sources:
         kept = skipped = 0
-        for _tid, pairs in tasks:
+        for _tid, pairs, task_rules in tasks:
             for _ in range(per_task):
-                ex = make_sample(tok, pairs, rng, args)
+                ex = make_sample(tok, pairs, rng, args, rules=task_rules)
                 if ex is None:
                     skipped += 1
                     continue
@@ -262,6 +372,13 @@ def main() -> int:
     rng.shuffle(encoded)
     if args.max_samples:
         encoded = encoded[: args.max_samples]
+    if args.dump_samples:
+        with (out_dir / "samples.txt").open("w") as f:
+            for ex in encoded[: args.dump_samples]:
+                ids, lab = ex["input_ids"].tolist(), ex["labels"].tolist()
+                sup = tok.decode([t for t, l in zip(ids, lab) if l != -100])
+                f.write("=" * 78 + "\n" + tok.decode(ids) + "\n--- supervised tokens ---\n" + sup + "\n")
+        print(f"wrote {min(args.dump_samples, len(encoded))} decoded samples to {out_dir / 'samples.txt'}", flush=True)
     lengths = sorted(int(e["input_ids"].numel()) for e in encoded)
     sup = sum(int((e["labels"] != -100).sum()) for e in encoded)
     stats["total"] = {

@@ -1,0 +1,25 @@
+{
+  "id": "wenbozhang2026/nvarc-qwen3-4b-ttt-2026-ceiling",
+  "title": "NVARC Qwen3-4B TTT 2026 ceiling",
+  "code_file": "nvarc_qwen3_4b_ttt_2026.ipynb",
+  "language": "python",
+  "kernel_type": "notebook",
+  "is_private": true,
+  "enable_gpu": true,
+  "enable_tpu": false,
+  "enable_internet": false,
+  "keywords": ["gpu"],
+  "dataset_sources": [],
+  "kernel_sources": [
+    "sorokin/pip-install-unsloth-flash-patch"
+  ],
+  "competition_sources": [
+    "arc-prize-2026-arc-agi-2"
+  ],
+  "model_sources": [
+    "sorokin/qwen3_4b_grids15_sft139/Transformers/bfloat16/1"
+  ],
+  "machine_shape": "NvidiaL4",
+  "docker_image_pinning_type": "original",
+  "docker_image": "gcr.io/kaggle-private-byod/python@sha256:320043e14c68293f1c946585b9257123385205a58af4b94b17d31868cae4e868"
+}
