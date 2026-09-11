@@ -2,8 +2,9 @@
 # Run the NVARC TTT pipeline locally (3090 box) and score it.
 #
 #   bash run_local.sh <run_name> <hours> [starter extra args...]
+#   hours=0 means no wall/per-task/DFS caps (finish every queued puzzle).
 #   e.g. bash run_local.sh smoke4 2 --keys 0934a4d8,36a08778,981571dc,aa4ec2a5
-#        bash run_local.sh eval120 30
+#        bash run_local.sh eval120 0
 #
 # Env overrides: NVARC_VENV, NVARC_MODEL, NVARC_DATA, NVARC_SOL, NVARC_WORK
 set -euo pipefail
@@ -25,7 +26,11 @@ export TOKENIZERS_PARALLELISM=false
 cd "$HERE"
 echo "run=$RUN hours=$HOURS work=$WORK extra=$*"
 date
-"$VENV/bin/python" starter.py --data "$DATA" --out "$WORK/outputs" --hours "$HOURS" "$@"
+STARTER_EXTRA=()
+if [ "$HOURS" = "0" ]; then
+  STARTER_EXTRA+=(--no-timeouts)
+fi
+"$VENV/bin/python" starter.py --data "$DATA" --out "$WORK/outputs" --hours "$HOURS" "${STARTER_EXTRA[@]}" "$@"
 echo "starter_exit=$?"
 date
 FINALIZE_KEYS=()

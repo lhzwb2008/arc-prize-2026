@@ -1,14 +1,15 @@
 """Local port of the NVARC starter (Kaggle notebook cell `starter.py`).
 
 Same worker loop as the Kaggle version, but paths / GPU count / task list are
-arguments instead of hardcoded Kaggle locations. Per-task budgets inside
-arc_solver.py (TTT, 1200s decode, 540s DFS) are left untouched so that local
-numbers stay comparable with the 4xL4 Kaggle run.
+arguments instead of hardcoded Kaggle locations.
+
+Kaggle still uses 12h wall, 1200s/task, 540s DFS. Local default is --no-timeouts
+so every queued task is fully decoded; pass --hours N to restore a wall budget.
 
 Example (3090, 120 eval tasks, overnight):
     NVARC_MODEL=/opt/models/qwen3_4b_grids15_sft139 \
     python starter.py --data /opt/data/kaggle/arc-agi_evaluation_challenges.json \
-        --out /opt/work/nvarc/eval120/outputs --hours 30
+        --out /opt/work/nvarc/eval120/outputs --no-timeouts
 """
 import argparse
 import json
@@ -49,14 +50,21 @@ if __name__ == "__main__":
     parser.add_argument("--out", required=True, help="dir for per-subkey pickles")
     parser.add_argument("--model", default=os.getenv("NVARC_MODEL", "/opt/models/qwen3_4b_grids15_sft139"))
     parser.add_argument("--nprocs", type=int, default=torch.cuda.device_count() or 1)
-    parser.add_argument("--hours", type=float, default=12.0, help="wall budget; Kaggle uses 12h-10min")
+    parser.add_argument("--hours", type=float, default=12.0, help="wall budget; 0 = no cutoff")
     parser.add_argument("--end-time", type=float, default=0.0, help="absolute epoch; overrides --hours")
+    parser.add_argument("--no-timeouts", action="store_true",
+                        help="finish every task: no wall/DFS/per-task caps")
     parser.add_argument("--keys", default="", help="comma list of task ids (default: all)")
     parser.add_argument("--keys-file", default="", help="file with one task id per line")
     parser.add_argument("--skip-done", action="store_true", help="skip tasks that already have pickles in --out")
     args = parser.parse_args()
 
-    end_time = args.end_time or (time.time() + args.hours * 3600 - 600)
+    if args.no_timeouts or args.hours <= 0:
+        os.environ["NVARC_TASK_LIMIT"] = "0"
+        os.environ["NVARC_DFS_LIMIT"] = "0"
+        end_time = time.time() + 365 * 24 * 3600
+    else:
+        end_time = args.end_time or (time.time() + args.hours * 3600 - 600)
 
     os.environ["NVARC_MODEL"] = args.model
     os.environ["NVARC_DATA"] = args.data

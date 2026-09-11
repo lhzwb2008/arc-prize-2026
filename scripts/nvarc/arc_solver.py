@@ -45,6 +45,32 @@ ASSISTANT_TOKEN_ID = 12
 PAD_ID = 13
 EOS_ID = 15
 
+# 0 disables the cap. Kaggle notebook keeps the original 540 / 1200 constants;
+# local runs set these via env (see run_local.sh --no-timeouts).
+def _env_limit(name, default):
+    raw = os.getenv(name)
+    if raw is None or raw == "":
+        return float(default)
+    return float(raw)
+
+
+def _within_dfs_budget(start_time, end_time) -> bool:
+    dfs_limit = _env_limit("NVARC_DFS_LIMIT", 540)
+    if dfs_limit > 0 and time.time() - start_time >= dfs_limit:
+        return False
+    if end_time > 0 and time.time() >= end_time:
+        return False
+    return True
+
+
+def _task_timed_out(start_time, end_time) -> bool:
+    task_limit = _env_limit("NVARC_TASK_LIMIT", 1200)
+    if task_limit > 0 and time.time() - start_time >= task_limit:
+        return True
+    if end_time > 0 and time.time() >= end_time:
+        return True
+    return False
+
 
 class UnslothFixedTrainer(UnslothTrainer):
 
@@ -140,7 +166,7 @@ def turbo_dfs(model, logits, max_new_tokens, max_score, scores, pos, cache, star
     for i in range(n):
         candidates[i] = sorted(candidates[i], key=lambda x:x[0]) #[:5]
     
-    while time.time() - start_time < 540 and time.time() < end_time:
+    while _within_dfs_budget(start_time, end_time):
 
         batch_tokens = []
         batch_scores = []
@@ -347,7 +373,7 @@ def worker(rank, queue, end_time):
 
     while not queue.empty():
 
-        if time.time() > end_time:
+        if end_time > 0 and time.time() > end_time:
             print(f"[Rank {rank}] stop!")
             break
 
@@ -447,7 +473,7 @@ def worker(rank, queue, end_time):
             for subkeys in batches:
 
                 spend_time = time.time() - start_time
-                if spend_time > 1200 or time.time() > end_time:
+                if _task_timed_out(start_time, end_time):
                     print(f"[Rank {rank}] timeout after {spend_time:.1f}s for puzzle {key}")
                     break
 
