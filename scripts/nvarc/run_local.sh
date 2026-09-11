@@ -7,6 +7,8 @@
 #        bash run_local.sh eval120 0
 #
 # Env overrides: NVARC_VENV, NVARC_MODEL, NVARC_DATA, NVARC_SOL, NVARC_WORK
+# Independent TTT pass (NVARC+): ARC_LORA_SEED ARC_TRAIN_AUG_SEED ARC_EVAL_AUG_SEED
+#   ARC_SCORE_SEED_OFFSET ARC_N_TRAIN_AUG ARC_N_EVAL_AUG
 set -euo pipefail
 
 RUN=${1:?run name}; HOURS=${2:?hours}; shift 2

@@ -5,6 +5,7 @@ import gc
 import os
 import io
 import time
+import zlib
 import torch
 import numpy as np
 from tqdm import tqdm
@@ -52,6 +53,15 @@ def _env_limit(name, default):
     if raw is None or raw == "":
         return float(default)
     return float(raw)
+
+
+def _env(name, default, cast):
+    v = os.getenv(name)
+    return cast(v) if v not in (None, "") else default
+
+
+def stable_seed(key, offset=0):
+    return (zlib.crc32(str(key).encode("utf-8")) + offset) % (1024 ** 2)
 
 
 def _within_dfs_budget(start_time, end_time) -> bool:
@@ -283,6 +293,17 @@ def worker(rank, queue, end_time):
 
     rerun_mode = os.getenv("KAGGLE_IS_COMPETITION_RERUN")
 
+    lora_seed = _env("ARC_LORA_SEED", 42, int)
+    train_aug_seed = _env("ARC_TRAIN_AUG_SEED", 1, int)
+    n_train_aug = _env("ARC_N_TRAIN_AUG", 16, int)
+    eval_aug_seed = _env("ARC_EVAL_AUG_SEED", 2, int)
+    n_eval_aug = _env("ARC_N_EVAL_AUG", 2, int)
+    score_seed_off = _env("ARC_SCORE_SEED_OFFSET", 0, int)
+    print(
+        f"[Rank {rank}] seeds lora={lora_seed} train_aug={train_aug_seed} n={n_train_aug} "
+        f"eval_aug={eval_aug_seed} n={n_eval_aug} score_off={score_seed_off}"
+    )
+
     peft_params = dict(
         r=256,
         target_modules=["q_proj", "k_proj", "v_proj", "o_proj", "gate_proj", "up_proj", "down_proj", "embed_tokens", "lm_head"],
@@ -290,7 +311,7 @@ def worker(rank, queue, end_time):
         lora_dropout=0.0,
         bias="none",
         use_gradient_checkpointing=False,
-        random_state=42,
+        random_state=lora_seed,
         use_rslora=True,
         loftq_config=None,
     )
@@ -307,7 +328,7 @@ def worker(rank, queue, end_time):
         optim="adamw_torch",
         weight_decay=0.0,
         lr_scheduler_type="cosine",
-        seed=42,
+        seed=lora_seed,
         report_to="none",
         save_strategy="no",
         eval_strategy="no",
@@ -395,7 +416,7 @@ def worker(rank, queue, end_time):
 
         puzzle_ds = arc_test_set.change_keys([key])
 
-        train_ds = puzzle_ds.augment(n=16, shfl_keys=True, seed=1)
+        train_ds = puzzle_ds.augment(n=n_train_aug, shfl_keys=True, seed=train_aug_seed)
         train_ds = train_ds.cut_to_len(formatter=formatter, name="text", max_len=max_seq_length)
 
         with io.StringIO() as buf, redirect_stdout(buf), redirect_stderr(buf):
@@ -430,7 +451,7 @@ def worker(rank, queue, end_time):
 
         puzzle_ds_multi = puzzle_ds.split_multi_replies()
 
-        eval_ds = puzzle_ds_multi.augment(n=2, seed=2)
+        eval_ds = puzzle_ds_multi.augment(n=n_eval_aug, seed=eval_aug_seed)
         eval_ds = eval_ds.cut_to_len(formatter=formatter, name="input", max_len=max_seq_length-max_new_tokens)
 
         test_id_to_subkeys = defaultdict(list)
@@ -438,33 +459,19 @@ def worker(rank, queue, end_time):
             test_id = subkey.split(".")[0].split("_")[1]
             test_id_to_subkeys[test_id].append(subkey)
 
+        # Batched DFS needs equal prefix lengths. rot0/rot180 share H×W; rot90/rot270 share W×H.
+        n_perm = n_eval_aug
         batches = []
-        for test_id, subkeys in test_id_to_subkeys.items():
-            # 0: permute x 2
-            # 4: rot90.rot90.permute x 2
-            batch = []
-            for offset in [0, 4]:
-                batch.extend(subkeys[offset:offset+2])
-            batches.append(batch)
-            # 2: permute.rot90 x 2
-            # 6: rot90.rot90.rot90.permute x 2
-            batch = []
-            for offset in [2, 6]:
-                batch.extend(subkeys[offset:offset+2])
-            batches.append(batch)
-        for test_id, subkeys in test_id_to_subkeys.items():
-            # 8: transpose.permute x 2
-            # 12: transpose.rot90.rot90.permute x 2
-            batch = []
-            for offset in [8, 12]:
-                batch.extend(subkeys[offset:offset+2])
-            batches.append(batch)
-            # 10: transpose.rot90.permute x 2
-            # 14: transpose.rot90.rot90.rot90.permute x 2
-            batch = []
-            for offset in [10, 14]:
-                batch.extend(subkeys[offset:offset+2])
-            batches.append(batch)
+        batch_size = 4
+        for geos in ([0, 2, 1, 3], [4, 6, 5, 7]):
+            for test_id, subkeys in test_id_to_subkeys.items():
+                for a, b in ((geos[0], geos[1]), (geos[2], geos[3])):
+                    views = subkeys[a * n_perm:(a + 1) * n_perm] + subkeys[b * n_perm:(b + 1) * n_perm]
+                    if n_perm == 2 and batch_size == 4:
+                        batches.append(views)
+                    else:
+                        for i in range(0, len(views), batch_size):
+                            batches.append(views[i:i + batch_size])
 
         with torch.inference_mode():
                 
@@ -511,7 +518,7 @@ def worker(rank, queue, end_time):
                                 queries={bk: puzzle_ds_multi.queries.get(bk)},
                                 replies={bk: [solution.tolist()]},
                             )
-                            aug_dataset = aug_dataset.augment(seed=hash(bk) % 1024**2)
+                            aug_dataset = aug_dataset.augment(seed=stable_seed(bk, score_seed_off))
                             aug_dataset = aug_dataset.cut_to_len(formatter=formatter, name="input", max_len=max_seq_length-max_new_tokens)
                             aug_queries = []
                             aug_answers = []
