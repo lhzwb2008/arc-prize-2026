@@ -49,9 +49,18 @@ class ArcDecoder:
         self.decoded_results = {}
 
     def load_decoded_results(self, store, run_name=""):
+        if not store or not os.path.isdir(store):
+            return
         for key in os.listdir(store):
-            with bz2.BZ2File(os.path.join(store, key)) as f:
-                outputs = pickle.load(f)
+            path = os.path.join(store, key)
+            if not os.path.isfile(path):
+                continue
+            try:
+                with bz2.BZ2File(path) as f:
+                    outputs = pickle.load(f)
+            except Exception as e:
+                print(f"skip pickle {key}: {e}", flush=True)
+                continue
             base_key = key.split(".")[0]
             self.decoded_results[base_key] = self.decoded_results.get(base_key, {})
             for i, sample in enumerate(outputs):

@@ -298,10 +298,11 @@ def worker(rank, queue, end_time):
     n_train_aug = _env("ARC_N_TRAIN_AUG", 16, int)
     eval_aug_seed = _env("ARC_EVAL_AUG_SEED", 2, int)
     n_eval_aug = _env("ARC_N_EVAL_AUG", 2, int)
+    n_eval_geos = _env("ARC_N_EVAL_GEOS", 8, int)
     score_seed_off = _env("ARC_SCORE_SEED_OFFSET", 0, int)
     print(
         f"[Rank {rank}] seeds lora={lora_seed} train_aug={train_aug_seed} n={n_train_aug} "
-        f"eval_aug={eval_aug_seed} n={n_eval_aug} score_off={score_seed_off}"
+        f"eval_aug={eval_aug_seed} n={n_eval_aug} geos={n_eval_geos} score_off={score_seed_off}"
     )
 
     peft_params = dict(
@@ -344,11 +345,14 @@ def worker(rank, queue, end_time):
 
     max_seq_length = 8192
 
-    # Local port: paths come from env (set by starter.py); defaults are the Kaggle ones.
-    model_path = os.getenv(
-        "NVARC_MODEL",
-        "/kaggle/input/models/sorokin/qwen3_4b_grids15_sft139/transformers/bfloat16/1",
-    )
+    # Local port: NVARC_MODEL. Kaggle notebook: arc_paths.nvarc_model_dir().
+    model_path = os.getenv("NVARC_MODEL")
+    if not model_path:
+        try:
+            from arc_paths import nvarc_model_dir
+            model_path = nvarc_model_dir()
+        except Exception:
+            model_path = "/kaggle/input/models/sorokin/qwen3_4b_grids15_sft139/transformers/bfloat16/1"
 
     model, tokenizer = FastLanguageModel.from_pretrained(
         model_name=model_path,
@@ -460,18 +464,31 @@ def worker(rank, queue, end_time):
             test_id_to_subkeys[test_id].append(subkey)
 
         # Batched DFS needs equal prefix lengths. rot0/rot180 share H×W; rot90/rot270 share W×H.
+        # Full cost = 16 views (8 geos × 2 color). Three Kaggle passes should sum to that:
+        # geos=5, n_eval_aug=1 → 5 views × 3 = 15. Train n=5 × 3 = 15 vs full 16.
         n_perm = n_eval_aug
-        batches = []
         batch_size = 4
-        for geos in ([0, 2, 1, 3], [4, 6, 5, 7]):
-            for test_id, subkeys in test_id_to_subkeys.items():
-                for a, b in ((geos[0], geos[1]), (geos[2], geos[3])):
-                    views = subkeys[a * n_perm:(a + 1) * n_perm] + subkeys[b * n_perm:(b + 1) * n_perm]
-                    if n_perm == 2 and batch_size == 4:
-                        batches.append(views)
-                    else:
-                        for i in range(0, len(views), batch_size):
-                            batches.append(views[i:i + batch_size])
+        pairs = [(0, 2), (1, 3)]
+        singles = []
+        if n_eval_geos >= 8:
+            pairs += [(4, 6), (5, 7)]
+        elif n_eval_geos >= 6:
+            pairs += [(4, 6)]
+        elif n_eval_geos >= 5:
+            singles = [4]
+        batches = []
+        for test_id, subkeys in test_id_to_subkeys.items():
+            for a, b in pairs:
+                views = subkeys[a * n_perm:(a + 1) * n_perm] + subkeys[b * n_perm:(b + 1) * n_perm]
+                if n_perm == 2 and batch_size == 4:
+                    batches.append(views)
+                else:
+                    for i in range(0, len(views), batch_size):
+                        batches.append(views[i:i + batch_size])
+            for a in singles:
+                views = subkeys[a * n_perm:(a + 1) * n_perm]
+                if views:
+                    batches.append(views)
 
         with torch.inference_mode():
                 

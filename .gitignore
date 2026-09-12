@@ -14,3 +14,7 @@ demo/output/
 *.whl
 # local NVARC TTT pickles live on the GPU box, not this repo
 scripts/nvarc/*.sync/
+# one-shot Kaggle submit waiter state
+notebooks/nvarc_2026/.pending_submit.json
+notebooks/nvarc_2026/.pending_submit.log
+notebooks/nvarc_2026/.pending_submit.done.json
