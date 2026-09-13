@@ -82,15 +82,31 @@ export ARC_N_TRAIN_AUG=$WIN
 export ARC_N_EVAL_AUG=1
 export ARC_N_EVAL_GEOS=8
 
+# 5 is lossless on half-A/B (uniform 40.33 == confidence 40.33). 8 is stricter.
+MIN_VOTES=${ARC_B_MIN_VOTES:-5}
+KEYS_B=$PAIR/pass_b_keys.txt
+"$VENV/bin/python" "$HERE/select_pass_b_keys.py" \
+  --outputs "$PASS_A/outputs" \
+  --data "$DATA" --solutions "$SOL" \
+  --min-votes "$MIN_VOTES" \
+  --keys-file "$KEYS_B" \
+  --report "$PAIR/pass_b_select.json"
+n_b=$(grep -c . "$KEYS_B" || true)
+log "confidence pass-B: min_votes=$MIN_VOTES keys=$n_b / 120"
+
 if [ -f "$WORK/$PASS_B_NAME/done" ]; then
   log "skip pass-B (done)"
+elif [ "${n_b:-0}" -eq 0 ]; then
+  log "skip pass-B (no low-confidence keys)"
+  mkdir -p "$WORK/$PASS_B_NAME/outputs"
+  touch "$WORK/$PASS_B_NAME/done"
 else
-  log "start pass-B n_train=$WIN geos=8 (half-B seeds)"
+  log "start pass-B n_train=$WIN geos=8 (half-B seeds, ${n_b} tasks)"
   export ARC_LORA_SEED=137
   export ARC_TRAIN_AUG_SEED=17
   export ARC_EVAL_AUG_SEED=29
   export ARC_SCORE_SEED_OFFSET=7
-  bash "$HERE/run_local.sh" "$PASS_B_NAME" 0 --skip-done
+  bash "$HERE/run_local.sh" "$PASS_B_NAME" 0 --skip-done --keys-file "$KEYS_B"
 fi
 
 log "pool A=$PASS_A + B=$WORK/$PASS_B_NAME (kgmon mixed top-2)"

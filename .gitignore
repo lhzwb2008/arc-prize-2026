@@ -9,6 +9,8 @@ credentials.json
 data/full/
 data/kaggle/
 demo/output/
+runs/cursor_cloud*/
+runs/chat_eval*/
 *.egg-info/
 .pytest_cache/
 *.whl
