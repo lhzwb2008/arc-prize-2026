@@ -13,11 +13,11 @@ set -euo pipefail
 
 RUN=${1:?run name}; HOURS=${2:?hours}; shift 2
 HERE=$(cd "$(dirname "$0")" && pwd)
-VENV=${NVARC_VENV:-/opt/venv_nvarc}
-export NVARC_MODEL=${NVARC_MODEL:-/opt/models/qwen3_4b_grids15_sft139}
-DATA=${NVARC_DATA:-/opt/data/kaggle/arc-agi_evaluation_challenges.json}
-SOL=${NVARC_SOL:-/opt/data/kaggle/arc-agi_evaluation_solutions.json}
-WORK=${NVARC_WORK:-/opt/work/nvarc}/$RUN
+VENV="${NVARC_VENV:-/opt/venv_nvarc}"
+export NVARC_MODEL="${NVARC_MODEL:-/opt/models/qwen3_4b_grids15_sft139}"
+DATA="${NVARC_DATA:-/opt/data/kaggle/arc-agi_evaluation_challenges.json}"
+SOL="${NVARC_SOL:-/opt/data/kaggle/arc-agi_evaluation_solutions.json}"
+WORK="${NVARC_WORK:-/opt/work/nvarc}/$RUN"
 mkdir -p "$WORK"
 
 export UNSLOTH_DISABLE_STATISTICS=1
