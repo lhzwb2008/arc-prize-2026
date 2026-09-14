@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
-# After v11 6×6 two-pass: find the cheapest (n_train × n_geos) whose candidate
-# pool (oracle) still matches 8×8 / 16×16.
-#
-# Views 2/4/5/6/8 are CPU subsets of existing 8-view pickles (same TTT adapter).
-# Train=7 is the only new GPU job: resume eval120_search/n7_g8 (62/120 done).
+# After v11: decide the cheapest full-pool recipe. Two steps, not a 7×5 hunt:
+#   1) floor n_train = smallest n whose geos=8 oracle still matches 8×8 / 16×16
+#      (8≈16 already; 6 is worse; 7 is the only missing GPU point)
+#   2) on THAT n_train only, CPU-cut geos to 6/5/4/2
+# If 7 < 8, forget 7×*; the view search is 8×6 / 8×5 / 8×4.
 # Does not start the old gen_queue (lr / epochs / lora_r).
 set -euo pipefail
 HERE=$(cd "$(dirname "$0")" && pwd)
