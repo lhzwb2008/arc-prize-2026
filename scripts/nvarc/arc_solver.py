@@ -300,15 +300,20 @@ def worker(rank, queue, end_time):
     n_eval_aug = _env("ARC_N_EVAL_AUG", 2, int)
     n_eval_geos = _env("ARC_N_EVAL_GEOS", 8, int)
     score_seed_off = _env("ARC_SCORE_SEED_OFFSET", 0, int)
+    lora_r = _env("ARC_LORA_R", 256, int)
+    lora_alpha = _env("ARC_LORA_ALPHA", 32, int)
+    n_epochs = _env("ARC_EPOCHS", 1.0, float)
+    lr = _env("ARC_LR", 5e-5, float)
     print(
         f"[Rank {rank}] seeds lora={lora_seed} train_aug={train_aug_seed} n={n_train_aug} "
-        f"eval_aug={eval_aug_seed} n={n_eval_aug} geos={n_eval_geos} score_off={score_seed_off}"
+        f"eval_aug={eval_aug_seed} n={n_eval_aug} geos={n_eval_geos} score_off={score_seed_off} "
+        f"lr={lr} epochs={n_epochs} lora_r={lora_r} lora_alpha={lora_alpha}"
     )
 
     peft_params = dict(
-        r=256,
+        r=lora_r,
         target_modules=["q_proj", "k_proj", "v_proj", "o_proj", "gate_proj", "up_proj", "down_proj", "embed_tokens", "lm_head"],
-        lora_alpha=32,
+        lora_alpha=lora_alpha,
         lora_dropout=0.0,
         bias="none",
         use_gradient_checkpointing=False,
@@ -321,11 +326,11 @@ def worker(rank, queue, end_time):
         per_device_eval_batch_size=1,
         per_device_train_batch_size=1,
         gradient_accumulation_steps=1,
-        num_train_epochs=1,
+        num_train_epochs=n_epochs,
         warmup_steps=0,
         warmup_ratio=0.1,
         max_grad_norm=1.0,
-        learning_rate=5e-5,
+        learning_rate=lr,
         optim="adamw_torch",
         weight_decay=0.0,
         lr_scheduler_type="cosine",

@@ -14,7 +14,7 @@ import os
 import numpy as np
 
 from arc_loader import ArcDataset
-from arc_decoder import ArcDecoder, score_kgmon
+from arc_decoder import ArcDecoder, score_kgmon, score_mean_quality
 
 
 def merge_keep_primary(sel_a, sel_p):
@@ -53,14 +53,14 @@ def main():
 
     decoder = ArcDecoder(data.split_multi_replies(), n_guesses=2)
     decoder.load_decoded_results(args.outputs)
-    sel_primary = decoder.run_selection_algo(score_kgmon) if args.keep_primary else None
+    sel_primary = decoder.run_selection_algo(score_mean_quality) if args.keep_primary else None
     for i, extra in enumerate(args.outputs_extra, 1):
         n_before = sum(len(v) for v in decoder.decoded_results.values())
         decoder.load_decoded_results(extra, run_name=f".p{i}")
         n_after = sum(len(v) for v in decoder.decoded_results.values())
         print(f"pooled extra {extra}: +{n_after - n_before} samples")
 
-    selected = decoder.run_selection_algo(score_kgmon)
+    selected = decoder.run_selection_algo(score_mean_quality)
     if sel_primary is not None:
         selected = merge_keep_primary(sel_primary, selected)
 

@@ -35,9 +35,19 @@ def score_kgmon(guesses):
     return score_sum(guesses, getter_kgmon)
 
 
+def getter_mean_quality(guesses):
+    # Average sample quality; no vote-count term. Best mean across all local pools.
+    return float(np.mean([-g["beam_score"] - np.mean(g["score_aug"]) for g in guesses]))
+
+
+def score_mean_quality(guesses):
+    return score_sum(guesses, getter_mean_quality)
+
+
 selection_algorithms = [
     score_full_probmul_3,
     score_kgmon,
+    score_mean_quality,
 ]
 
 
@@ -66,7 +76,7 @@ class ArcDecoder:
             for i, sample in enumerate(outputs):
                 self.decoded_results[base_key][f"{key}{run_name}.out{i}"] = sample
 
-    def run_selection_algo(self, selection_algorithm=score_kgmon):
+    def run_selection_algo(self, selection_algorithm=score_mean_quality):
         return {bk: selection_algorithm({k: g for k, g in v.items()}) for bk, v in self.decoded_results.items()}
 
     def benchmark_selection_algos(self):

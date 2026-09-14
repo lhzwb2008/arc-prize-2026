@@ -1,19 +1,15 @@
 #!/usr/bin/env bash
-# Two 6×6 TTT passes on the official 120 eval, then pool — local stand-in for
-# the Kaggle NVARC+ notebook (SEED_A / SEED_B, cheap-first omitted locally
-# because starter.py has no --order; both passes still run all 120, no caps).
-#
-# Recipe: ARC_N_TRAIN_AUG=6, ARC_N_EVAL_GEOS=6, ARC_N_EVAL_AUG=1.
-# Pool: pure kgmon top-2 (same as eval120_half_pool) plus keep-primary (Kaggle checkpoint).
+# Two 6×6 TTT passes on the official 120 eval, then mean_quality pool
+# (same ranker as Kaggle v11 checkpoint).
 set -euo pipefail
 HERE=$(cd "$(dirname "$0")" && pwd)
 WORK=${NVARC_WORK:-/opt/work/nvarc}
 DATA=${NVARC_DATA:-/opt/data/kaggle/arc-agi_evaluation_challenges.json}
 SOL=${NVARC_SOL:-/opt/data/kaggle/arc-agi_evaluation_solutions.json}
 VENV=${NVARC_VENV:-/opt/venv_nvarc}
-A_NAME=${NVARC_N6X6_A:-eval120_n6x6_a}
-B_NAME=${NVARC_N6X6_B:-eval120_n6x6_b}
-POOL=$WORK/eval120_n6x6_pool
+A_NAME=${NVARC_N6X6_A:-eval120_n6x6_v11_a}
+B_NAME=${NVARC_N6X6_B:-eval120_n6x6_v11_b}
+POOL=$WORK/${NVARC_N6X6_POOL:-eval120_n6x6_v11_pool}
 META=$POOL/timing.json
 
 log() { echo "[$(date '+%F %T')] $*"; }
@@ -50,7 +46,7 @@ t3=$(date +%s)
 B_SEC=$((t3 - t2))
 log "pass B wall ${B_SEC}s = $(awk -v s="$B_SEC" 'BEGIN{printf "%.2fh", s/3600}')"
 
-log "=== pool A+B pure kgmon (match half2) ==="
+log "=== pool A+B mean_quality (v11 default) ==="
 "$VENV/bin/python" "$HERE/finalize.py" \
   --data "$DATA" --solutions "$SOL" \
   --outputs "$WORK/$A_NAME/outputs" \
@@ -58,53 +54,43 @@ log "=== pool A+B pure kgmon (match half2) ==="
   --submission "$POOL/submission.json" \
   --report "$POOL/report.json"
 
-log "=== pool A+B keep-primary (Kaggle checkpoint) ==="
-"$VENV/bin/python" "$HERE/finalize.py" \
-  --data "$DATA" --solutions "$SOL" \
-  --outputs "$WORK/$A_NAME/outputs" \
-  --outputs-extra "$WORK/$B_NAME/outputs" \
-  --keep-primary \
-  --submission "$POOL/submission_keep_primary.json" \
-  --report "$POOL/report_keep_primary.json"
-
 "$VENV/bin/python" - << PY
 import json, time
 from pathlib import Path
-work = Path("$WORK")
-pool = json.loads((work / "eval120_n6x6_pool/report.json").read_text())
-kp = json.loads((work / "eval120_n6x6_pool/report_keep_primary.json").read_text())
-a = json.loads((work / "$A_NAME/report.json").read_text())
-b = json.loads((work / "$B_NAME/report.json").read_text())
-half_p = work / "eval120_half_pool/report.json"
-half = json.loads(half_p.read_text()) if half_p.exists() else None
+pool_p = Path("$POOL/report.json")
+a = json.loads(Path("$WORK/$A_NAME/report.json").read_text())
+b = json.loads(Path("$WORK/$B_NAME/report.json").read_text())
+pool = json.loads(pool_p.read_text())
 n = pool["n_tasks"]
 def row(tag, d):
     s = d["score"]
     print(f"{tag:22s} {s:7.3f}/{n} = {100*s/n:5.2f}%")
     return s
-print("--- n6x6 two-pass ---")
+print("--- n6x6 v11 two-pass (mean_quality) ---")
 sa = row("pass A 6x6", a)
 sb = row("pass B 6x6", b)
-sp = row("pool kgmon", pool)
-sk = row("pool keep-primary", kp)
-if half:
-    row("half2 8x8 pool", half)
+sp = row("pool mean_quality", pool)
+old = Path("/opt/work/nvarc/eval120_n6x6_pool/report.json")
+old_mq = Path("/opt/work/nvarc/eval120_n6x6_pool/report_mean_quality.json")
+if old.exists():
+    d = json.loads(old.read_text())
+    print(f"{'prev A+B kgmon':22s} {d['score']:7.3f}/{d['n_tasks']}")
+if old_mq.exists():
+    d = json.loads(old_mq.read_text())
+    print(f"{'prev A+B mean_q':22s} {d['score']:7.3f}/{d['n_tasks']}")
 print(f"A_sec=$A_SEC B_sec=$B_SEC total_sec={int('$A_SEC')+int('$B_SEC')}")
-meta = {
-    "recipe": {"n_train_aug": 6, "n_eval_geos": 6, "n_eval_aug": 1},
+Path("$META").write_text(json.dumps({
+    "recipe": {"n_train_aug": 6, "n_eval_geos": 6, "n_eval_aug": 1, "ranker": "mean_quality"},
     "pass_a_sec": int("$A_SEC"),
     "pass_b_sec": int("$B_SEC"),
     "total_sec": int("$A_SEC") + int("$B_SEC"),
     "pass_a_score": sa,
     "pass_b_score": sb,
-    "pool_kgmon": sp,
-    "pool_keep_primary": sk,
-    "half2_pool": None if not half else half["score"],
+    "pool_mean_quality": sp,
     "finished_at": time.strftime("%Y-%m-%d %H:%M:%S"),
-}
-Path("$META").write_text(json.dumps(meta, indent=2) + "\n")
+}, indent=2) + "\n")
 PY
 
 touch "$POOL/done"
-log "n6x6 two-pass done"
+log "n6x6 v11 two-pass done"
 date

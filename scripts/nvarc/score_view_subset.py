@@ -40,6 +40,12 @@ def geo_indices(n_eval_geos: int) -> list[int]:
     return sorted(dict.fromkeys(ids))
 
 
+def _geo_key(fn: str) -> str:
+    if ".permute" in fn:
+        return fn.split(".permute")[0]
+    return fn.split(".")[0]
+
+
 def keep_files(src: str, geos: int, n_eval_aug: int | None) -> list[str]:
     groups: dict[str, list[str]] = {}
     for fn in os.listdir(src):
@@ -53,18 +59,16 @@ def keep_files(src: str, geos: int, n_eval_aug: int | None) -> list[str]:
     want = set(geo_indices(geos))
     kept = []
     for files in groups.values():
-        files = sorted(files)
-        n = len(files)
-        src_n_perm = 2 if n >= 15 else 1
-        n_geos_present = n // src_n_perm
-        take_perm = src_n_perm
-        if n_eval_aug is not None:
-            take_perm = min(src_n_perm, max(1, n_eval_aug))
-        for gi in range(n_geos_present):
+        by_geo: dict[str, list[str]] = {}
+        for fn in sorted(files):
+            by_geo.setdefault(_geo_key(fn), []).append(fn)
+        geo_list = list(by_geo)
+        for gi, gkey in enumerate(geo_list):
             if gi not in want:
                 continue
-            start = gi * src_n_perm
-            kept.extend(files[start:start + take_perm])
+            perms = by_geo[gkey]
+            take = len(perms) if n_eval_aug is None else min(len(perms), max(1, n_eval_aug))
+            kept.extend(perms[:take])
     return kept
 
 

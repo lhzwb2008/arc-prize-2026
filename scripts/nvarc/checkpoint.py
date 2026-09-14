@@ -14,7 +14,7 @@ from pathlib import Path
 
 import numpy as np
 
-from arc_decoder import ArcDecoder, score_kgmon
+from arc_decoder import ArcDecoder, score_kgmon, score_mean_quality
 from arc_loader import ArcDataset
 
 
@@ -62,7 +62,7 @@ def build_submission(data_path: str, primary: str, extras: list[str], keep_prima
         raise SystemExit(f"primary pickle dir missing: {primary}")
     decoder.load_decoded_results(primary)
     n_primary = sum(len(v) for v in decoder.decoded_results.values())
-    sel_primary = decoder.run_selection_algo(score_kgmon) if keep_primary else None
+    sel_primary = decoder.run_selection_algo(score_mean_quality) if keep_primary else None
     n_extra = 0
     for i, extra in enumerate(extras, 1):
         if not extra or not os.path.isdir(extra):
@@ -72,7 +72,7 @@ def build_submission(data_path: str, primary: str, extras: list[str], keep_prima
         before = sum(len(v) for v in decoder.decoded_results.values())
         decoder.load_decoded_results(extra, run_name=f".p{i}")
         n_extra += sum(len(v) for v in decoder.decoded_results.values()) - before
-    selected = decoder.run_selection_algo(score_kgmon) if decoder.decoded_results else None
+    selected = decoder.run_selection_algo(score_mean_quality) if decoder.decoded_results else None
     if sel_primary is not None and selected is not None:
         selected = merge_keep_primary(sel_primary, selected)
     submission = data.get_submission(selected)
