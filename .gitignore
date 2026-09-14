@@ -11,6 +11,7 @@ data/kaggle/
 demo/output/
 runs/cursor_cloud*/
 runs/chat_eval*/
+runs/llm_bench*/
 *.egg-info/
 .pytest_cache/
 *.whl

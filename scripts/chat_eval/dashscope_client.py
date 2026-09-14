@@ -78,7 +78,7 @@ def chat_complete(
     model: str | None = None,
     reasoning_effort: str = "high",
     enable_thinking: bool = True,
-    max_tokens: int = 16384,
+    max_tokens: int = 131072,
     timeout_s: float = 1800.0,
     stream: bool = False,
     on_delta: Callable[[str], None] | None = None,
