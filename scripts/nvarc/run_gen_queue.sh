@@ -1,14 +1,12 @@
 #!/usr/bin/env bash
-# Generation-axis GPU queue. Starts after v11 6×6 two-pass finishes.
+# TTT hparam queue on the Kaggle unit (8×6, seed A). Not 6×6: n_train=6
+# is below the full-pool floor, so lr/epoch wins there would not transfer.
 #
-# Order:
-#   1. 6×6 n_eval_aug=2 (decode color perm) — same A seeds as 6×6 A
-#      then CPU-ablate back to aug=1 on the same TTT pickle
-#   2. TTT hparams, one factor at a time, still 6×6 / seed A / aug=1:
-#        lr=2e-5, lr=1e-4, epochs=2, lora_r=128, lora_r=512
-#
-# Each job is skip-if-done. A failed job (e.g. r=512 OOM) is marked and
-# the queue continues. Does not touch the running v11 process.
+# Kept (unknown, could move 8×6):
+#   lr=2e-5, lr=1e-4, epochs=2
+# Dropped:
+#   n_eval_aug=2 — 16×16 already +~1; 8×6×2-perm blows the 12h two-pass budget
+#   lora_r=128/512 — author 256; r=512 OOM risk; low chance of changing recipe
 set -euo pipefail
 HERE=$(cd "$(dirname "$0")" && pwd)
 WORK=${NVARC_WORK:-/opt/work/nvarc}
@@ -17,7 +15,7 @@ SOL=${NVARC_SOL:-/opt/data/kaggle/arc-agi_evaluation_solutions.json}
 VENV=${NVARC_VENV:-/opt/venv_nvarc}
 LOGDIR=$WORK/eval120_search_logs
 SEARCH=$WORK/eval120_search
-V11_DONE=$WORK/eval120_n6x6_v11_pool/done
+BASELINE=$WORK/eval120_half_a/outputs
 
 log() { echo "[$(date '+%F %T')] $*"; }
 
@@ -26,7 +24,7 @@ mkdir -p "$LOGDIR" "$SEARCH"
 reset_recipe() {
   unset ARC_LR ARC_EPOCHS ARC_LORA_R ARC_LORA_ALPHA
   export PYTHONHASHSEED=0
-  export ARC_N_TRAIN_AUG=6
+  export ARC_N_TRAIN_AUG=8
   export ARC_N_EVAL_GEOS=6
   export ARC_N_EVAL_AUG=1
   export ARC_LORA_SEED=42
@@ -48,25 +46,15 @@ wait_gpu() {
   exit 1
 }
 
-wait_v11() {
-  log "waiting for v11 two-pass ($V11_DONE)"
-  while true; do
-    if [ -f "$V11_DONE" ]; then
-      log "v11 pool done"
-      break
-    fi
-    if ! pgrep -f "run_n6x6_two.sh|run_local.sh eval120_n6x6_v11" >/dev/null; then
-      log "v11 process gone without pool/done — continue after GPU drain"
-      break
-    fi
-    sleep 60
-  done
+wait_idle() {
+  log "waiting for GPU"
   wait_gpu
 }
 
 compare() {
   local tag=$1 outputs=$2
-  "$VENV/bin/python" "$HERE/compare_gen.py" --tag "$tag" --outputs "$outputs" || true
+  "$VENV/bin/python" "$HERE/compare_gen.py" --tag "$tag" --outputs "$outputs" \
+    --baseline "$BASELINE" --baseline-geos 6 || true
 }
 
 run_job() {
@@ -97,38 +85,23 @@ run_job() {
   fi
 }
 
-wait_v11
-log "=== gen queue start ==="
+wait_idle
+log "=== 8x6 hparam queue start ==="
 
-run_job eval120_search/n6x6_aug2 ARC_N_EVAL_AUG=2
+run_job eval120_search/n8x6_lr2e5 ARC_LR=2e-5
+run_job eval120_search/n8x6_lr1e4 ARC_LR=1e-4
+run_job eval120_search/n8x6_ep2 ARC_EPOCHS=2
 
-if [ -d "$SEARCH/n6x6_aug2/outputs" ] && [ ! -f "$SEARCH/n6x6_aug2_g6a1/report.json" ]; then
-  log "CPU ablate n6x6_aug2 → geos=6 aug=1 (same TTT)"
-  mkdir -p "$SEARCH/n6x6_aug2_g6a1"
-  "$VENV/bin/python" "$HERE/score_view_subset.py" \
-    --outputs "$SEARCH/n6x6_aug2/outputs" \
-    --geos 6 --n-eval-aug 1 \
-    --data "$DATA" --solutions "$SOL" \
-    --report "$SEARCH/n6x6_aug2_g6a1/report.json" \
-    --submission "$SEARCH/n6x6_aug2_g6a1/submission.json" || true
-fi
-
-run_job eval120_search/n6x6_lr2e5 ARC_LR=2e-5
-run_job eval120_search/n6x6_lr1e4 ARC_LR=1e-4
-run_job eval120_search/n6x6_ep2 ARC_EPOCHS=2
-run_job eval120_search/n6x6_r128 ARC_LORA_R=128
-run_job eval120_search/n6x6_r512 ARC_LORA_R=512
-
-log "=== gen queue done ==="
+log "=== 8x6 hparam queue done ==="
 if [ -f "$SEARCH/gen_queue_summary.json" ]; then
   "$VENV/bin/python" - << 'PY'
 import json
 from pathlib import Path
 d=json.loads(Path("/opt/work/nvarc/eval120_search/gen_queue_summary.json").read_text())
-base=d.get("baseline_6x6A") or {}
+base=d.get("baseline_8x6A") or {}
 print(f"{'tag':<28} {'mean_q':>7} {'kgmon':>7} {'oracle':>7}  d_mq  d_ora")
 if base:
-    print(f"{'6x6A baseline':<28} {base['mean_quality']:7.3f} {base['kgmon']:7.3f} {base['oracle']:7.3f}")
+    print(f"{'8x6A baseline':<28} {base['mean_quality']:7.3f} {base['kgmon']:7.3f} {base['oracle']:7.3f}")
 for r in d.get("runs", []):
     dm=r["mean_quality"]-base.get("mean_quality", 0) if base else 0
     do=r["oracle"]-base.get("oracle", 0) if base else 0

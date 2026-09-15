@@ -1,0 +1,14 @@
+---
+description: Report eval scores as Kaggle public score plus oracle when known
+alwaysApply: true
+---
+
+# 分数怎么报
+
+对用户说分数时，默认换成 **Kaggle 公开榜同款百分制**，不要只丢「34.50/120」。
+
+- 公式：`100 * points / 120`（分母已核实是 120 题；多 test 按题内比例给分，与 `validate_submission` / report.json 的 `score` 同一指标）。
+- 写法：`29.86` 或 `29.86（35.83/120）`；百分比才是榜上的数。
+- 这不是 172 个 test grid 的条数正确率，是 120 题的题均正确比例再乘 100。
+- 有 oracle / 候选池天花板就一起报，同样换成百分制。
+- DeepSeek / chat eval 若按同一 120 题计分，也用这套换算。

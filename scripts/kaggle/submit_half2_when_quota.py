@@ -166,18 +166,13 @@ def _run(once: bool, kaggle_bin: str) -> int:
             log("could not read submissions; retry in 5 min")
             time.sleep(300)
             continue
+        # Daily quota is one submit per UTC calendar day. After midnight the
+        # last row is still yesterday (used) — that means the slot is free.
         if d == today:
             log("this UTC day already has a submission; marking done")
             DONE.write_text(json.dumps({**st, "submitted_utc": datetime.now(timezone.utc).isoformat(),
                                         "note": "detected existing same-day submission"}, indent=2) + "\n")
             return 0
-        if used and d == used:
-            if once:
-                log("quota still the UTC day that burned the slot")
-                return 0
-            log("quota still the UTC day that burned the slot; sleep 10 min")
-            time.sleep(600)
-            continue
         break
     else:
         log("FAIL: timed out waiting for a new UTC day")
