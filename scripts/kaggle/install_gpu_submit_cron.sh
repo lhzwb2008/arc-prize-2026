@@ -6,6 +6,8 @@ ROOT=${NVARC_REPO:-/opt/arc-prize-2026}
 VENV=${NVARC_KAGGLE_VENV:-/opt/venv_kaggle}
 STATE_DIR=$ROOT/notebooks/nvarc_2026
 LOCK=/opt/work/nvarc/kaggle_v12_submit.lock
+# Distinct from the Python fcntl lock (/tmp/nvarc_kaggle_submit.lock). Same-path
+# flock + fcntl deadlocks on Linux (see v12 variance miss on 2026-09-16).
 LOG=/opt/work/nvarc/kaggle_v12_submit.log
 CRON_MARK='nvarc kaggle v12 auto-submit'
 
