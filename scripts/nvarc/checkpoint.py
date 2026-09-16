@@ -136,5 +136,55 @@ def main():
     maybe_write(submission, args.submission)
 
 
+def run_live(primary, extras, dest, data_path="", keep_primary=False):
+    """In-process merge. Same work as CLI, without a transformers relaunch."""
+    if not data_path:
+        gp = Path("/kaggle/working/gate.json")
+        if gp.exists():
+            data_path = json.loads(gp.read_text()).get("path") or ""
+    if not data_path:
+        data_path = os.getenv("NVARC_DATA") or ""
+    if not data_path:
+        raise RuntimeError("need data_path")
+    extras = [p for p in (extras or []) if p]
+    submission, n_decoded, n_primary, n_extra = build_submission(
+        data_path, primary, extras, keep_primary,
+    )
+    print(
+        f"checkpoint decoded={n_decoded} samples_a={n_primary} samples_extra={n_extra} "
+        f"keep_primary={keep_primary}",
+        flush=True,
+    )
+    if n_decoded == 0:
+        print("checkpoint: nothing decoded yet", flush=True)
+        return False
+    return maybe_write(submission, dest)
+
+
+def live_checkpoint(tag="live"):
+    """Notebook starter.py live merge: flock + run_live. Env-driven."""
+    primary = os.getenv("NVARC_CHECKPOINT_PRIMARY", "")
+    if not primary:
+        return
+    sub = os.getenv("NVARC_CHECKPOINT_SUB", "")
+    if not sub:
+        return
+    extras = [p for p in os.getenv("NVARC_CHECKPOINT_EXTRAS", "").split(":") if p]
+    out = os.getenv("NVARC_OUT", "")
+    if out and out != primary and out not in extras:
+        extras.append(out)
+    try:
+        import fcntl
+        with open(sub + ".lock", "a") as lf:
+            fcntl.flock(lf.fileno(), fcntl.LOCK_EX)
+            try:
+                print(f"live checkpoint {tag} primary={primary} extra={extras}", flush=True)
+                run_live(primary, extras, sub, os.getenv("NVARC_DATA") or "", False)
+            finally:
+                fcntl.flock(lf.fileno(), fcntl.LOCK_UN)
+    except Exception as e:
+        print(f"live checkpoint {tag}: {type(e).__name__}: {e}", flush=True)
+
+
 if __name__ == "__main__":
     main()

@@ -401,7 +401,7 @@ def worker(rank, queue, end_time):
     os.makedirs(dir_outputs, exist_ok=True)
     print(f"[Rank {rank}] model={model_path} data={test_path} out={dir_outputs}")
 
-    while not queue.empty():
+    while True:
 
         if end_time > 0 and time.time() > end_time:
             print(f"[Rank {rank}] stop!")

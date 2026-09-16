@@ -7,7 +7,7 @@ VENV=${NVARC_KAGGLE_VENV:-/opt/venv_kaggle}
 LOCK=/opt/work/nvarc/v13_submit.cron.lock
 LOG=/opt/work/nvarc/v13_submit.log
 CRON_MARK='nvarc v13 auto-submit'
-VERSION=${NVARC_KERNEL_VERSION:-13}
+VERSION=${NVARC_KERNEL_VERSION:-14}
 
 mkdir -p /opt/work/nvarc
 chmod +x "$ROOT/scripts/kaggle/submit_v12_variance.py"

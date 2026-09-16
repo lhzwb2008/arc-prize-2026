@@ -25,7 +25,7 @@ COMP = "arc-prize-2026-arc-agi-2"
 KERNEL = os.environ.get(
     "NVARC_KERNEL", "wenbozhang2026/nvarc-qwen3-4b-ttt-2026-ceiling"
 )
-VERSION = int(os.environ.get("NVARC_KERNEL_VERSION", "13"))
+VERSION = int(os.environ.get("NVARC_KERNEL_VERSION", "14"))
 STATE = Path(os.environ.get("NVARC_V13_STATE", "/opt/work/nvarc/v13_submit_state.json"))
 LOG = Path(os.environ.get("NVARC_V13_LOG", "/opt/work/nvarc/v13_submit.log"))
 # Must NOT be the same path as the cron `flock -n` file
@@ -39,8 +39,8 @@ RUNS = [
         "id": "v13",
         "not_before_utc": "2026-09-17T00:02:00+00:00",
         "message": (
-            "NVARC 8x6 v13: leftover-B, end-of-pass mean_quality pool, "
-            "no keep-primary, catchup then B, queue.get"
+            "NVARC 8x6 v14: leftover-B mean_quality, catchup, delayed sentinels, "
+            "90s live merge + hard write at 12h-5min, no keep-primary"
         ),
     },
 ]
