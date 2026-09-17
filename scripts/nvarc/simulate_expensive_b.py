@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
-"""CPU: A-full + expensive-first leftover-B, mixed mean_quality, under 16×16 wall.
+"""CPU: leftover-B under the first 16×16 wall. Generic cheap-first policy.
 
 Uses existing n8x6 pickle dirs on GPU2. Does not touch the GPU.
 
-Wall cap defaults to the first full-cost 16×16 eval120 pickle span (~13.58h).
-Pass A is kept in full; B is an expensive-first prefix. Ranking is mixed
-mean_quality over A+leftover-B (keep-primary / pass-pair are diagnostics).
+A stays full; leftover B is a cheap-first prefix until wall. Ranking is mixed
+mean_quality. Expensive-first prefix is reported as a comparison only.
+Do not skip a fitted number of expensive tasks — hidden eval is a different 120.
 
   python simulate_expensive_b.py \
       --outputs /opt/work/nvarc/eval120_n8x6_a/outputs \
@@ -85,6 +85,10 @@ def expensive_order(tasks: list[str], work: dict[str, float]) -> list[str]:
     return sorted(tasks, key=lambda k: work.get(k, 0.0), reverse=True)
 
 
+def cheap_order(tasks: list[str], work: dict[str, float]) -> list[str]:
+    return sorted(tasks, key=lambda k: work.get(k, 0.0))
+
+
 def hours_for_subset(tasks: list[str], dur: dict[str, float]) -> float:
     return sum(dur.get(t, 0.0) for t in tasks) / 3600.0
 
@@ -128,6 +132,23 @@ def pick_best_within_budget(rows: list[dict], budget_h: float) -> dict | None:
     return max(ok, key=lambda r: (r["mixed_pct"], -r["b_h"]))
 
 
+def bootstrap_delta_pct(pts_base: dict, pts_new: dict, iters: int = 2000, seed: int = 0):
+    """Paired task bootstrap of (new - base) in Kaggle percent. Same 120 labels."""
+    tasks = sorted(set(pts_base) | set(pts_new))
+    d = np.array([pts_new.get(t, 0.0) - pts_base.get(t, 0.0) for t in tasks])
+    rng = np.random.default_rng(seed)
+    n = len(d)
+    draws = np.array([d[rng.integers(0, n, n)].sum() for _ in range(iters)])
+    scale = 100.0 / N
+    return {
+        "mean_pct": float(draws.mean() * scale),
+        "p_lt_0": float((draws < 0).mean()),
+        "p_eq_0": float((draws == 0).mean()),
+        "p_gt_0": float((draws > 0).mean()),
+        "ci90_pct": [float(np.percentile(draws, 5) * scale), float(np.percentile(draws, 95) * scale)],
+    }
+
+
 def load_sel(dm, path, run_name=""):
     from arc_decoder import ArcDecoder, score_mean_quality
     dec = ArcDecoder(dm, n_guesses=2)
@@ -152,6 +173,11 @@ def score_pool(replies, decoded_a, decoded_b_slice, sel_a):
     mixed_sc, mixed_hit, _ = task_score(replies, sel_m)
     keep_sc, _, _ = task_score(replies, merge_keep_primary(sel_a, sel_m))
     pair_sc, _, _ = task_score(replies, merge_pass_pair(sel_a, sel_b))
+    per = {}
+    for bk, golds in replies.items():
+        ok = any(np.array_equal(g, golds[0]) for g in (sel_m.get(bk) or [])[:2])
+        per.setdefault(bk.split("_")[0], []).append(bool(ok))
+    mixed_pts = {t: sum(v) / len(v) for t, v in per.items()}
     return {
         "mixed": mixed_sc,
         "mixed_pct": pct(mixed_sc),
@@ -165,6 +191,7 @@ def score_pool(replies, decoded_a, decoded_b_slice, sel_a):
         "gold_in_pool": in_pool,
         "n_out": n_out,
         "n_b_tasks": len({bk.split("_")[0] for bk in decoded_b_slice}),
+        "mixed_pts": mixed_pts,
     }
 
 
@@ -276,6 +303,10 @@ def main() -> int:
         flush=True,
     )
 
+    a_pts_sel = a_pts
+    cheap = cheap_order(tasks_all, work)
+    mtime_order = sorted(done_b, key=lambda k: done_b[k])
+
     def eval_keep(kind, keep):
         decoded_b = restrict_decoded(dec_b.decoded_results, set(keep))
         sc = score_pool(replies, dec_a.decoded_results, decoded_b, sel_a)
@@ -310,71 +341,87 @@ def main() -> int:
     hour_grid = sorted({round(h, 3) for h in hour_grid if h >= 0})
 
     rows = []
-    print("\n=== expensive-first leftover-B + mixed mean_quality ===", flush=True)
+    print("\n=== cheap-first leftover-B + mixed mean_quality (generic policy) ===", flush=True)
     seen = set()
     for hours in hour_grid:
-        keep = prefix_until_hours(exp_order, dur_b, hours)
-        key = tuple(keep)
+        keep = prefix_until_hours(cheap, dur_b, hours)
+        key = ("cheap",) + tuple(keep)
         if key in seen:
             continue
         seen.add(key)
+        rows.append(eval_keep("cheap-first", keep))
+
+    print("\n=== expensive-first leftover-B (generic prefix, not skip-head) ===", flush=True)
+    seen_e = set()
+    for hours in hour_grid:
+        keep = prefix_until_hours(exp_order, dur_b, hours)
+        key = ("exp",) + tuple(keep)
+        if key in seen_e:
+            continue
+        seen_e.add(key)
         rows.append(eval_keep("expensive-first", keep))
 
-    barren_n = 0
-    for r in rows:
-        if r["kind"] != "expensive-first":
-            continue
-        if r["mixed_pct"] <= pct(a_sc) + 0.05:
-            barren_n = r["n_b_tasks"]
-        else:
-            break
-    skip = exp_order[:barren_n]
-    tail = exp_order[barren_n:]
-    skip_h = hours_for_subset(skip, dur_b)
-    print(
-        f"\n=== skip barren expensive head n={barren_n} ({skip_h:.2f}h, mixed still A) "
-        f"then leftover-B on the rest ===",
-        flush=True,
-    )
-    seen_tail = set()
-    for hours in hour_grid:
-        keep = prefix_until_hours(tail, dur_b, hours)
-        key = tuple(keep)
-        if key in seen_tail:
-            continue
-        seen_tail.add(key)
-        rows.append(eval_keep(f"skip-head-{barren_n}", keep))
+    cheap_local = eval_keep("cheap-first", prefix_until_hours(cheap, dur_b, b_budget_local))
+    cheap_kaggle = eval_keep("cheap-first", prefix_until_hours(cheap, dur_b, b_budget_kaggle))
+    exp_local = eval_keep("expensive-first", prefix_until_hours(exp_order, dur_b, b_budget_local))
+    exp_kaggle = eval_keep("expensive-first", prefix_until_hours(exp_order, dur_b, b_budget_kaggle))
+    # eval_keep already printed; those four may duplicate a grid row. Fine.
 
-    rec_local = pick_best_within_budget(rows, t16_h)
-    rec_kaggle = pick_best_within_budget(rows, KAGGLE_H - KAGGLE_STOP_MIN / 60.0)
-    rec_local_prefix = pick_best_within_budget(
-        [r for r in rows if r["kind"] == "expensive-first"], t16_h
-    )
-    rec_kaggle_prefix = pick_best_within_budget(
-        [r for r in rows if r["kind"] == "expensive-first"],
-        KAGGLE_H - KAGGLE_STOP_MIN / 60.0,
-    )
-    print("\n=== recommend (max mixed mean_q, A+B wall <= budget) ===", flush=True)
+    print("\n=== policy (generic: A done, B cheap-first until wall, mixed mean_q) ===", flush=True)
     for name, rec, bud in (
-        ("local_16x16 any", rec_local, t16_h),
-        ("kaggle_12h any", rec_kaggle, KAGGLE_H - KAGGLE_STOP_MIN / 60.0),
-        ("local_16x16 expensive-prefix", rec_local_prefix, t16_h),
-        ("kaggle_12h expensive-prefix", rec_kaggle_prefix, KAGGLE_H - KAGGLE_STOP_MIN / 60.0),
+        ("cheap-first @16x16 leftover", cheap_local, t16_h),
+        ("cheap-first @kaggle12 leftover", cheap_kaggle, KAGGLE_H - KAGGLE_STOP_MIN / 60.0),
+        ("expensive-first @16x16 leftover", exp_local, t16_h),
+        ("expensive-first @kaggle12 leftover", exp_kaggle, KAGGLE_H - KAGGLE_STOP_MIN / 60.0),
     ):
-        if not rec:
-            print(f"  {name} budget {bud:.2f}h: no row fits (A already {a_h:.2f}h)")
-            continue
         delta = rec["mixed_pct"] - pct(a_sc)
         print(
-            f"  {name} budget {bud:.2f}h -> kind={rec['kind']} nB={rec['n_b_tasks']}  "
-            f"B={rec['b_h']:.2f}h  total {rec['total_h']:.2f}h  mixed {rec['mixed_pct']:.2f} "
-            f"({delta:+.2f} vs A)  keepP {rec['keepP_pct']:.2f}  pair {rec['pair_pct']:.2f}",
+            f"  {name} cap {bud:.2f}h -> nB={rec['n_b_tasks']} B={rec['b_h']:.2f}h "
+            f"total {rec['total_h']:.2f}h mixed {rec['mixed_pct']:.2f} "
+            f"({delta:+.2f} vs A) keepP {rec['keepP_pct']:.2f}",
             flush=True,
         )
 
-    rec = rec_local or rec_kaggle
-    def strip_keys(r):
-        return None if not r else {k: r[k] for k in r if k != "keys"}
+    boot_cheap_a = bootstrap_delta_pct(a_pts_sel, cheap_local["mixed_pts"])
+    boot_cheap_full = bootstrap_delta_pct(full["mixed_pts"], cheap_local["mixed_pts"])
+    boot_exp_a = bootstrap_delta_pct(a_pts_sel, exp_local["mixed_pts"])
+    boot_score = bootstrap_delta_pct({t: 0.0 for t in cheap_local["mixed_pts"]}, cheap_local["mixed_pts"])
+    print("\n=== paired bootstrap on the same 120 public tasks (Kaggle percent) ===", flush=True)
+    print(
+        f"  cheap@16x16 mixed {cheap_local['mixed_pct']:.2f}  "
+        f"score CI90 [{boot_score['ci90_pct'][0]:.2f}, {boot_score['ci90_pct'][1]:.2f}]",
+        flush=True,
+    )
+    print(
+        f"  cheap@16x16 minus A: {boot_cheap_a['mean_pct']:+.2f}  "
+        f"CI90 [{boot_cheap_a['ci90_pct'][0]:+.2f}, {boot_cheap_a['ci90_pct'][1]:+.2f}]  "
+        f"P(<=A) {boot_cheap_a['p_lt_0']+boot_cheap_a['p_eq_0']:.3f}",
+        flush=True,
+    )
+    print(
+        f"  cheap@16x16 minus full mixed: {boot_cheap_full['mean_pct']:+.2f}  "
+        f"CI90 [{boot_cheap_full['ci90_pct'][0]:+.2f}, {boot_cheap_full['ci90_pct'][1]:+.2f}]",
+        flush=True,
+    )
+    print(
+        f"  exp-prefix@16x16 minus A: {boot_exp_a['mean_pct']:+.2f}  "
+        f"CI90 [{boot_exp_a['ci90_pct'][0]:+.2f}, {boot_exp_a['ci90_pct'][1]:+.2f}]",
+        flush=True,
+    )
+    print(
+        "  1 Kaggle point = 1.2/120 tasks. 29 vs 30 is ~1 task; 28 vs 33 is not the same kind of gap.",
+        flush=True,
+    )
+    print(
+        "  skip-N-expensive is public-eval overfit; not a hidden-set policy.",
+        flush=True,
+    )
+
+    def strip_row(r):
+        return None if not r else {k: v for k, v in r.items() if k not in ("keys", "mixed_pts")}
+
+    rec = cheap_local
+    rec_kaggle = cheap_kaggle
     doc = {
         "t16_h": t16_h,
         "a_h": a_h,
@@ -387,20 +434,25 @@ def main() -> int:
         "b_unique": b_unique,
         "b_unique_expensive_rank": {t: rank_work[t] + 1 for t in b_unique},
         "a_missing": a_missing,
-        "barren_expensive_n": barren_n,
-        "barren_expensive_h": skip_h,
         "b_budget_local_h": b_budget_local,
         "b_budget_kaggle_h": b_budget_kaggle,
-        "recommend_local": strip_keys(rec_local),
-        "recommend_kaggle": strip_keys(rec_kaggle),
-        "recommend_local_prefix": strip_keys(rec_local_prefix),
-        "recommend_kaggle_prefix": strip_keys(rec_kaggle_prefix),
-        "rows": [{k: v for k, v in r.items() if k != "keys"} for r in rows],
+        "policy": "A cheap-first to completion, leftover-B cheap-first until wall, mixed mean_quality",
+        "recommend_local": strip_row(cheap_local),
+        "recommend_kaggle": strip_row(cheap_kaggle),
+        "expensive_prefix_local": strip_row(exp_local),
+        "expensive_prefix_kaggle": strip_row(exp_kaggle),
+        "bootstrap": {
+            "cheap16_score_ci90": boot_score["ci90_pct"],
+            "cheap16_minus_A": boot_cheap_a,
+            "cheap16_minus_full": boot_cheap_full,
+            "exp16_minus_A": boot_exp_a,
+        },
+        "rows": [strip_row(r) for r in rows],
         "ranker": "mixed mean_quality",
-        "b_order": "expensive-first estimated_work; also skip barren expensive head",
+        "b_order": "cheap-first estimated_work (generic); expensive-first prefix for comparison only",
         "note": (
-            "Tomorrow stays single-pass 8x6. Day-after: A cheap-first to completion, "
-            "B only a slice of expensive tasks, mixed mean_quality (no full B)."
+            "Do not skip a fitted number of expensive tasks. Hidden eval is a different "
+            "120. Day-after: leftover-B --order cheap until wall, mixed mean_quality."
         ),
     }
     if args.out:

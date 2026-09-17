@@ -1,18 +1,15 @@
 #!/usr/bin/env python3
-"""Local / Kaggle-style leftover-B: A is done, B is expensive-first until wall.
+"""After pass A, leftover-B cheap-first until the 16x16 (or Kaggle 12h) wall.
 
-Does not push a kernel and does not submit. Default wall cap is the first
-16×16 full-cost pickle span. Pooling is mixed mean_quality (not keep-primary).
+Generic policy, no per-task key list: starter --order cheap + --end-time.
+Pooling is mixed mean_quality. Does not push a kernel and does not submit.
 
-  # dry-run (print remaining B hours / keys)
   python schedule_partial_b.py --dry-run
-
-  # actually run leftover B on GPU2 after pass A
+  python schedule_partial_b.py --dry-run --kaggle12
   python schedule_partial_b.py
 """
 from __future__ import annotations
 
-import json
 import os
 import subprocess
 import sys
@@ -26,14 +23,11 @@ SOL = os.getenv("NVARC_SOL", "/opt/data/kaggle/arc-agi_evaluation_solutions.json
 PYTHON = os.getenv("NVARC_PYTHON", sys.executable)
 
 A_NAME = os.getenv("NVARC_N8X6_A", "eval120_n8x6_a")
-B_NAME = os.getenv("NVARC_PARTIAL_B", "eval120_n8x6_b_exp")
+B_NAME = os.getenv("NVARC_PARTIAL_B", "eval120_n8x6_b_cheap")
 SUM = WORK / os.getenv("NVARC_PARTIAL_SUM", "eval120_n8x6_partial")
 PRIMARY = str(WORK / A_NAME / "outputs")
 B_OUT = str(WORK / B_NAME / "outputs")
 SUB = str(SUM / "submission.json")
-KEYS = SUM / "b_expensive_keys.json"
-SIM_KEYS = WORK / "eval120_n8x6_two" / "b_expensive_keys.json"
-SIM_KEYS_KAGGLE = WORK / "eval120_n8x6_two" / "b_expensive_keys_kaggle.json"
 T16_H = float(os.getenv("NVARC_T16_HOURS", "13.58"))
 KAGGLE_H = float(os.getenv("NVARC_KAGGLE_HOURS", "12.0"))
 
@@ -59,27 +53,16 @@ def main() -> int:
         cap = KAGGLE_H - 20.0 / 60.0
     a_h = pickle_span_h(PRIMARY)
     b_budget = max(0.15, cap - a_h)
-    log(f"A wall {a_h:.2f}h  cap {cap:.2f}h  leftover-B {b_budget:.2f}h  pool=mixed mean_quality")
-
-    keys_src = KEYS if KEYS.exists() else SIM_KEYS
-    if "--kaggle12" in sys.argv and SIM_KEYS_KAGGLE.exists():
-        keys_src = SIM_KEYS_KAGGLE
-    keys = []
-    if keys_src.exists():
-        keys = json.loads(keys_src.read_text())
-        log(f"B keys {len(keys)} from {keys_src}")
-    else:
-        log("no keys file; starter --order expensive will take the work-sorted prefix")
-
+    log(
+        f"A wall {a_h:.2f}h  cap {cap:.2f}h  leftover-B {b_budget:.2f}h  "
+        f"order=cheap  pool=mixed mean_quality"
+    )
     if dry:
         log("dry-run: not launching starter")
         return 0
 
     SUM.mkdir(parents=True, exist_ok=True)
     Path(B_OUT).mkdir(parents=True, exist_ok=True)
-    if keys:
-        KEYS.parent.mkdir(parents=True, exist_ok=True)
-        KEYS.write_text(json.dumps(keys) + "\n")
 
     env = os.environ.copy()
     env.update({
@@ -112,11 +95,9 @@ def main() -> int:
         "--data", DATA,
         "--out", B_OUT,
         "--end-time", str(end_time),
-        "--order", "file" if keys else "expensive",
+        "--order", "cheap",
         "--skip-done",
     ]
-    if keys:
-        cmd.extend(["--keys-file", str(KEYS)])
     log(" ".join(cmd))
     rc = subprocess.call(cmd, env=env)
     log(f"starter rc={rc}")

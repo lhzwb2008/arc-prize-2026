@@ -11,6 +11,8 @@ if HERE not in sys.path:
     sys.path.insert(0, HERE)
 
 from simulate_expensive_b import (  # noqa: E402
+    bootstrap_delta_pct,
+    cheap_order,
     estimated_work,
     expensive_order,
     hours_for_subset,
@@ -30,9 +32,16 @@ class WorkOrderTests(unittest.TestCase):
         }
         self.assertGreater(estimated_work(big), estimated_work(small))
 
-    def test_expensive_order_desc(self):
+    def test_cheap_order_asc(self):
         work = {"cheap": 1.0, "mid": 5.0, "hard": 9.0}
-        self.assertEqual(expensive_order(["cheap", "mid", "hard"], work), ["hard", "mid", "cheap"])
+        self.assertEqual(cheap_order(["cheap", "mid", "hard"], work), ["cheap", "mid", "hard"])
+
+    def test_bootstrap_delta_sign(self):
+        base = {f"t{i}": 0.0 for i in range(20)}
+        new = {f"t{i}": 1.0 if i < 2 else 0.0 for i in range(20)}
+        boot = bootstrap_delta_pct(base, new, iters=200, seed=0)
+        self.assertGreater(boot["mean_pct"], 0.0)
+        self.assertGreater(boot["p_gt_0"], 0.5)
 
     def test_prefix_until_hours_skips_tail(self):
         order = ["h", "m", "c"]
