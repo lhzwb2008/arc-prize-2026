@@ -3,9 +3,9 @@
 Same worker loop as the Kaggle version, but paths / GPU count / task list are
 arguments instead of hardcoded Kaggle locations.
 
-Live pooling (Kaggle v14): set NVARC_CHECKPOINT_PRIMARY / _EXTRAS / _SUB
-and optional NVARC_HARD_MERGE_TIME (epoch seconds). None sentinels are queued
-only after every worker has started.
+Live pooling (Kaggle v15): set NVARC_CHECKPOINT_PRIMARY / _EXTRAS / _SUB
+and optional NVARC_HARD_MERGE_TIME (epoch seconds). Default merge is
+keep-primary. None sentinels are queued only after every worker has started.
 """
 import argparse
 import json

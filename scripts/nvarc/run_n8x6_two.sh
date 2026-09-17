@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Native 8×6 TTT: pass A, then pass B with Kaggle v14 live/hard mean_quality pooling.
+# Native 8×6 TTT: pass A, then leftover-B expensive-first with keep-primary merge.
 set -euo pipefail
 HERE=$(cd "$(dirname "$0")" && pwd)
 WORK=${NVARC_WORK:-/opt/work/nvarc}
@@ -39,5 +39,5 @@ else
   log "pass A already done ($WORK/$A_NAME/done)"
 fi
 
-log "=== n8x6-B + v14 live/hard pool ==="
+log "=== n8x6-B expensive-first + v15 keep-primary pool ==="
 exec "$VENV/bin/python" -u "$HERE/schedule_local_v14.py"

@@ -1,8 +1,11 @@
 """Atomically write submission.json from pickle dirs.
 
-Pass-A is --outputs (keep-primary). Later passes are --outputs-extra.
-A hard kill cannot tear the JSON: we fsync a temp file, then os.replace.
+Pass-A is --outputs. Later passes are --outputs-extra.
+Default pool mode is keep-primary: mixed mean_quality over A+B, then force
+pass-A top-1 back into the two attempts. On the 3090 n8x6 pickles this
+beats pure mixed (+0.42) and pass-pair (+1.25). Pass-pair remains available.
 
+A hard kill cannot tear the JSON: we fsync a temp file, then os.replace.
 Does not overwrite an existing scored file with an all-[[0]] result.
 """
 from __future__ import annotations
@@ -12,25 +15,13 @@ import json
 import os
 from pathlib import Path
 
-import numpy as np
-
-from arc_decoder import ArcDecoder, score_kgmon, score_mean_quality
+from arc_decoder import (
+    ArcDecoder,
+    merge_keep_primary,
+    merge_pass_pair,
+    score_mean_quality,
+)
 from arc_loader import ArcDataset
-
-
-def merge_keep_primary(sel_a, sel_p):
-    """Pooled ranking, but pass-A top-1 is always one of the two attempts."""
-    selected = {}
-    n_forced = 0
-    for bk in set(sel_a) | set(sel_p):
-        a1 = (sel_a.get(bk) or [None])[0]
-        top = list(sel_p.get(bk) or [])[:2]
-        if a1 is not None and not any(np.array_equal(a1, g) for g in top):
-            top = (top[:1] + [a1]) if top else [a1]
-            n_forced += 1
-        selected[bk] = top
-    print(f"keep-primary: forced pass-A top-1 back on {n_forced} outputs", flush=True)
-    return selected
 
 
 def n_nonzero(submission) -> int:
@@ -55,28 +46,76 @@ def atomic_write_json(path: str | Path, obj) -> None:
     os.replace(tmp, path)
 
 
-def build_submission(data_path: str, primary: str, extras: list[str], keep_primary: bool):
+def resolve_pool_mode(keep_primary: bool, pool_mode: str | None) -> str:
+    if keep_primary:
+        return "keep-primary"
+    mode = (pool_mode or os.getenv("NVARC_POOL_MODE") or "keep-primary").strip().lower().replace("_", "-")
+    if mode in ("keep", "keep-primary"):
+        return "keep-primary"
+    if mode in ("mixed", "pool", "mean-quality", "mean_quality"):
+        return "mixed"
+    return "pair"
+
+
+def rank_dir(dataset, path, run_name=""):
+    dec = ArcDecoder(dataset, n_guesses=2)
+    if path and os.path.isdir(path):
+        dec.load_decoded_results(path, run_name=run_name)
+    n = sum(len(v) for v in dec.decoded_results.values())
+    sel = dec.run_selection_algo(score_mean_quality) if dec.decoded_results else {}
+    return dec, sel, n
+
+
+def _merge_decoded(a: dict, b: dict) -> dict:
+    out = {}
+    for bk in set(a) | set(b):
+        out[bk] = {**(a.get(bk) or {}), **(b.get(bk) or {})}
+    return out
+
+
+def build_submission(
+    data_path: str,
+    primary: str,
+    extras: list[str],
+    keep_primary: bool = False,
+    pool_mode: str | None = None,
+):
     data = ArcDataset.from_file(data_path)
-    decoder = ArcDecoder(data.split_multi_replies(), n_guesses=2)
+    dm = data.split_multi_replies()
     if not os.path.isdir(primary):
         raise SystemExit(f"primary pickle dir missing: {primary}")
-    decoder.load_decoded_results(primary)
-    n_primary = sum(len(v) for v in decoder.decoded_results.values())
-    sel_primary = decoder.run_selection_algo(score_mean_quality) if keep_primary else None
+    mode = resolve_pool_mode(keep_primary, pool_mode)
+    dec_a, sel_a, n_primary = rank_dir(dm, primary)
+
+    extra_paths = []
+    for extra in extras or []:
+        if extra and os.path.isdir(extra) and any(Path(extra).iterdir()):
+            extra_paths.append(extra)
+
+    dec_b = ArcDecoder(dm, n_guesses=2)
     n_extra = 0
-    for i, extra in enumerate(extras, 1):
-        if not extra or not os.path.isdir(extra):
-            continue
-        if not any(Path(extra).iterdir()):
-            continue
-        before = sum(len(v) for v in decoder.decoded_results.values())
-        decoder.load_decoded_results(extra, run_name=f".p{i}")
-        n_extra += sum(len(v) for v in decoder.decoded_results.values()) - before
-    selected = decoder.run_selection_algo(score_mean_quality) if decoder.decoded_results else None
-    if sel_primary is not None and selected is not None:
-        selected = merge_keep_primary(sel_primary, selected)
+    for i, extra in enumerate(extra_paths, 1):
+        before = sum(len(v) for v in dec_b.decoded_results.values())
+        dec_b.load_decoded_results(extra, run_name=f".p{i}")
+        n_extra += sum(len(v) for v in dec_b.decoded_results.values()) - before
+    sel_b = dec_b.run_selection_algo(score_mean_quality) if dec_b.decoded_results else {}
+
+    selected = None
+    if mode == "pair":
+        if sel_a or sel_b:
+            selected = merge_pass_pair(sel_a, sel_b)
+    else:
+        mixed = ArcDecoder(dm, n_guesses=2)
+        mixed.decoded_results = _merge_decoded(dec_a.decoded_results, dec_b.decoded_results)
+        sel_p = mixed.run_selection_algo(score_mean_quality) if mixed.decoded_results else None
+        if mode == "keep-primary" and sel_p is not None:
+            selected = merge_keep_primary(sel_a, sel_p)
+        else:
+            selected = sel_p
+
     submission = data.get_submission(selected)
-    n_decoded = len(decoder.decoded_results)
+    n_decoded = len(set(dec_a.decoded_results) | set(dec_b.decoded_results))
+    print(f"pool_mode={mode}", flush=True)
     return submission, n_decoded, n_primary, n_extra
 
 
@@ -100,10 +139,12 @@ def maybe_write(submission, dest: str) -> bool:
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--data", default="", help="challenges json; inferred from gate.json if omitted")
-    ap.add_argument("--outputs", required=True, help="pass-A pickle dir (keep-primary source)")
+    ap.add_argument("--outputs", required=True, help="pass-A pickle dir")
     ap.add_argument("--outputs-extra", action="append", default=[], help="later-pass pickle dirs")
     ap.add_argument("--keep-primary", action="store_true",
-                    help="force pass-A top-1 to remain among the two attempts")
+                    help="legacy: mixed mean_quality then force pass-A top-1")
+    ap.add_argument("--pool-mode", default="",
+                    help="keep-primary (default), mixed, or pair. pair = A_top1+B_top1")
     ap.add_argument("--submission", default="/kaggle/working/submission.json")
     args = ap.parse_args()
 
@@ -122,12 +163,14 @@ def main():
         except Exception as e:
             raise SystemExit(f"need --data ({e})")
 
+    mode = resolve_pool_mode(args.keep_primary, args.pool_mode or None)
     submission, n_decoded, n_primary, n_extra = build_submission(
-        data_path, args.outputs, args.outputs_extra, args.keep_primary,
+        data_path, args.outputs, args.outputs_extra,
+        keep_primary=args.keep_primary, pool_mode=mode,
     )
     print(
         f"checkpoint decoded={n_decoded} samples_a={n_primary} samples_extra={n_extra} "
-        f"keep_primary={args.keep_primary}",
+        f"pool_mode={mode} keep_primary={args.keep_primary}",
         flush=True,
     )
     if n_decoded == 0:
@@ -136,7 +179,7 @@ def main():
     maybe_write(submission, args.submission)
 
 
-def run_live(primary, extras, dest, data_path="", keep_primary=False):
+def run_live(primary, extras, dest, data_path="", keep_primary=False, pool_mode=None):
     """In-process merge. Same work as CLI, without a transformers relaunch."""
     if not data_path:
         gp = Path("/kaggle/working/gate.json")
@@ -147,12 +190,13 @@ def run_live(primary, extras, dest, data_path="", keep_primary=False):
     if not data_path:
         raise RuntimeError("need data_path")
     extras = [p for p in (extras or []) if p]
+    mode = resolve_pool_mode(keep_primary, pool_mode)
     submission, n_decoded, n_primary, n_extra = build_submission(
-        data_path, primary, extras, keep_primary,
+        data_path, primary, extras, keep_primary, pool_mode=mode,
     )
     print(
         f"checkpoint decoded={n_decoded} samples_a={n_primary} samples_extra={n_extra} "
-        f"keep_primary={keep_primary}",
+        f"pool_mode={mode} keep_primary={keep_primary}",
         flush=True,
     )
     if n_decoded == 0:
