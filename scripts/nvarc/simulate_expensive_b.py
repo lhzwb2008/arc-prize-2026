@@ -276,6 +276,36 @@ def main() -> int:
         flush=True,
     )
 
+    def eval_keep(kind, keep):
+        decoded_b = restrict_decoded(dec_b.decoded_results, set(keep))
+        sc = score_pool(replies, dec_a.decoded_results, decoded_b, sel_a)
+        b_h = hours_for_subset(keep, dur_b)
+        work_all = sum(work.values()) or 1.0
+        n_b_unique = sum(1 for t in b_unique if t in keep)
+        n_miss = sum(1 for t in a_missing if t in keep)
+        row = {
+            **sc,
+            "kind": kind,
+            "n_b_tasks": len(keep),
+            "n_b_decoded": sc["n_b_tasks"],
+            "b_h": b_h,
+            "a_h": a_h,
+            "total_h": a_h + b_h,
+            "work_frac": sum(work[t] for t in keep) / work_all,
+            "b_unique_in": n_b_unique,
+            "a_missing_in": n_miss,
+            "within_16x16": a_h + b_h <= t16_h + 1e-6,
+            "within_kaggle12": a_h + b_h <= (KAGGLE_H - KAGGLE_STOP_MIN / 60.0) + 1e-6,
+            "keys": keep,
+        }
+        flag = ""
+        if row["within_16x16"]:
+            flag += " [<=16x16]"
+        if row["within_kaggle12"]:
+            flag += " [<=kaggle12]"
+        print(fmt_row(row) + f"  B-wins {n_b_unique}/{len(b_unique)}  A-miss {n_miss}/{len(a_missing)}{flag}", flush=True)
+        return row
+
     hour_grid = [0.0, 1.0, 2.0, 3.0, 3.5, 4.0, b_budget_kaggle, 5.0, b_budget_local, 6.0, 7.0, b_span]
     hour_grid = sorted({round(h, 3) for h in hour_grid if h >= 0})
 
@@ -288,57 +318,63 @@ def main() -> int:
         if key in seen:
             continue
         seen.add(key)
-        decoded_b = restrict_decoded(dec_b.decoded_results, set(keep))
-        sc = score_pool(replies, dec_a.decoded_results, decoded_b, sel_a)
-        b_h = hours_for_subset(keep, dur_b)
-        work_sum = sum(work[t] for t in keep)
-        work_all = sum(work.values()) or 1.0
-        n_b_unique = sum(1 for t in b_unique if t in keep)
-        n_miss = sum(1 for t in a_missing if t in keep)
-        row = {
-            **sc,
-            "kind": "expensive-first",
-            "n_b_tasks": len(keep),
-            "n_b_decoded": sc["n_b_tasks"],
-            "b_h": b_h,
-            "a_h": a_h,
-            "total_h": a_h + b_h,
-            "work_frac": work_sum / work_all,
-            "b_unique_in": n_b_unique,
-            "a_missing_in": n_miss,
-            "within_16x16": a_h + b_h <= t16_h + 1e-6,
-            "within_kaggle12": a_h + b_h <= (KAGGLE_H - KAGGLE_STOP_MIN / 60.0) + 1e-6,
-            "keys": keep,
-            **sc,
-            "mixed_pct": sc["mixed_pct"],
-            "keepP_pct": sc["keepP_pct"],
-            "pair_pct": sc["pair_pct"],
-            "oracle_pct": sc["oracle_pct"],
-        }
-        rows.append(row)
-        flag = ""
-        if row["within_16x16"]:
-            flag += " [<=16x16]"
-        if row["within_kaggle12"]:
-            flag += " [<=kaggle12]"
-        print(fmt_row(row) + f"  B-wins {n_b_unique}/{len(b_unique)}  A-miss {n_miss}/{len(a_missing)}{flag}", flush=True)
+        rows.append(eval_keep("expensive-first", keep))
+
+    barren_n = 0
+    for r in rows:
+        if r["kind"] != "expensive-first":
+            continue
+        if r["mixed_pct"] <= pct(a_sc) + 0.05:
+            barren_n = r["n_b_tasks"]
+        else:
+            break
+    skip = exp_order[:barren_n]
+    tail = exp_order[barren_n:]
+    skip_h = hours_for_subset(skip, dur_b)
+    print(
+        f"\n=== skip barren expensive head n={barren_n} ({skip_h:.2f}h, mixed still A) "
+        f"then leftover-B on the rest ===",
+        flush=True,
+    )
+    seen_tail = set()
+    for hours in hour_grid:
+        keep = prefix_until_hours(tail, dur_b, hours)
+        key = tuple(keep)
+        if key in seen_tail:
+            continue
+        seen_tail.add(key)
+        rows.append(eval_keep(f"skip-head-{barren_n}", keep))
 
     rec_local = pick_best_within_budget(rows, t16_h)
     rec_kaggle = pick_best_within_budget(rows, KAGGLE_H - KAGGLE_STOP_MIN / 60.0)
+    rec_local_prefix = pick_best_within_budget(
+        [r for r in rows if r["kind"] == "expensive-first"], t16_h
+    )
+    rec_kaggle_prefix = pick_best_within_budget(
+        [r for r in rows if r["kind"] == "expensive-first"],
+        KAGGLE_H - KAGGLE_STOP_MIN / 60.0,
+    )
     print("\n=== recommend (max mixed mean_q, A+B wall <= budget) ===", flush=True)
-    for name, rec, bud in (("local_16x16", rec_local, t16_h), ("kaggle_12h", rec_kaggle, KAGGLE_H - KAGGLE_STOP_MIN / 60.0)):
+    for name, rec, bud in (
+        ("local_16x16 any", rec_local, t16_h),
+        ("kaggle_12h any", rec_kaggle, KAGGLE_H - KAGGLE_STOP_MIN / 60.0),
+        ("local_16x16 expensive-prefix", rec_local_prefix, t16_h),
+        ("kaggle_12h expensive-prefix", rec_kaggle_prefix, KAGGLE_H - KAGGLE_STOP_MIN / 60.0),
+    ):
         if not rec:
             print(f"  {name} budget {bud:.2f}h: no row fits (A already {a_h:.2f}h)")
             continue
         delta = rec["mixed_pct"] - pct(a_sc)
         print(
-            f"  {name} budget {bud:.2f}h -> nB={rec['n_b_tasks']}  B={rec['b_h']:.2f}h  "
-            f"total {rec['total_h']:.2f}h  mixed {rec['mixed_pct']:.2f} "
+            f"  {name} budget {bud:.2f}h -> kind={rec['kind']} nB={rec['n_b_tasks']}  "
+            f"B={rec['b_h']:.2f}h  total {rec['total_h']:.2f}h  mixed {rec['mixed_pct']:.2f} "
             f"({delta:+.2f} vs A)  keepP {rec['keepP_pct']:.2f}  pair {rec['pair_pct']:.2f}",
             flush=True,
         )
 
     rec = rec_local or rec_kaggle
+    def strip_keys(r):
+        return None if not r else {k: r[k] for k in r if k != "keys"}
     doc = {
         "t16_h": t16_h,
         "a_h": a_h,
@@ -349,17 +385,22 @@ def main() -> int:
         "full_keepP_pct": full["keepP_pct"],
         "mtime_vs_expensive_corr": corr,
         "b_unique": b_unique,
+        "b_unique_expensive_rank": {t: rank_work[t] + 1 for t in b_unique},
         "a_missing": a_missing,
+        "barren_expensive_n": barren_n,
+        "barren_expensive_h": skip_h,
         "b_budget_local_h": b_budget_local,
         "b_budget_kaggle_h": b_budget_kaggle,
-        "recommend_local": None if not rec_local else {k: rec_local[k] for k in rec_local if k != "keys"},
-        "recommend_kaggle": None if not rec_kaggle else {k: rec_kaggle[k] for k in rec_kaggle if k != "keys"},
+        "recommend_local": strip_keys(rec_local),
+        "recommend_kaggle": strip_keys(rec_kaggle),
+        "recommend_local_prefix": strip_keys(rec_local_prefix),
+        "recommend_kaggle_prefix": strip_keys(rec_kaggle_prefix),
         "rows": [{k: v for k, v in r.items() if k != "keys"} for r in rows],
         "ranker": "mixed mean_quality",
-        "b_order": "expensive-first estimated_work",
+        "b_order": "expensive-first estimated_work; also skip barren expensive head",
         "note": (
             "Tomorrow stays single-pass 8x6. Day-after: A cheap-first to completion, "
-            "B expensive-first until wall cap, mixed mean_quality (no full B, no keep-primary)."
+            "B only a slice of expensive tasks, mixed mean_quality (no full B)."
         ),
     }
     if args.out:
@@ -370,7 +411,7 @@ def main() -> int:
         Path(args.keys_out).parent.mkdir(parents=True, exist_ok=True)
         keys = rec["keys"]
         Path(args.keys_out).write_text(json.dumps(keys, indent=2) + "\n")
-        print(f"wrote {len(keys)} B keys -> {args.keys_out}", flush=True)
+        print(f"wrote {len(keys)} B keys ({rec['kind']}) -> {args.keys_out}", flush=True)
     return 0
 
 

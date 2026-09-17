@@ -109,9 +109,11 @@ def main() -> int:
         "--data", DATA,
         "--out", B_OUT,
         "--end-time", str(end_time),
-        "--order", "expensive",
+        "--order", "file" if keys else "expensive",
         "--skip-done",
     ]
+    if keys:
+        cmd.extend(["--keys-file", str(KEYS)])
     log(" ".join(cmd))
     rc = subprocess.call(cmd, env=env)
     log(f"starter rc={rc}")
