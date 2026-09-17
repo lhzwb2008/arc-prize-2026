@@ -15,12 +15,13 @@ import numpy as np
 from arc_decoder import (
     ArcDecoder,
     hashable,
+    merge_keep_primary,
+    merge_pass_pair,
     score_full_probmul_3,
     score_kgmon,
     score_sum,
 )
 from arc_loader import ArcDataset
-from finalize import merge_keep_primary
 
 
 def _mean_aug(g):
@@ -156,21 +157,7 @@ def oracle_score(replies, decoded):
 
 def pass_pair_top1(sel_a, sel_b):
     """Attempt 1 = A top-1, attempt 2 = B top-1 (or A's #2 if same)."""
-    selected = {}
-    for bk in set(sel_a) | set(sel_b):
-        a = list(sel_a.get(bk) or [])
-        b = list(sel_b.get(bk) or [])
-        out = []
-        if a:
-            out.append(a[0])
-        for g in b:
-            if not out or not np.array_equal(g, out[0]):
-                out.append(g)
-                break
-        if len(out) < 2 and len(a) > 1:
-            out.append(a[1])
-        selected[bk] = out[:2]
-    return selected
+    return merge_pass_pair(sel_a, sel_b)
 
 
 def main():

@@ -36,12 +36,75 @@ def score_kgmon(guesses):
 
 
 def getter_mean_quality(guesses):
-    # Average sample quality; no vote-count term. Best mean across all local pools.
+    # Average sample quality; no vote-count term.
+    # Only safe inside one TTT adapter. Mixing two LoRA runs' beam scores
+    # lets a singleton high-q wrong grid beat a well-supported gold.
     return float(np.mean([-g["beam_score"] - np.mean(g["score_aug"]) for g in guesses]))
 
 
 def score_mean_quality(guesses):
     return score_sum(guesses, getter_mean_quality)
+
+
+def merge_keep_primary(sel_a, sel_p):
+    """Pooled ranking, but pass-A top-1 is always one of the two attempts."""
+    selected = {}
+    n_forced = 0
+    for bk in set(sel_a) | set(sel_p):
+        a1 = (sel_a.get(bk) or [None])[0]
+        top = list(sel_p.get(bk) or [])[:2]
+        if a1 is not None and not any(np.array_equal(a1, g) for g in top):
+            top = (top[:1] + [a1]) if top else [a1]
+            n_forced += 1
+        selected[bk] = top
+    print(f"keep-primary: forced pass-A top-1 back on {n_forced} outputs", flush=True)
+    return selected
+
+
+def merge_pass_pair(sel_a, sel_b):
+    """Rank each pass alone, then attempt_1=A top-1, attempt_2=B top-1.
+
+    Tasks with no B pickle keep A's top-2 (leftover-B floor). B top-1 that
+    matches A top-1 falls through to A's #2. Never mixes uncalibrated
+    beam scores from two adapters into one mean_quality list.
+    """
+    selected = {}
+    n_a_only = n_pair = n_same = n_b_only = 0
+    for bk in set(sel_a) | set(sel_b):
+        a = list(sel_a.get(bk) or [])
+        b = list(sel_b.get(bk) or [])
+        out = []
+        used_b = False
+        if a:
+            out.append(a[0])
+        if b:
+            if not out:
+                out.append(b[0])
+                used_b = True
+            elif not np.array_equal(b[0], out[0]):
+                out.append(b[0])
+                used_b = True
+            else:
+                n_same += 1
+        if len(out) < 2:
+            rest = (a[1:] if a else []) + (b[1:] if b else [])
+            for g in rest:
+                if not any(np.array_equal(g, x) for x in out):
+                    out.append(g)
+                    break
+        selected[bk] = out[:2]
+        if not b:
+            n_a_only += 1
+        elif not a:
+            n_b_only += 1
+        elif used_b:
+            n_pair += 1
+    print(
+        f"pass-pair: {len(selected)} outputs  A-only={n_a_only} "
+        f"A1+B1={n_pair} B1==A1={n_same} B-only={n_b_only}",
+        flush=True,
+    )
+    return selected
 
 
 selection_algorithms = [
