@@ -81,6 +81,24 @@ def leftover_hours(cap_h: float, a_h: float) -> float:
     return max(0.0, float(cap_h) - float(a_h))
 
 
+def timing_total_hours(path: str | Path) -> float | None:
+    p = Path(path)
+    if not p.is_file():
+        return None
+    try:
+        d = json.loads(p.read_text())
+    except (OSError, json.JSONDecodeError):
+        return None
+    if not isinstance(d, dict):
+        return None
+    if d.get("total_sec") is not None:
+        return float(d["total_sec"]) / 3600.0
+    a, b = d.get("pass_a_sec"), d.get("pass_b_sec")
+    if a is not None and b is not None:
+        return (float(a) + float(b)) / 3600.0
+    return None
+
+
 def task_done_mtime(out_dir: str | Path) -> dict[str, float]:
     done: dict[str, float] = {}
     p = Path(out_dir)
@@ -240,6 +258,7 @@ def main() -> int:
     ap.add_argument("--n6x6-b", default="/opt/work/nvarc/eval120_n6x6_v11_b/outputs")
     ap.add_argument("--n6x6-old-a", default="/opt/work/nvarc/eval120_n6x6_a/outputs")
     ap.add_argument("--n6x6-old-b", default="/opt/work/nvarc/eval120_n6x6_b/outputs")
+    ap.add_argument("--n6x6-timing", default="/opt/work/nvarc/eval120_n6x6_pool/timing.json")
     ap.add_argument("--t16-hours", type=float, default=0.0,
                     help="override 16x16 wall hours (0 = pickle span)")
     ap.add_argument("--a-hours", type=float, default=0.0,
@@ -264,11 +283,14 @@ def main() -> int:
     b_span = pickle_span_h(args.outputs_b) or 7.03
     n6_v11 = two_pass_hours(args.n6x6_a, args.n6x6_b)
     n6_old = two_pass_hours(args.n6x6_old_a, args.n6x6_old_b)
+    n6_timing = timing_total_hours(args.n6x6_timing)
     walls = {"16x16": t16_h}
     if n6_v11:
         walls["n6x6_v11_A+B"] = n6_v11
     if n6_old:
         walls["n6x6_old_A+B"] = n6_old
+    if n6_timing:
+        walls["n6x6_old_timing"] = n6_timing
     cap_name, cap_h = pick_kaggle_equiv_wall(walls)
     print("=== local walls (1x3090) vs Kaggle 12h ===", flush=True)
     for k, v in walls.items():

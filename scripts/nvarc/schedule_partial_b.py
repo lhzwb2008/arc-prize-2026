@@ -14,6 +14,7 @@ Pooling is mixed mean_quality. Does not push a kernel and does not submit.
 """
 from __future__ import annotations
 
+import json
 import os
 import subprocess
 import sys
@@ -39,6 +40,7 @@ N6A = str(WORK / os.getenv("NVARC_N6X6_A", "eval120_n6x6_v11_a") / "outputs")
 N6B = str(WORK / os.getenv("NVARC_N6X6_B", "eval120_n6x6_v11_b") / "outputs")
 N6OLD_A = str(WORK / os.getenv("NVARC_N6X6_OLD_A", "eval120_n6x6_a") / "outputs")
 N6OLD_B = str(WORK / os.getenv("NVARC_N6X6_OLD_B", "eval120_n6x6_b") / "outputs")
+N6_TIMING = str(WORK / os.getenv("NVARC_N6X6_TIMING", "eval120_n6x6_pool/timing.json"))
 
 
 def log(msg):
@@ -73,6 +75,17 @@ def kaggle_equiv_cap() -> tuple[float, str, dict[str, float]]:
     n6old = two_pass_hours(N6OLD_A, N6OLD_B)
     if n6old > 0:
         walls["n6x6_old_A+B"] = n6old
+    n6t = 0.0
+    tp = Path(N6_TIMING)
+    if tp.is_file():
+        try:
+            d = json.loads(tp.read_text())
+            if isinstance(d, dict) and d.get("total_sec") is not None:
+                n6t = float(d["total_sec"]) / 3600.0
+        except (OSError, json.JSONDecodeError, TypeError, ValueError):
+            n6t = 0.0
+    if n6t > 0:
+        walls["n6x6_old_timing"] = n6t
     cap_name = max(walls, key=walls.get)
     cap_h = walls[cap_name]
     if forced:

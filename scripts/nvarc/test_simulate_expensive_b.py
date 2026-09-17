@@ -19,6 +19,7 @@ from simulate_expensive_b import (  # noqa: E402
     leftover_hours,
     pick_best_within_budget,
     pick_kaggle_equiv_wall,
+    timing_total_hours,
     prefix_until_hours,
     restrict_decoded,
     sequential_durations,
@@ -98,6 +99,16 @@ class WorkOrderTests(unittest.TestCase):
     def test_leftover_hours(self):
         self.assertAlmostEqual(leftover_hours(13.579, 8.042), 5.537, places=3)
         self.assertEqual(leftover_hours(12.0, 13.0), 0.0)
+
+    def test_timing_total_hours(self):
+        import json
+        import tempfile
+        from pathlib import Path
+        with tempfile.TemporaryDirectory() as d:
+            p = Path(d) / "timing.json"
+            p.write_text(json.dumps({"total_sec": 46267, "pass_a_sec": 23245, "pass_b_sec": 23022}))
+            self.assertAlmostEqual(timing_total_hours(p), 46267 / 3600.0)
+            self.assertIsNone(timing_total_hours(Path(d) / "missing.json"))
 
 
 if __name__ == "__main__":
