@@ -409,9 +409,12 @@ def main() -> int:
         print("wrote", args.out, flush=True)
     if rec and args.keys_out:
         Path(args.keys_out).parent.mkdir(parents=True, exist_ok=True)
-        keys = rec["keys"]
-        Path(args.keys_out).write_text(json.dumps(keys, indent=2) + "\n")
-        print(f"wrote {len(keys)} B keys ({rec['kind']}) -> {args.keys_out}", flush=True)
+        Path(args.keys_out).write_text(json.dumps(rec["keys"], indent=2) + "\n")
+        print(f"wrote {len(rec['keys'])} B keys ({rec['kind']}) -> {args.keys_out}", flush=True)
+    kg_path = Path(str(args.keys_out).replace(".json", "_kaggle.json")) if args.keys_out else None
+    if rec_kaggle and kg_path:
+        kg_path.write_text(json.dumps(rec_kaggle["keys"], indent=2) + "\n")
+        print(f"wrote {len(rec_kaggle['keys'])} Kaggle B keys ({rec_kaggle['kind']}) -> {kg_path}", flush=True)
     return 0
 
 

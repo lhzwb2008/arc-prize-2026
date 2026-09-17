@@ -33,6 +33,7 @@ B_OUT = str(WORK / B_NAME / "outputs")
 SUB = str(SUM / "submission.json")
 KEYS = SUM / "b_expensive_keys.json"
 SIM_KEYS = WORK / "eval120_n8x6_two" / "b_expensive_keys.json"
+SIM_KEYS_KAGGLE = WORK / "eval120_n8x6_two" / "b_expensive_keys_kaggle.json"
 T16_H = float(os.getenv("NVARC_T16_HOURS", "13.58"))
 KAGGLE_H = float(os.getenv("NVARC_KAGGLE_HOURS", "12.0"))
 
@@ -61,6 +62,8 @@ def main() -> int:
     log(f"A wall {a_h:.2f}h  cap {cap:.2f}h  leftover-B {b_budget:.2f}h  pool=mixed mean_quality")
 
     keys_src = KEYS if KEYS.exists() else SIM_KEYS
+    if "--kaggle12" in sys.argv and SIM_KEYS_KAGGLE.exists():
+        keys_src = SIM_KEYS_KAGGLE
     keys = []
     if keys_src.exists():
         keys = json.loads(keys_src.read_text())
