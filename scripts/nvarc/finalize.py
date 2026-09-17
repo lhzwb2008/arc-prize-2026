@@ -33,7 +33,7 @@ def main():
     ap.add_argument("--keep-primary", action="store_true",
                     help="legacy: mixed mean_quality then force --outputs top-1")
     ap.add_argument("--pool-mode", default="",
-                    help="pair (default), mixed, or keep-primary")
+                    help="keep-primary (default), mixed, or pair")
     ap.add_argument("--submission", required=True)
     ap.add_argument("--report", default="", help="optional json with per-task results")
     ap.add_argument("--keys", default="", help="comma list of task ids (default: all in --data)")
@@ -63,7 +63,7 @@ def main():
         for bk in set(decoder_a.decoded_results) | set(decoder_b.decoded_results)
     }
 
-    mode = "keep-primary" if args.keep_primary else (args.pool_mode or os.getenv("NVARC_POOL_MODE") or "pair")
+    mode = "keep-primary" if args.keep_primary else (args.pool_mode or os.getenv("NVARC_POOL_MODE") or "keep-primary")
     mode = mode.strip().lower().replace("_", "-")
     if mode in ("keep", "keep-primary"):
         selected = merge_keep_primary(sel_a, decoder.run_selection_algo(score_mean_quality))

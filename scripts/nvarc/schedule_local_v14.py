@@ -1,8 +1,8 @@
 """Local replay of the Kaggle v15 scheduler (after pass A).
 
 Catchup on A leftovers, then leftover-B **expensive-first** so the remaining
-wall hits hard tasks. Merge is pass-pair (A_top1 + B_top1), not mixed
-mean_quality. Live rewrite every 90s + hard write at T0+12h-5min.
+wall hits hard tasks. Merge is keep-primary (mixed mean_quality, then force
+A top-1). Live rewrite every 90s + hard write at T0+12h-5min.
 """
 from __future__ import annotations
 
@@ -57,7 +57,7 @@ COMMON = {
     "NVARC_CHECKPOINT_EVERY": "90",
     "NVARC_CHECKPOINT_SUB": SUB,
     "NVARC_HARD_MERGE_TIME": str(hard_merge_time),
-    "NVARC_POOL_MODE": "pair",
+    "NVARC_POOL_MODE": "keep-primary",
     "NVARC_DATA": DATA,
     "NVARC_QUEUED_KEYS": QUEUED,
 }
@@ -188,7 +188,7 @@ def main():
     SUM.mkdir(parents=True, exist_ok=True)
     (SUM / "t0.epoch").write_text(str(T0) + "\n")
     log(
-        f"RECIPE v15 local n_train=8 geos=6 ranker=pass-pair finish_all={finish_all} "
+        f"RECIPE v15 local n_train=8 geos=6 ranker=keep-primary finish_all={finish_all} "
         f"T0={time.strftime('%F %T', time.localtime(T0))} "
         f"hard_merge_in={(hard_merge_time-time.time())/60:.1f}min "
         f"workers_stop_in={(global_end_time-time.time())/60:.1f}min"
@@ -239,14 +239,14 @@ def main():
     print("--- native 8x6 A+B timed pool (v14 local) ---", flush=True)
     row("pass A seed42", a_rep.get("score"))
     row("pass B seed137", b_rep.get("score"))
-    row("pool pass-pair", pool_rep.get("score"))
+    row("pool keep-primary", pool_rep.get("score"))
     print(f"B wall {(t_b1 - t_b0)/3600:.2f}h  remaining={remaining()/60:.1f} min", flush=True)
 
     (SUM / "timing.json").write_text(json.dumps({
         "recipe": {
             "n_train_aug": 8, "n_eval_geos": 6, "n_eval_aug": 1,
             "lr": 5e-5, "epochs": 1, "lora_r": 256,
-            "pooled": True, "ranker": "pass-pair", "keep_primary": False,
+            "pooled": True, "ranker": "keep-primary", "keep_primary": True,
             "live_every_s": 90, "hard_merge_time": hard_merge_time,
             "finish_all": finish_all,
         },

@@ -5,8 +5,7 @@ arguments instead of hardcoded Kaggle locations.
 
 Live pooling (Kaggle v15): set NVARC_CHECKPOINT_PRIMARY / _EXTRAS / _SUB
 and optional NVARC_HARD_MERGE_TIME (epoch seconds). Default merge is
-pass-pair (A_top1+B_top1). None sentinels are queued only after every
-worker has started.
+keep-primary. None sentinels are queued only after every worker has started.
 """
 import argparse
 import json

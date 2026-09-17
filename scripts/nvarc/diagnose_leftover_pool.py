@@ -87,7 +87,9 @@ def main() -> int:
     ap.add_argument("--outputs", required=True)
     ap.add_argument("--outputs-b", required=True)
     ap.add_argument("--b-frac", type=float, default=0.35,
-                    help="cheap-first fraction of B tasks to keep (leftover-B)")
+                    help="fraction of B tasks to keep (leftover-B)")
+    ap.add_argument("--b-order", choices=["cheap", "expensive"], default="cheap",
+                    help="which end of the work-sorted list leftover B keeps")
     ap.add_argument("--out", default="")
     args = ap.parse_args()
 
@@ -121,8 +123,13 @@ def main() -> int:
 
     tasks = sorted(raw, key=lambda k: estimated_work(raw[k]))
     n_keep = max(1, int(round(len(tasks) * args.b_frac)))
-    cheap = set(tasks[:n_keep])
-    decoded_b_left = restrict_b(dec_b.decoded_results, cheap)
+    if args.b_order == "expensive":
+        keep = set(tasks[-n_keep:])
+        label = "expensive-first"
+    else:
+        keep = set(tasks[:n_keep])
+        label = "cheap-first"
+    decoded_b_left = restrict_b(dec_b.decoded_results, keep)
     sel_b_left = ArcDecoder(dm, n_guesses=2)
     sel_b_left.decoded_results = decoded_b_left
     sel_b2 = sel_b_left.run_selection_algo(score_mean_quality) if decoded_b_left else {}
@@ -132,7 +139,7 @@ def main() -> int:
     sel_p2 = mix_left.run_selection_algo(score_mean_quality)
 
     ora2, in_pool2, n_out2 = oracle_score(replies, pooled_left)
-    print(f"\n=== leftover-B cheap-first {n_keep}/{len(tasks)} tasks ===", flush=True)
+    print(f"\n=== leftover-B {label} {n_keep}/{len(tasks)} tasks ===", flush=True)
     print(f"leftover oracle {pct(ora2):.2f}  gold_in_pool {in_pool2}/{n_out2}", flush=True)
     left = {
         "A": report("A-only", replies, sel_a),
@@ -151,6 +158,7 @@ def main() -> int:
         "full": {k: {"score": v, "pct": pct(v)} for k, v in scores.items()},
         "leftover": {k: {"score": v, "pct": pct(v)} for k, v in left.items()},
         "b_frac": args.b_frac,
+        "b_order": args.b_order,
         "n_b_kept": n_keep,
         "oracle_full_pct": pct(ora),
         "oracle_leftover_pct": pct(ora2),

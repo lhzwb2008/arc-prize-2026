@@ -1,8 +1,9 @@
 """Atomically write submission.json from pickle dirs.
 
 Pass-A is --outputs. Later passes are --outputs-extra.
-Default pool mode is pass-pair: rank each pass with mean_quality, then
-attempt_1 = A top-1, attempt_2 = B top-1 (A top-2 if B is missing/same).
+Default pool mode is keep-primary: mixed mean_quality over A+B, then force
+pass-A top-1 back into the two attempts. On the 3090 n8x6 pickles this
+beats pure mixed (+0.42) and pass-pair (+1.25). Pass-pair remains available.
 
 A hard kill cannot tear the JSON: we fsync a temp file, then os.replace.
 Does not overwrite an existing scored file with an all-[[0]] result.
@@ -48,7 +49,7 @@ def atomic_write_json(path: str | Path, obj) -> None:
 def resolve_pool_mode(keep_primary: bool, pool_mode: str | None) -> str:
     if keep_primary:
         return "keep-primary"
-    mode = (pool_mode or os.getenv("NVARC_POOL_MODE") or "pair").strip().lower().replace("_", "-")
+    mode = (pool_mode or os.getenv("NVARC_POOL_MODE") or "keep-primary").strip().lower().replace("_", "-")
     if mode in ("keep", "keep-primary"):
         return "keep-primary"
     if mode in ("mixed", "pool", "mean-quality", "mean_quality"):
@@ -143,7 +144,7 @@ def main():
     ap.add_argument("--keep-primary", action="store_true",
                     help="legacy: mixed mean_quality then force pass-A top-1")
     ap.add_argument("--pool-mode", default="",
-                    help="pair (default), mixed, or keep-primary. pair = A_top1+B_top1")
+                    help="keep-primary (default), mixed, or pair. pair = A_top1+B_top1")
     ap.add_argument("--submission", default="/kaggle/working/submission.json")
     args = ap.parse_args()
 
