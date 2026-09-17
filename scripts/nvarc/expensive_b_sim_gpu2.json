@@ -48,9 +48,24 @@
     "da515329",
     "edb79dae"
   ],
+  "kaggle_equiv": {
+    "cap_name": "16x16",
+    "cap_h": 13.57922720624341,
+    "walls": {
+      "16x16": 13.57922720624341,
+      "n6x6_v11_A+B": 13.015313157571686,
+      "n6x6_old_A+B": 12.750006503462792,
+      "n6x6_old_timing": 12.851944444444445
+    },
+    "leftover_h": 5.537330362266964,
+    "n6_max_h": 13.015313157571686,
+    "n6_leftover_h": 4.973416313595241,
+    "note": "6x6 two-pass is COMPLETE on hidden Kaggle 12h. Local cap = max(16x16 pickle span, GPU 6x6 two-pass spans)."
+  },
   "b_budget_local_h": 5.537330362266964,
+  "b_budget_equiv_h": 5.537330362266964,
   "b_budget_kaggle_h": 3.6247698226902205,
-  "policy": "A cheap-first to completion, leftover-B cheap-first until wall, mixed mean_quality",
+  "policy": "A cheap-first to completion, leftover-B cheap-first until max(16x16, 6x6 two-pass), mixed mean_quality",
   "recommend_local": {
     "mixed": 40.00000000000001,
     "mixed_pct": 33.33333333333334,
@@ -73,6 +88,7 @@
     "b_unique_in": 9,
     "a_missing_in": 12,
     "within_16x16": true,
+    "within_cap": true,
     "within_kaggle12": false
   },
   "recommend_kaggle": {
@@ -97,7 +113,33 @@
     "b_unique_in": 5,
     "a_missing_in": 9,
     "within_16x16": true,
+    "within_cap": true,
     "within_kaggle12": true
+  },
+  "recommend_n6": {
+    "mixed": 38.50000000000001,
+    "mixed_pct": 32.08333333333334,
+    "mixed_top2": 50,
+    "keepP": 39.50000000000001,
+    "keepP_pct": 32.91666666666667,
+    "pair": 38.00000000000001,
+    "pair_pct": 31.666666666666675,
+    "oracle": 43.49999999999999,
+    "oracle_pct": 36.24999999999999,
+    "gold_in_pool": 58,
+    "n_out": 172,
+    "n_b_tasks": 90,
+    "kind": "cheap-first",
+    "n_b_decoded": 75,
+    "b_h": 4.907338614980393,
+    "a_h": 8.041896843976446,
+    "total_h": 12.949235458956839,
+    "work_frac": 0.5444119432932755,
+    "b_unique_in": 6,
+    "a_missing_in": 12,
+    "within_16x16": true,
+    "within_cap": true,
+    "within_kaggle12": false
   },
   "expensive_prefix_local": {
     "mixed": 36.5,
@@ -121,6 +163,7 @@
     "b_unique_in": 5,
     "a_missing_in": 8,
     "within_16x16": true,
+    "within_cap": true,
     "within_kaggle12": false
   },
   "expensive_prefix_kaggle": {
@@ -145,6 +188,7 @@
     "b_unique_in": 0,
     "a_missing_in": 5,
     "within_16x16": true,
+    "within_cap": true,
     "within_kaggle12": true
   },
   "bootstrap": {
@@ -206,6 +250,7 @@
       "b_unique_in": 0,
       "a_missing_in": 0,
       "within_16x16": true,
+      "within_cap": true,
       "within_kaggle12": true
     },
     {
@@ -230,6 +275,7 @@
       "b_unique_in": 1,
       "a_missing_in": 2,
       "within_16x16": true,
+      "within_cap": true,
       "within_kaggle12": true
     },
     {
@@ -254,6 +300,7 @@
       "b_unique_in": 2,
       "a_missing_in": 4,
       "within_16x16": true,
+      "within_cap": true,
       "within_kaggle12": true
     },
     {
@@ -278,6 +325,7 @@
       "b_unique_in": 2,
       "a_missing_in": 7,
       "within_16x16": true,
+      "within_cap": true,
       "within_kaggle12": true
     },
     {
@@ -302,6 +350,7 @@
       "b_unique_in": 4,
       "a_missing_in": 9,
       "within_16x16": true,
+      "within_cap": true,
       "within_kaggle12": true
     },
     {
@@ -326,6 +375,7 @@
       "b_unique_in": 5,
       "a_missing_in": 9,
       "within_16x16": true,
+      "within_cap": true,
       "within_kaggle12": true
     },
     {
@@ -350,6 +400,32 @@
       "b_unique_in": 5,
       "a_missing_in": 10,
       "within_16x16": true,
+      "within_cap": true,
+      "within_kaggle12": false
+    },
+    {
+      "mixed": 38.50000000000001,
+      "mixed_pct": 32.08333333333334,
+      "mixed_top2": 50,
+      "keepP": 39.50000000000001,
+      "keepP_pct": 32.91666666666667,
+      "pair": 38.00000000000001,
+      "pair_pct": 31.666666666666675,
+      "oracle": 43.49999999999999,
+      "oracle_pct": 36.24999999999999,
+      "gold_in_pool": 58,
+      "n_out": 172,
+      "n_b_tasks": 90,
+      "kind": "cheap-first",
+      "n_b_decoded": 75,
+      "b_h": 4.907338614980393,
+      "a_h": 8.041896843976446,
+      "total_h": 12.949235458956839,
+      "work_frac": 0.5444119432932755,
+      "b_unique_in": 6,
+      "a_missing_in": 12,
+      "within_16x16": true,
+      "within_cap": true,
       "within_kaggle12": false
     },
     {
@@ -374,6 +450,7 @@
       "b_unique_in": 6,
       "a_missing_in": 12,
       "within_16x16": true,
+      "within_cap": true,
       "within_kaggle12": false
     },
     {
@@ -398,6 +475,7 @@
       "b_unique_in": 9,
       "a_missing_in": 12,
       "within_16x16": true,
+      "within_cap": true,
       "within_kaggle12": false
     },
     {
@@ -422,6 +500,7 @@
       "b_unique_in": 9,
       "a_missing_in": 12,
       "within_16x16": false,
+      "within_cap": false,
       "within_kaggle12": false
     },
     {
@@ -446,6 +525,7 @@
       "b_unique_in": 9,
       "a_missing_in": 15,
       "within_16x16": false,
+      "within_cap": false,
       "within_kaggle12": false
     },
     {
@@ -470,6 +550,7 @@
       "b_unique_in": 9,
       "a_missing_in": 15,
       "within_16x16": false,
+      "within_cap": false,
       "within_kaggle12": false
     },
     {
@@ -494,6 +575,7 @@
       "b_unique_in": 0,
       "a_missing_in": 0,
       "within_16x16": true,
+      "within_cap": true,
       "within_kaggle12": true
     },
     {
@@ -518,6 +600,7 @@
       "b_unique_in": 0,
       "a_missing_in": 1,
       "within_16x16": true,
+      "within_cap": true,
       "within_kaggle12": true
     },
     {
@@ -542,6 +625,7 @@
       "b_unique_in": 0,
       "a_missing_in": 2,
       "within_16x16": true,
+      "within_cap": true,
       "within_kaggle12": true
     },
     {
@@ -566,6 +650,7 @@
       "b_unique_in": 0,
       "a_missing_in": 5,
       "within_16x16": true,
+      "within_cap": true,
       "within_kaggle12": true
     },
     {
@@ -590,6 +675,7 @@
       "b_unique_in": 0,
       "a_missing_in": 5,
       "within_16x16": true,
+      "within_cap": true,
       "within_kaggle12": true
     },
     {
@@ -614,6 +700,7 @@
       "b_unique_in": 0,
       "a_missing_in": 5,
       "within_16x16": true,
+      "within_cap": true,
       "within_kaggle12": true
     },
     {
@@ -638,6 +725,7 @@
       "b_unique_in": 2,
       "a_missing_in": 5,
       "within_16x16": true,
+      "within_cap": true,
       "within_kaggle12": false
     },
     {
@@ -662,6 +750,7 @@
       "b_unique_in": 4,
       "a_missing_in": 6,
       "within_16x16": true,
+      "within_cap": true,
       "within_kaggle12": false
     },
     {
@@ -686,6 +775,7 @@
       "b_unique_in": 5,
       "a_missing_in": 8,
       "within_16x16": true,
+      "within_cap": true,
       "within_kaggle12": false
     },
     {
@@ -710,6 +800,7 @@
       "b_unique_in": 6,
       "a_missing_in": 8,
       "within_16x16": false,
+      "within_cap": false,
       "within_kaggle12": false
     },
     {
@@ -734,6 +825,7 @@
       "b_unique_in": 7,
       "a_missing_in": 12,
       "within_16x16": false,
+      "within_cap": false,
       "within_kaggle12": false
     },
     {
@@ -758,10 +850,11 @@
       "b_unique_in": 7,
       "a_missing_in": 12,
       "within_16x16": false,
+      "within_cap": false,
       "within_kaggle12": false
     }
   ],
   "ranker": "mixed mean_quality",
   "b_order": "cheap-first estimated_work (generic); expensive-first prefix for comparison only",
-  "note": "Do not skip a fitted number of expensive tasks. Hidden eval is a different 120. Day-after: leftover-B --order cheap until wall, mixed mean_quality."
+  "note": "Do not skip a fitted number of expensive tasks. Hidden eval is a different 120. Day-after: leftover-B --order cheap until kaggle-equiv wall, mixed mean_quality."
 }
