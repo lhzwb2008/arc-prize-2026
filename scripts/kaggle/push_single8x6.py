@@ -13,6 +13,14 @@ FOLDER = ROOT / "notebooks" / "nvarc_2026"
 OUT = Path(os.environ.get("NVARC_SINGLE_KERNEL", "/opt/work/nvarc/single8x6_kernel.json"))
 
 
+def extract_version(payload: dict):
+    return (
+        payload.get("version_number")
+        or payload.get("versionNumber")
+        or payload.get("version_Number")
+    )
+
+
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--folder", default=str(FOLDER))
@@ -41,12 +49,13 @@ def main() -> int:
         "ref": getattr(resp, "ref", None),
         "url": getattr(resp, "url", None),
         "version_number": getattr(resp, "version_number", None),
+        "versionNumber": getattr(resp, "versionNumber", None),
         "error": getattr(resp, "error", None),
     }
     print(json.dumps(payload, indent=2, default=str), flush=True)
     if payload.get("error"):
         raise SystemExit(f"FAIL push error: {payload['error']}")
-    version = payload.get("version_number")
+    version = extract_version(payload)
     if version is None:
         raise SystemExit("FAIL: push returned no version_number")
     doc = {

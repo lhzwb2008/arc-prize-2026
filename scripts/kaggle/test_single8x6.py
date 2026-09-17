@@ -139,6 +139,12 @@ class DryRunScriptTests(unittest.TestCase):
             self.assertIn("already terminal", p.stdout)
             self.assertIn("elapsed_h=8.5", p.stdout)
 
+    def test_extract_version_camel_case(self):
+        sys.path.insert(0, str(ROOT / "scripts/kaggle"))
+        import push_single8x6
+        self.assertEqual(push_single8x6.extract_version({"versionNumber": 15}), 15)
+        self.assertEqual(push_single8x6.extract_version({"version_number": 16}), 16)
+
 
 if __name__ == "__main__":
     unittest.main()
