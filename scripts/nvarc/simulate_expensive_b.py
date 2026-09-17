@@ -1,10 +1,14 @@
 #!/usr/bin/env python3
-"""CPU: leftover-B under the first 16×16 wall. Generic cheap-first policy.
+"""CPU: leftover-B under the Kaggle-12h-equivalent local wall.
+
+The equivalent wall is max(first 16×16 pickle span, GPU 6×6 two-pass spans).
+6×6 two-pass is known COMPLETE on hidden Kaggle 12h, so the longer of those
+local walls is the 12h cap; leftover-B is that cap minus pass-A hours.
 
 Uses existing n8x6 pickle dirs on GPU2. Does not touch the GPU.
 
-A stays full; leftover B is a cheap-first prefix until wall. Ranking is mixed
-mean_quality. Expensive-first prefix is reported as a comparison only.
+A stays full; leftover B is a cheap-first prefix until that cap. Ranking is
+mixed mean_quality. Expensive-first prefix is reported as a comparison only.
 Do not skip a fitted number of expensive tasks — hidden eval is a different 120.
 
   python simulate_expensive_b.py \
@@ -54,6 +58,27 @@ def pickle_span_h(out_dir: str | Path) -> float | None:
     if len(ts) < 2:
         return None
     return (max(ts) - min(ts)) / 3600.0
+
+
+def two_pass_hours(a_dir: str | Path, b_dir: str | Path) -> float | None:
+    a = pickle_span_h(a_dir)
+    b = pickle_span_h(b_dir)
+    if a is None or b is None:
+        return None
+    return a + b
+
+
+def pick_kaggle_equiv_wall(named_hours: dict[str, float]) -> tuple[str, float]:
+    """Longer local wall that still maps to a Kaggle 12h COMPLETE (6x6 two-pass)."""
+    named = {k: v for k, v in named_hours.items() if v and v > 0}
+    if not named:
+        return "none", 0.0
+    name = max(named, key=named.get)
+    return name, float(named[name])
+
+
+def leftover_hours(cap_h: float, a_h: float) -> float:
+    return max(0.0, float(cap_h) - float(a_h))
 
 
 def task_done_mtime(out_dir: str | Path) -> dict[str, float]:
@@ -211,6 +236,10 @@ def main() -> int:
     ap.add_argument("--outputs", default="/opt/work/nvarc/eval120_n8x6_a/outputs")
     ap.add_argument("--outputs-b", default="/opt/work/nvarc/eval120_n8x6_b/outputs")
     ap.add_argument("--full-16x16", default="/opt/work/nvarc/eval120/outputs")
+    ap.add_argument("--n6x6-a", default="/opt/work/nvarc/eval120_n6x6_v11_a/outputs")
+    ap.add_argument("--n6x6-b", default="/opt/work/nvarc/eval120_n6x6_v11_b/outputs")
+    ap.add_argument("--n6x6-old-a", default="/opt/work/nvarc/eval120_n6x6_a/outputs")
+    ap.add_argument("--n6x6-old-b", default="/opt/work/nvarc/eval120_n6x6_b/outputs")
     ap.add_argument("--t16-hours", type=float, default=0.0,
                     help="override 16x16 wall hours (0 = pickle span)")
     ap.add_argument("--a-hours", type=float, default=0.0,
@@ -233,6 +262,23 @@ def main() -> int:
     t16_h = args.t16_hours or pickle_span_h(args.full_16x16) or 13.58
     a_h = args.a_hours or pickle_span_h(args.outputs) or 8.04
     b_span = pickle_span_h(args.outputs_b) or 7.03
+    n6_v11 = two_pass_hours(args.n6x6_a, args.n6x6_b)
+    n6_old = two_pass_hours(args.n6x6_old_a, args.n6x6_old_b)
+    walls = {"16x16": t16_h}
+    if n6_v11:
+        walls["n6x6_v11_A+B"] = n6_v11
+    if n6_old:
+        walls["n6x6_old_A+B"] = n6_old
+    cap_name, cap_h = pick_kaggle_equiv_wall(walls)
+    print("=== local walls (1x3090) vs Kaggle 12h ===", flush=True)
+    for k, v in walls.items():
+        mark = "  <-- cap" if k == cap_name else ""
+        print(f"  {k:18s} {v:6.3f}h{mark}", flush=True)
+    print(
+        f"  Kaggle 12h equivalent = max(...) = {cap_h:.3f}h ({cap_name}). "
+        f"6x6 two-pass is known COMPLETE on hidden 12h.",
+        flush=True,
+    )
 
     done_b = task_done_mtime(args.outputs_b)
     start_b = min((f.stat().st_mtime for f in Path(args.outputs_b).iterdir() if f.is_file()), default=0.0)
@@ -295,11 +341,15 @@ def main() -> int:
             flush=True,
         )
 
-    b_budget_local = max(0.0, t16_h - a_h)
-    b_budget_kaggle = max(0.0, KAGGLE_H - KAGGLE_STOP_MIN / 60.0 - a_h)
+    b_budget_equiv = leftover_hours(cap_h, a_h)
+    b_budget_local = b_budget_equiv
+    b_budget_kaggle = leftover_hours(KAGGLE_H - KAGGLE_STOP_MIN / 60.0, a_h)
+    n6_h = max((v for k, v in walls.items() if k.startswith("n6x6") and v), default=0.0)
+    b_budget_n6 = leftover_hours(n6_h, a_h) if n6_h else 0.0
     print(
-        f"\nB leftover budgets: local_16x16 {b_budget_local:.2f}h  "
-        f"kaggle_12h-20min {b_budget_kaggle:.2f}h (A assumed {a_h:.2f}h)",
+        f"\nB leftover budgets: kaggle-equiv({cap_name}) {b_budget_equiv:.2f}h  "
+        f"literal_12h-20min {b_budget_kaggle:.2f}h  "
+        f"n6x6-max {b_budget_n6:.2f}h (A {a_h:.2f}h)",
         flush=True,
     )
 
@@ -326,18 +376,24 @@ def main() -> int:
             "b_unique_in": n_b_unique,
             "a_missing_in": n_miss,
             "within_16x16": a_h + b_h <= t16_h + 1e-6,
+            "within_cap": a_h + b_h <= cap_h + 1e-6,
             "within_kaggle12": a_h + b_h <= (KAGGLE_H - KAGGLE_STOP_MIN / 60.0) + 1e-6,
             "keys": keep,
         }
         flag = ""
-        if row["within_16x16"]:
+        if row["within_cap"]:
+            flag += " [<=cap]"
+        if row["within_16x16"] and abs(t16_h - cap_h) > 1e-6:
             flag += " [<=16x16]"
         if row["within_kaggle12"]:
-            flag += " [<=kaggle12]"
+            flag += " [<=literal12]"
         print(fmt_row(row) + f"  B-wins {n_b_unique}/{len(b_unique)}  A-miss {n_miss}/{len(a_missing)}{flag}", flush=True)
         return row
 
-    hour_grid = [0.0, 1.0, 2.0, 3.0, 3.5, 4.0, b_budget_kaggle, 5.0, b_budget_local, 6.0, 7.0, b_span]
+    hour_grid = [
+        0.0, 1.0, 2.0, 3.0, 3.5, 4.0, b_budget_kaggle, 5.0,
+        b_budget_n6, b_budget_equiv, 6.0, 7.0, b_span,
+    ]
     hour_grid = sorted({round(h, 3) for h in hour_grid if h >= 0})
 
     rows = []
@@ -361,19 +417,27 @@ def main() -> int:
         seen_e.add(key)
         rows.append(eval_keep("expensive-first", keep))
 
-    cheap_local = eval_keep("cheap-first", prefix_until_hours(cheap, dur_b, b_budget_local))
+    cheap_local = eval_keep("cheap-first", prefix_until_hours(cheap, dur_b, b_budget_equiv))
     cheap_kaggle = eval_keep("cheap-first", prefix_until_hours(cheap, dur_b, b_budget_kaggle))
-    exp_local = eval_keep("expensive-first", prefix_until_hours(exp_order, dur_b, b_budget_local))
+    cheap_n6 = (
+        eval_keep("cheap-first", prefix_until_hours(cheap, dur_b, b_budget_n6))
+        if n6_h and abs(n6_h - cap_h) > 1e-6
+        else None
+    )
+    exp_local = eval_keep("expensive-first", prefix_until_hours(exp_order, dur_b, b_budget_equiv))
     exp_kaggle = eval_keep("expensive-first", prefix_until_hours(exp_order, dur_b, b_budget_kaggle))
-    # eval_keep already printed; those four may duplicate a grid row. Fine.
+    # eval_keep already printed; those may duplicate a grid row. Fine.
 
     print("\n=== policy (generic: A done, B cheap-first until wall, mixed mean_q) ===", flush=True)
-    for name, rec, bud in (
-        ("cheap-first @16x16 leftover", cheap_local, t16_h),
-        ("cheap-first @kaggle12 leftover", cheap_kaggle, KAGGLE_H - KAGGLE_STOP_MIN / 60.0),
-        ("expensive-first @16x16 leftover", exp_local, t16_h),
-        ("expensive-first @kaggle12 leftover", exp_kaggle, KAGGLE_H - KAGGLE_STOP_MIN / 60.0),
-    ):
+    policy_rows = [
+        (f"cheap-first @kaggle-equiv leftover ({cap_name})", cheap_local, cap_h),
+        ("cheap-first @literal-12h leftover", cheap_kaggle, KAGGLE_H - KAGGLE_STOP_MIN / 60.0),
+        (f"expensive-first @kaggle-equiv leftover ({cap_name})", exp_local, cap_h),
+        ("expensive-first @literal-12h leftover", exp_kaggle, KAGGLE_H - KAGGLE_STOP_MIN / 60.0),
+    ]
+    if cheap_n6 is not None:
+        policy_rows.insert(1, ("cheap-first @6x6-two leftover (sensitivity)", cheap_n6, n6_h))
+    for name, rec, bud in policy_rows:
         delta = rec["mixed_pct"] - pct(a_sc)
         print(
             f"  {name} cap {bud:.2f}h -> nB={rec['n_b_tasks']} B={rec['b_h']:.2f}h "
@@ -388,23 +452,23 @@ def main() -> int:
     boot_score = bootstrap_delta_pct({t: 0.0 for t in cheap_local["mixed_pts"]}, cheap_local["mixed_pts"])
     print("\n=== paired bootstrap on the same 120 public tasks (Kaggle percent) ===", flush=True)
     print(
-        f"  cheap@16x16 mixed {cheap_local['mixed_pct']:.2f}  "
+        f"  cheap@kaggle-equiv mixed {cheap_local['mixed_pct']:.2f}  "
         f"score CI90 [{boot_score['ci90_pct'][0]:.2f}, {boot_score['ci90_pct'][1]:.2f}]",
         flush=True,
     )
     print(
-        f"  cheap@16x16 minus A: {boot_cheap_a['mean_pct']:+.2f}  "
+        f"  cheap@kaggle-equiv minus A: {boot_cheap_a['mean_pct']:+.2f}  "
         f"CI90 [{boot_cheap_a['ci90_pct'][0]:+.2f}, {boot_cheap_a['ci90_pct'][1]:+.2f}]  "
         f"P(<=A) {boot_cheap_a['p_lt_0']+boot_cheap_a['p_eq_0']:.3f}",
         flush=True,
     )
     print(
-        f"  cheap@16x16 minus full mixed: {boot_cheap_full['mean_pct']:+.2f}  "
+        f"  cheap@kaggle-equiv minus full mixed: {boot_cheap_full['mean_pct']:+.2f}  "
         f"CI90 [{boot_cheap_full['ci90_pct'][0]:+.2f}, {boot_cheap_full['ci90_pct'][1]:+.2f}]",
         flush=True,
     )
     print(
-        f"  exp-prefix@16x16 minus A: {boot_exp_a['mean_pct']:+.2f}  "
+        f"  exp-prefix@kaggle-equiv minus A: {boot_exp_a['mean_pct']:+.2f}  "
         f"CI90 [{boot_exp_a['ci90_pct'][0]:+.2f}, {boot_exp_a['ci90_pct'][1]:+.2f}]",
         flush=True,
     )
@@ -434,11 +498,28 @@ def main() -> int:
         "b_unique": b_unique,
         "b_unique_expensive_rank": {t: rank_work[t] + 1 for t in b_unique},
         "a_missing": a_missing,
-        "b_budget_local_h": b_budget_local,
+        "kaggle_equiv": {
+            "cap_name": cap_name,
+            "cap_h": cap_h,
+            "walls": walls,
+            "leftover_h": b_budget_equiv,
+            "n6_max_h": n6_h,
+            "n6_leftover_h": b_budget_n6,
+            "note": (
+                "6x6 two-pass is COMPLETE on hidden Kaggle 12h. Local cap = "
+                "max(16x16 pickle span, GPU 6x6 two-pass spans)."
+            ),
+        },
+        "b_budget_local_h": b_budget_equiv,
+        "b_budget_equiv_h": b_budget_equiv,
         "b_budget_kaggle_h": b_budget_kaggle,
-        "policy": "A cheap-first to completion, leftover-B cheap-first until wall, mixed mean_quality",
+        "policy": (
+            "A cheap-first to completion, leftover-B cheap-first until "
+            "max(16x16, 6x6 two-pass), mixed mean_quality"
+        ),
         "recommend_local": strip_row(cheap_local),
         "recommend_kaggle": strip_row(cheap_kaggle),
+        "recommend_n6": strip_row(cheap_n6),
         "expensive_prefix_local": strip_row(exp_local),
         "expensive_prefix_kaggle": strip_row(exp_kaggle),
         "bootstrap": {
@@ -452,7 +533,7 @@ def main() -> int:
         "b_order": "cheap-first estimated_work (generic); expensive-first prefix for comparison only",
         "note": (
             "Do not skip a fitted number of expensive tasks. Hidden eval is a different "
-            "120. Day-after: leftover-B --order cheap until wall, mixed mean_quality."
+            "120. Day-after: leftover-B --order cheap until kaggle-equiv wall, mixed mean_quality."
         ),
     }
     if args.out:

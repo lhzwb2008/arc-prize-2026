@@ -1,5 +1,9 @@
 #!/usr/bin/env python3
-"""After pass A, leftover-B cheap-first until the 16x16 (or Kaggle 12h) wall.
+"""After pass A, leftover-B cheap-first until the Kaggle-12h-equivalent wall.
+
+Default cap is max(first 16x16 pickle span, GPU 6x6 two-pass spans).
+6x6 two-pass is known COMPLETE on hidden Kaggle 12h. --kaggle12 uses a
+literal 12h-20min clock instead.
 
 Generic policy, no per-task key list: starter --order cheap + --end-time.
 Pooling is mixed mean_quality. Does not push a kernel and does not submit.
@@ -30,6 +34,11 @@ B_OUT = str(WORK / B_NAME / "outputs")
 SUB = str(SUM / "submission.json")
 T16_H = float(os.getenv("NVARC_T16_HOURS", "13.58"))
 KAGGLE_H = float(os.getenv("NVARC_KAGGLE_HOURS", "12.0"))
+FULL_16 = str(WORK / os.getenv("NVARC_FULL_16X16", "eval120") / "outputs")
+N6A = str(WORK / os.getenv("NVARC_N6X6_A", "eval120_n6x6_v11_a") / "outputs")
+N6B = str(WORK / os.getenv("NVARC_N6X6_B", "eval120_n6x6_v11_b") / "outputs")
+N6OLD_A = str(WORK / os.getenv("NVARC_N6X6_OLD_A", "eval120_n6x6_a") / "outputs")
+N6OLD_B = str(WORK / os.getenv("NVARC_N6X6_OLD_B", "eval120_n6x6_b") / "outputs")
 
 
 def log(msg):
@@ -46,16 +55,43 @@ def pickle_span_h(out_dir: str) -> float:
     return (max(ts) - min(ts)) / 3600.0
 
 
+def two_pass_hours(a_dir: str, b_dir: str) -> float:
+    a = pickle_span_h(a_dir)
+    b = pickle_span_h(b_dir)
+    if a <= 0 or b <= 0:
+        return 0.0
+    return a + b
+
+
+def kaggle_equiv_cap() -> tuple[float, str, dict[str, float]]:
+    forced = os.getenv("NVARC_CAP_HOURS")
+    t16 = pickle_span_h(FULL_16) or T16_H
+    walls = {"16x16": t16}
+    n6 = two_pass_hours(N6A, N6B)
+    if n6 > 0:
+        walls["n6x6_v11_A+B"] = n6
+    n6old = two_pass_hours(N6OLD_A, N6OLD_B)
+    if n6old > 0:
+        walls["n6x6_old_A+B"] = n6old
+    cap_name = max(walls, key=walls.get)
+    cap_h = walls[cap_name]
+    if forced:
+        return float(forced), "NVARC_CAP_HOURS", walls
+    return cap_h, cap_name, walls
+
+
 def main() -> int:
     dry = "--dry-run" in sys.argv
-    cap = T16_H
+    cap, cap_name, walls = kaggle_equiv_cap()
     if "--kaggle12" in sys.argv:
         cap = KAGGLE_H - 20.0 / 60.0
+        cap_name = "literal-12h-20min"
     a_h = pickle_span_h(PRIMARY)
     b_budget = max(0.15, cap - a_h)
+    wall_s = " ".join(f"{k}={v:.2f}h" for k, v in walls.items())
     log(
-        f"A wall {a_h:.2f}h  cap {cap:.2f}h  leftover-B {b_budget:.2f}h  "
-        f"order=cheap  pool=mixed mean_quality"
+        f"walls {wall_s}  A {a_h:.2f}h  cap {cap:.2f}h ({cap_name})  "
+        f"leftover-B {b_budget:.2f}h  order=cheap  pool=mixed mean_quality"
     )
     if dry:
         log("dry-run: not launching starter")

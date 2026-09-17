@@ -16,7 +16,9 @@ from simulate_expensive_b import (  # noqa: E402
     estimated_work,
     expensive_order,
     hours_for_subset,
+    leftover_hours,
     pick_best_within_budget,
+    pick_kaggle_equiv_wall,
     prefix_until_hours,
     restrict_decoded,
     sequential_durations,
@@ -74,6 +76,28 @@ class WorkOrderTests(unittest.TestCase):
         self.assertEqual(rec["b_h"], 5.5)
         rec12 = pick_best_within_budget(rows, 11.67)
         self.assertEqual(rec12["b_h"], 3.5)
+
+    def test_pick_kaggle_equiv_wall_takes_longer(self):
+        name, h = pick_kaggle_equiv_wall({
+            "16x16": 13.579,
+            "n6x6_v11_A+B": 13.015,
+            "n6x6_old_A+B": 12.852,
+        })
+        self.assertEqual(name, "16x16")
+        self.assertAlmostEqual(h, 13.579)
+        name6, h6 = pick_kaggle_equiv_wall({
+            "16x16": 12.0,
+            "n6x6_v11_A+B": 13.1,
+        })
+        self.assertEqual(name6, "n6x6_v11_A+B")
+        self.assertAlmostEqual(h6, 13.1)
+        none_name, none_h = pick_kaggle_equiv_wall({"16x16": 0.0, "n6": None})
+        self.assertEqual(none_name, "none")
+        self.assertEqual(none_h, 0.0)
+
+    def test_leftover_hours(self):
+        self.assertAlmostEqual(leftover_hours(13.579, 8.042), 5.537, places=3)
+        self.assertEqual(leftover_hours(12.0, 13.0), 0.0)
 
 
 if __name__ == "__main__":
