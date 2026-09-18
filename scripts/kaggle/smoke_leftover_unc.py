@@ -74,10 +74,14 @@ def main() -> int:
         fails.append("notebook missing b_priority_queue.py")
     else:
         print("OK b_priority_queue.py writefile")
-    if "NVARC_CHECKPOINT_MIN_GAP" not in src:
-        fails.append("notebook missing checkpoint min-gap")
+    if "_hard_merge_watchdog" not in src or "hard-Tminus5" not in src:
+        fails.append("notebook missing 12h-5min hard merge")
     else:
-        print("OK checkpoint min-gap")
+        print("OK 12h-5min hard merge")
+    if 'live_checkpoint("tick"' in src:
+        fails.append("notebook still has live checkpoint ticks")
+    else:
+        print("OK no live ticks")
     if 'NVARC_POOL_MODE": "keep-primary"' not in src:
         fails.append("notebook pool mode is not keep-primary")
     else:

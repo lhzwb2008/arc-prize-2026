@@ -139,8 +139,6 @@ def main() -> int:
         "NVARC_CHECKPOINT_PRIMARY": PRIMARY,
         "NVARC_CHECKPOINT_EXTRAS": B_OUT,
         "NVARC_CHECKPOINT_SUB": SUB,
-        "NVARC_CHECKPOINT_EVERY": "90",
-        "NVARC_CHECKPOINT_MIN_GAP": "300",
         "NVARC_DATA": DATA,
         "NVARC_OUT": B_OUT,
     })

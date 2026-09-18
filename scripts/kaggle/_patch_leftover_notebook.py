@@ -13,7 +13,7 @@ MD = """# ARC Prize 2026 — NVARC 8×6 leftover-B (v17)
 
 Fork of Ivan Sorokin's notebook (`sorokin/qwen3_4b_grids15_sft139`). **Two** 8 train-aug / 6 decode-view LoRA TTT passes.
 
-**Pass A** cheap-first (seed 42). **Pass B** leftover until **12h−2min**, queued by pass-A uncertainty per unit cost: `(1 - A top-1 vote share) / estimated_work`. No task ids. Pooling is **keep-primary**. Live rewrite when pickles change and ≥5 min since last write; hard write at 12h−5min. Workers no longer idle 20 min for a final merge — submission.json is already being rewritten.
+**Pass A** cheap-first (seed 42). **Pass B** leftover until **12h−2min**, queued by pass-A uncertainty per unit cost: `(1 - A top-1 vote share) / estimated_work`. No task ids. Pooling is **keep-primary**. One hard rewrite at **12h−5min** (plus after-A / start / end / signal). No 5-min live ticks — leftover-B keeps the GPU.
 
 **v17.** Driver `SCHEDULE` is leftover. Save Version smoke is still A-only (4 eval keys). Hidden rerun does A then leftover-B.
 """
@@ -23,8 +23,7 @@ from pathlib import Path
 
 # v17: 8x6 leftover-B. A cheap-first; B ordered by A-uncertainty/cost.
 # Save Version (not hidden): A-only 4-key smoke. Hidden: A then leftover-B.
-# Live rewrite gated (pickle change + 5min gap). Hard write at 12h-5min.
-# Workers stop at 12h-2min so the end checkpoint can finish; no 20min TTT idle.
+# One hard write at 12h-5min. No live ticks. Workers stop at 12h-2min.
 SCHEDULE = "leftover"
 
 COMMON = {
@@ -36,8 +35,6 @@ COMMON = {
     "ARC_N_EVAL_AUG": "1",
     "NVARC_TASK_LIMIT": "0",
     "NVARC_DFS_LIMIT": "0",
-    "NVARC_CHECKPOINT_EVERY": "90",
-    "NVARC_CHECKPOINT_MIN_GAP": "300",
     "NVARC_CHECKPOINT_SUB": "/kaggle/working/submission.json",
     "NVARC_HARD_MERGE_TIME": str(hard_merge_time),
     "NVARC_POOL_MODE": "keep-primary",
@@ -48,8 +45,7 @@ os.environ.update(COMMON)
 print(
     f"RECIPE v17 n_train={os.environ['ARC_N_TRAIN_AUG']} geos={os.environ['ARC_N_EVAL_GEOS']} "
     f"eval_aug={os.environ['ARC_N_EVAL_AUG']} schedule={SCHEDULE} ranker=keep-primary "
-    f"b_order=A-uncertainty/cost hard_merge_in={(hard_merge_time-time.time())/60:.1f}min "
-    f"ckpt_min_gap={os.environ['NVARC_CHECKPOINT_MIN_GAP']}s",
+    f"b_order=A-uncertainty/cost hard_merge_in={(hard_merge_time-time.time())/60:.1f}min",
     flush=True,
 )
 
@@ -341,7 +337,38 @@ def main():
             "            live_checkpoint(\"tick\")\n",
             "            live_checkpoint(\"tick\", force=False)\n",
         )
-        nb["cells"][starter_i]["source"] = as_source(starter)
+    tick_loop = '''    def _loop():
+        interval = float(os.getenv("NVARC_CHECKPOINT_EVERY", "90"))
+        while not stop.wait(interval):
+            live_checkpoint("tick", force=False)
+            if hard_merge > 0 and time.time() >= hard_merge:
+                live_checkpoint("hard-Tminus5")
+                break
+
+    t = threading.Thread(target=_loop, daemon=True)
+    t.start()
+'''
+    tick_loop_old = '''    def _loop():
+        interval = float(os.getenv("NVARC_CHECKPOINT_EVERY", "90"))
+        while not stop.wait(interval):
+            live_checkpoint("tick")
+            if hard_merge > 0 and time.time() >= hard_merge:
+                live_checkpoint("hard-Tminus5")
+                break
+
+    t = threading.Thread(target=_loop, daemon=True)
+    t.start()
+'''
+    no_tick = """    # No live ticks. After-A plus the notebook 12h-5min watchdog keep submission.json.
+    # start/end/signal still force-write.
+"""
+    if tick_loop in starter:
+        starter = starter.replace(tick_loop, no_tick)
+    elif tick_loop_old in starter:
+        starter = starter.replace(tick_loop_old, no_tick)
+    elif 'live_checkpoint("tick"' in starter:
+        raise SystemExit("starter still has live ticks; loop block not matched")
+    nb["cells"][starter_i]["source"] = as_source(starter)
 
     md_i = find_cell(nb, "# ARC Prize 2026", cell_type="markdown")
     nb["cells"][md_i]["source"] = as_source(MD)
@@ -375,7 +402,7 @@ def main():
     nb["cells"][wall_i]["source"] = as_source(
         "import time\n"
         "T0 = time.time()\n"
-        "# Live + hard-merge keep submission.json fresh; only reserve 2min for the last write.\n"
+        "# Hard-merge at 12h-5min; workers stop 2min before kill so the last write can finish.\n"
         "global_end_time = T0 + 12 * 3600 - 2 * 60\n"
         "hard_merge_time = T0 + 12 * 3600 - 5 * 60\n"
         "print(\n"
@@ -391,7 +418,9 @@ def main():
     assert "b_priority_queue.py" in src
     assert "NVARC_CHECKPOINT_MIN_GAP" in src
     assert "Save Version smoke: skip leftover-B" in src
-    assert 'live_checkpoint("tick", force=False)' in src
+    assert "_hard_merge_watchdog" in src
+    assert "hard-Tminus5" in src
+    assert 'live_checkpoint("tick"' not in src
     assert "global_end_time = T0 + 12 * 3600 - 2 * 60" in src
     assert "global_end_time = T0 + 12 * 3600 - 20 * 60" not in src
     print("patched", NB, "cells", len(nb["cells"]))

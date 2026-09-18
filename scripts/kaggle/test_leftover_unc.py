@@ -49,11 +49,13 @@ class NotebookLeftoverTests(unittest.TestCase):
         self.assertIn("Save Version smoke: skip leftover-B", self.src)
         self.assertIn("gate_hidden()", self.src)
 
-    def test_keep_primary_and_gated_ckpt(self):
+    def test_keep_primary_and_hard_merge_only(self):
         self.assertIn('NVARC_POOL_MODE": "keep-primary"', self.src)
-        self.assertIn("NVARC_CHECKPOINT_MIN_GAP", self.src)
-        self.assertIn("checkpoint_due", self.src)
-        self.assertIn('live_checkpoint("tick", force=False)', self.src)
+        self.assertIn("_hard_merge_watchdog", self.src)
+        self.assertIn("hard-Tminus5", self.src)
+        self.assertNotIn('live_checkpoint("tick"', self.src)
+        self.assertNotIn('"NVARC_CHECKPOINT_MIN_GAP": "300"', self.src)
+        self.assertNotIn('"NVARC_CHECKPOINT_EVERY": "90"', self.src)
 
     def test_wall_hours_printed(self):
         self.assertIn("wall_h=", self.src)
