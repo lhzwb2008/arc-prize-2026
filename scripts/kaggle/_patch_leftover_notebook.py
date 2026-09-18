@@ -13,7 +13,7 @@ MD = """# ARC Prize 2026 — NVARC 8×6 leftover-B (v17)
 
 Fork of Ivan Sorokin's notebook (`sorokin/qwen3_4b_grids15_sft139`). **Two** 8 train-aug / 6 decode-view LoRA TTT passes.
 
-**Pass A** cheap-first (seed 42). **Pass B** leftover until 12h−20min, queued by pass-A uncertainty per unit cost: `(1 - A top-1 vote share) / estimated_work`. No task ids. Pooling is **keep-primary**. Live rewrite only when pickles change and ≥5 min since last write; hard write at 12h−5min.
+**Pass A** cheap-first (seed 42). **Pass B** leftover until **12h−2min**, queued by pass-A uncertainty per unit cost: `(1 - A top-1 vote share) / estimated_work`. No task ids. Pooling is **keep-primary**. Live rewrite when pickles change and ≥5 min since last write; hard write at 12h−5min. Workers no longer idle 20 min for a final merge — submission.json is already being rewritten.
 
 **v17.** Driver `SCHEDULE` is leftover. Save Version smoke is still A-only (4 eval keys). Hidden rerun does A then leftover-B.
 """
@@ -24,6 +24,7 @@ from pathlib import Path
 # v17: 8x6 leftover-B. A cheap-first; B ordered by A-uncertainty/cost.
 # Save Version (not hidden): A-only 4-key smoke. Hidden: A then leftover-B.
 # Live rewrite gated (pickle change + 5min gap). Hard write at 12h-5min.
+# Workers stop at 12h-2min so the end checkpoint can finish; no 20min TTT idle.
 SCHEDULE = "leftover"
 
 COMMON = {
@@ -370,6 +371,20 @@ def main():
     last = last.replace("schedule=single 8x6 A-only", "schedule=leftover 8x6 A+B-unc")
     nb["cells"][last_i]["source"] = as_source(last)
 
+    wall_i = find_cell(nb, "T0 = time.time()", cell_type="code")
+    nb["cells"][wall_i]["source"] = as_source(
+        "import time\n"
+        "T0 = time.time()\n"
+        "# Live + hard-merge keep submission.json fresh; only reserve 2min for the last write.\n"
+        "global_end_time = T0 + 12 * 3600 - 2 * 60\n"
+        "hard_merge_time = T0 + 12 * 3600 - 5 * 60\n"
+        "print(\n"
+        '    f"wall T0; workers stop in {(global_end_time-T0)/60:.0f} min; "\n'
+        '    f"hard-merge at T+{(hard_merge_time-T0)/60:.0f} min (12h-5min)",\n'
+        "    flush=True,\n"
+        ")\n"
+    )
+
     NB.write_text(json.dumps(nb, indent=1, ensure_ascii=False) + "\n")
     src = "\n".join(cell_src(c) for c in nb["cells"])
     assert 'SCHEDULE = "leftover"' in src
@@ -377,6 +392,8 @@ def main():
     assert "NVARC_CHECKPOINT_MIN_GAP" in src
     assert "Save Version smoke: skip leftover-B" in src
     assert 'live_checkpoint("tick", force=False)' in src
+    assert "global_end_time = T0 + 12 * 3600 - 2 * 60" in src
+    assert "global_end_time = T0 + 12 * 3600 - 20 * 60" not in src
     print("patched", NB, "cells", len(nb["cells"]))
 
 

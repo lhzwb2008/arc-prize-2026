@@ -59,6 +59,11 @@ class NotebookLeftoverTests(unittest.TestCase):
         self.assertIn("wall_h=", self.src)
         self.assertIn("schedule=leftover 8x6 A+B-unc", self.src)
 
+    def test_workers_stop_at_2min_not_20min(self):
+        self.assertIn("global_end_time = T0 + 12 * 3600 - 2 * 60", self.src)
+        self.assertNotIn("global_end_time = T0 + 12 * 3600 - 20 * 60", self.src)
+        self.assertIn("hard_merge_time = T0 + 12 * 3600 - 5 * 60", self.src)
+
 
 class LockSplitTests(unittest.TestCase):
     def test_cron_flock_not_fcntl_lock(self):
