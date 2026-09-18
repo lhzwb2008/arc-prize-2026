@@ -215,7 +215,6 @@ if __name__ == "__main__":
     )
 
     stop = threading.Event()
-    hard_merge = float(os.getenv("NVARC_HARD_MERGE_TIME") or "0")
 
     def _on_term(signum, frame):
         print(f"starter signal {signum}: checkpoint then stop", flush=True)
@@ -224,17 +223,7 @@ if __name__ == "__main__":
     signal.signal(signal.SIGTERM, _on_term)
     signal.signal(signal.SIGINT, _on_term)
 
-    def _loop():
-        interval = float(os.getenv("NVARC_CHECKPOINT_EVERY", "90"))
-        while not stop.wait(interval):
-            # tick: only when pickles changed and >= NVARC_CHECKPOINT_MIN_GAP since last write
-            live_checkpoint("tick", force=False)
-            if hard_merge > 0 and time.time() >= hard_merge:
-                live_checkpoint("hard-Tminus5")
-                break
-
-    t = threading.Thread(target=_loop, daemon=True)
-    t.start()
+    # No live ticks: start/end/signal write. Local finalize runs after end_time.
     threading.Thread(target=put_sentinels, daemon=True).start()
     try:
         live_checkpoint("start")
