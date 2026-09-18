@@ -7,8 +7,9 @@ literal 12h-20min clock instead.
 
 B queue order comes from b_priority_queue.py: pass-A top-1 vote share per
 unit estimated cost (generic rule from A's own outputs, no ids). Falls back
-to cheap-first. Pooling is mixed mean_quality. Does not push a kernel and
-does not submit.
+to cheap-first. Pooling is keep-primary. Writes a new B dir
+(eval120_n8x6_b_unc); never the historical eval120_n8x6_b. Does not push a
+kernel and does not submit. Stops at the cap; does not finish all of B.
 
   python schedule_partial_b.py --dry-run
   python schedule_partial_b.py --dry-run --kaggle12
@@ -30,8 +31,9 @@ SOL = os.getenv("NVARC_SOL", "/opt/data/kaggle/arc-agi_evaluation_solutions.json
 PYTHON = os.getenv("NVARC_PYTHON", sys.executable)
 
 A_NAME = os.getenv("NVARC_N8X6_A", "eval120_n8x6_a")
-B_NAME = os.getenv("NVARC_PARTIAL_B", "eval120_n8x6_b_cheap")
-SUM = WORK / os.getenv("NVARC_PARTIAL_SUM", "eval120_n8x6_partial")
+B_NAME = os.getenv("NVARC_PARTIAL_B", "eval120_n8x6_b_unc")
+SUM = WORK / os.getenv("NVARC_PARTIAL_SUM", "eval120_n8x6_unc")
+FORBIDDEN_B = os.getenv("NVARC_FORBID_B", "eval120_n8x6_b")
 PRIMARY = str(WORK / A_NAME / "outputs")
 B_OUT = str(WORK / B_NAME / "outputs")
 SUB = str(SUM / "submission.json")
@@ -106,8 +108,12 @@ def main() -> int:
     wall_s = " ".join(f"{k}={v:.2f}h" for k, v in walls.items())
     log(
         f"walls {wall_s}  A {a_h:.2f}h  cap {cap:.2f}h ({cap_name})  "
-        f"leftover-B {b_budget:.2f}h  order=A-uncertainty/cost (fallback cheap)  pool=mixed mean_quality"
+        f"leftover-B {b_budget:.2f}h  order=A-uncertainty/cost (fallback cheap)  "
+        f"pool=keep-primary  B={B_NAME}"
     )
+    if B_NAME == FORBIDDEN_B or Path(B_OUT).resolve() == (WORK / FORBIDDEN_B / "outputs").resolve():
+        log(f"refusing to overwrite historical {FORBIDDEN_B}")
+        return 1
     if dry:
         log("dry-run: not launching starter")
         return 0
@@ -129,7 +135,7 @@ def main() -> int:
         "ARC_SCORE_SEED_OFFSET": "7",
         "NVARC_TASK_LIMIT": "0",
         "NVARC_DFS_LIMIT": "0",
-        "NVARC_POOL_MODE": "mixed",
+        "NVARC_POOL_MODE": "keep-primary",
         "NVARC_CHECKPOINT_PRIMARY": PRIMARY,
         "NVARC_CHECKPOINT_EXTRAS": B_OUT,
         "NVARC_CHECKPOINT_SUB": SUB,
@@ -171,13 +177,21 @@ def main() -> int:
         PYTHON, str(HERE / "finalize.py"),
         "--data", DATA, "--solutions", SOL,
         "--outputs", PRIMARY, "--outputs-extra", B_OUT,
-        "--pool-mode", "mixed",
+        "--pool-mode", "keep-primary",
         "--submission", SUB,
         "--report", str(SUM / "report.json"),
     ]
     log(" ".join(fin))
     rc2 = subprocess.call(fin, env=env)
-    log(f"finalize rc={rc2} mixed mean_quality")
+    log(f"finalize rc={rc2} keep-primary")
+    if Path(SUM / "report.json").exists():
+        try:
+            rep = json.loads((SUM / "report.json").read_text())
+            sc = rep.get("score")
+            if sc is not None:
+                log(f"local kaggle-equiv score {100.0 * float(sc) / 120.0:.2f} ({float(sc):.2f}/120)")
+        except (OSError, json.JSONDecodeError, TypeError, ValueError):
+            pass
     return rc2 or rc
 
 

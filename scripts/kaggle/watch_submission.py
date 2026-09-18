@@ -26,6 +26,7 @@ SUBMIT_STATE = Path(os.environ.get(
     "NVARC_SINGLE_STATE", "/opt/work/nvarc/single8x6_submit_state.json"
 ))
 LOCK = Path(os.environ.get("NVARC_WATCH_LOCK", "/tmp/nvarc_single8x6_watch.lock"))
+RUN_LABEL = os.environ.get("NVARC_WATCH_LABEL", "single8x6")
 
 
 def log(msg: str) -> None:
@@ -178,7 +179,7 @@ def main() -> int:
             return 0
         ref = wanted_ref(args.ref)
         if not ref:
-            log("waiting for single8x6 submit ref; skip")
+            log(f"waiting for {RUN_LABEL} submit ref; skip")
             return 0
         kaggle = find_kaggle(args.kaggle)
         rows = list_rows(kaggle)
