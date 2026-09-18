@@ -161,6 +161,13 @@ class LocalScheduleTests(unittest.TestCase):
         self.assertIn("dry-run", p.stdout)
         self.assertIn("eval120_n8x6_b_unc", p.stdout)
 
+    def test_local_launcher_uses_uncertainty_queue_and_nohup(self):
+        sh = (ROOT / "scripts/nvarc/run_leftover_unc_b.sh").read_text()
+        self.assertIn("eval120_n8x6_b_unc", sh)
+        self.assertIn("keep-primary", sh)
+        self.assertIn("nohup", sh)
+        self.assertIn("schedule_partial_b.py", sh)
+
 
 if __name__ == "__main__":
     unittest.main()
