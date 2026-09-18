@@ -32,7 +32,41 @@ def estimated_work(task):
     return train_tokens * n_train + test_tokens * n_geos * len(task["test"])
 
 
-def live_checkpoint(tag="live"):
+def pickle_fingerprint(dirs):
+    """(file count, newest mtime) over the pickle dirs; cheap to compute."""
+    n = 0
+    newest = 0.0
+    for d in dirs:
+        if not d or not os.path.isdir(d):
+            continue
+        with os.scandir(d) as it:
+            for e in it:
+                if e.is_file():
+                    n += 1
+                    m = e.stat().st_mtime
+                    if m > newest:
+                        newest = m
+    return (n, newest)
+
+
+_CKPT_STATE = {"fp": None, "t": 0.0}
+
+
+def checkpoint_due(dirs, now, min_gap_s, force=False):
+    """Write only when pickles changed and min_gap_s passed since the last write."""
+    fp = pickle_fingerprint(dirs)
+    if force:
+        _CKPT_STATE.update(fp=fp, t=now)
+        return True
+    if fp == _CKPT_STATE["fp"]:
+        return False
+    if now - _CKPT_STATE["t"] < min_gap_s:
+        return False
+    _CKPT_STATE.update(fp=fp, t=now)
+    return True
+
+
+def live_checkpoint(tag="live", force=True):
     primary = os.getenv("NVARC_CHECKPOINT_PRIMARY", "")
     if not primary:
         return
@@ -43,6 +77,9 @@ def live_checkpoint(tag="live"):
     out = os.getenv("NVARC_OUT", "")
     if out and out != primary and out not in extras:
         extras.append(out)
+    min_gap = float(os.getenv("NVARC_CHECKPOINT_MIN_GAP", "300"))
+    if not checkpoint_due([primary] + extras, time.time(), min_gap, force=force):
+        return
     try:
         import fcntl
         from checkpoint import run_live
@@ -190,7 +227,8 @@ if __name__ == "__main__":
     def _loop():
         interval = float(os.getenv("NVARC_CHECKPOINT_EVERY", "90"))
         while not stop.wait(interval):
-            live_checkpoint("tick")
+            # tick: only when pickles changed and >= NVARC_CHECKPOINT_MIN_GAP since last write
+            live_checkpoint("tick", force=False)
             if hard_merge > 0 and time.time() >= hard_merge:
                 live_checkpoint("hard-Tminus5")
                 break

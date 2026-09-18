@@ -1,12 +1,14 @@
 #!/usr/bin/env python3
-"""After pass A, leftover-B cheap-first until the Kaggle-12h-equivalent wall.
+"""After pass A, leftover-B until the Kaggle-12h-equivalent wall.
 
 Default cap is max(first 16x16 pickle span, GPU 6x6 two-pass spans).
 6x6 two-pass is known COMPLETE on hidden Kaggle 12h. --kaggle12 uses a
 literal 12h-20min clock instead.
 
-Generic policy, no per-task key list: starter --order cheap + --end-time.
-Pooling is mixed mean_quality. Does not push a kernel and does not submit.
+B queue order comes from b_priority_queue.py: pass-A top-1 vote share per
+unit estimated cost (generic rule from A's own outputs, no ids). Falls back
+to cheap-first. Pooling is mixed mean_quality. Does not push a kernel and
+does not submit.
 
   python schedule_partial_b.py --dry-run
   python schedule_partial_b.py --dry-run --kaggle12
@@ -104,7 +106,7 @@ def main() -> int:
     wall_s = " ".join(f"{k}={v:.2f}h" for k, v in walls.items())
     log(
         f"walls {wall_s}  A {a_h:.2f}h  cap {cap:.2f}h ({cap_name})  "
-        f"leftover-B {b_budget:.2f}h  order=cheap  pool=mixed mean_quality"
+        f"leftover-B {b_budget:.2f}h  order=A-uncertainty/cost (fallback cheap)  pool=mixed mean_quality"
     )
     if dry:
         log("dry-run: not launching starter")
@@ -132,11 +134,25 @@ def main() -> int:
         "NVARC_CHECKPOINT_EXTRAS": B_OUT,
         "NVARC_CHECKPOINT_SUB": SUB,
         "NVARC_CHECKPOINT_EVERY": "90",
+        "NVARC_CHECKPOINT_MIN_GAP": "300",
         "NVARC_DATA": DATA,
         "NVARC_OUT": B_OUT,
     })
     if Path("/usr/local/cuda/bin/ptxas").exists():
         env["TRITON_PTXAS_PATH"] = "/usr/local/cuda/bin/ptxas"
+
+    # B queue: pass-A uncertainty per unit cost (b_priority_queue.py); no ids, no labels.
+    keys_file = str(SUM / "b_priority_keys.json")
+    qcmd = [
+        PYTHON, str(HERE / "b_priority_queue.py"),
+        "--data", DATA, "--outputs", PRIMARY,
+        "--skip-done", B_OUT, "--keys-out", keys_file,
+    ]
+    log(" ".join(qcmd))
+    rcq = subprocess.call(qcmd, env=env)
+    order_args = ["--order", "file", "--keys-file", keys_file] if rcq == 0 else ["--order", "cheap"]
+    if rcq != 0:
+        log(f"b_priority_queue rc={rcq}; falling back to --order cheap")
 
     end_time = time.time() + b_budget * 3600
     cmd = [
@@ -144,7 +160,7 @@ def main() -> int:
         "--data", DATA,
         "--out", B_OUT,
         "--end-time", str(end_time),
-        "--order", "cheap",
+        *order_args,
         "--skip-done",
     ]
     log(" ".join(cmd))
