@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Push the NVARC kernel (8×6 leftover-B uncertainty/cost) and record version_number."""
+"""Push the NVARC kernel (8×8 leftover-B uncertainty/cost) and record version_number."""
 from __future__ import annotations
 
 import argparse
@@ -10,7 +10,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 FOLDER = ROOT / "notebooks" / "nvarc_2026"
-OUT = Path(os.environ.get("NVARC_LEFTOVER_KERNEL", "/opt/work/nvarc/leftover_unc_kernel.json"))
+OUT = Path(os.environ.get("NVARC_LEFTOVER_KERNEL", "/opt/work/nvarc/leftover_8x8_kernel.json"))
 
 
 def extract_version(payload: dict):
@@ -38,13 +38,15 @@ def main() -> int:
     if "ARC_N_TRAIN_AUG\"] = \"8\"" not in text and "ARC_N_TRAIN_AUG'] = '8'" not in text:
         if 'COMMON["ARC_N_TRAIN_AUG"] = "8"' not in text:
             raise SystemExit("FAIL: notebook is not 8 train-aug")
-    if 'COMMON["ARC_N_EVAL_GEOS"] = "6"' not in text:
-        raise SystemExit("FAIL: leftover_unc push refuses non-8×6 notebook")
+    if 'COMMON["ARC_N_EVAL_GEOS"] = "8"' not in text:
+        raise SystemExit("FAIL: leftover_8x8 push refuses non-8×8 notebook")
+    if 'COMMON["ARC_N_EVAL_GEOS"] = "6"' in text:
+        raise SystemExit("FAIL: leftover_8x8 push refuses leftover 8×6 notebook")
     if "Save Version smoke: skip leftover-B" not in text:
         raise SystemExit("FAIL: notebook would TTT leftover-B on Save Version")
     if "b_priority_queue.py" not in text:
         raise SystemExit("FAIL: notebook missing b_priority_queue.py")
-    print(f"notebook ok: SCHEDULE=leftover 8×6 A+B-unc  folder={folder}", flush=True)
+    print(f"notebook ok: SCHEDULE=leftover 8×8 A+B-unc  folder={folder}", flush=True)
     if args.dry_run:
         print("dry-run: not pushing")
         return 0
@@ -74,7 +76,7 @@ def main() -> int:
         "pushed_utc": datetime.now(timezone.utc).isoformat(),
         "accelerator": args.accelerator,
         "schedule": "leftover",
-        "recipe": "8x6",
+        "recipe": "8x8",
         "b_order": "A-uncertainty/cost",
         "pool": "keep-primary",
     }
