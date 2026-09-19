@@ -20,7 +20,8 @@ chmod +x \
   "$ROOT/scripts/kaggle/submit_leftover_8x8.py" \
   "$ROOT/scripts/kaggle/watch_submission.py" \
   "$ROOT/scripts/kaggle/smoke_leftover_8x8.py" \
-  "$ROOT/scripts/kaggle/push_leftover_8x8.py"
+  "$ROOT/scripts/kaggle/push_leftover_8x8.py" \
+  "$ROOT/scripts/kaggle/refresh_kaggle_oauth.py"
 
 export KAGGLE_CONFIG_DIR=/root/.kaggle
 export NVARC_KAGGLE=$VENV/bin/kaggle
@@ -53,9 +54,9 @@ crontab -l 2>/dev/null \
   > "$TMP" || true
 # 10-min poll; Python no-ops until 08:00 CST (2026-09-20T00:00:00Z)
 # flock file is leftover_8x8_submit.cron.lock; fcntl lock is /tmp/nvarc_leftover_8x8_submit.lock
-printf '%s\n' "*/10 * * * * KAGGLE_CONFIG_DIR=/root/.kaggle NVARC_LEFTOVER_KERNEL=$WORKDIR/leftover_8x8_kernel.json NVARC_LEFTOVER_STATE=$WORKDIR/leftover_8x8_submit_state.json NVARC_LEFTOVER_LOCK=/tmp/nvarc_leftover_8x8_submit.lock /usr/bin/flock -n $SUBMIT_LOCK $VENV/bin/python $ROOT/scripts/kaggle/submit_leftover_8x8.py --once --kaggle $VENV/bin/kaggle >> $SUBMIT_LOG 2>&1  # $SUBMIT_MARK" >> "$TMP"
+printf '%s\n' "*/10 * * * * KAGGLE_CONFIG_DIR=/root/.kaggle NVARC_LEFTOVER_KERNEL=$WORKDIR/leftover_8x8_kernel.json NVARC_LEFTOVER_STATE=$WORKDIR/leftover_8x8_submit_state.json NVARC_LEFTOVER_LOCK=/tmp/nvarc_leftover_8x8_submit.lock /usr/bin/flock -n $SUBMIT_LOCK /bin/bash -lc '$VENV/bin/python $ROOT/scripts/kaggle/refresh_kaggle_oauth.py >> $SUBMIT_LOG 2>&1 && $VENV/bin/python $ROOT/scripts/kaggle/submit_leftover_8x8.py --once --kaggle $VENV/bin/kaggle >> $SUBMIT_LOG 2>&1'  # $SUBMIT_MARK" >> "$TMP"
 # 30-min duration watch; waits until submit writes a ref
-printf '%s\n' "*/30 * * * * KAGGLE_CONFIG_DIR=/root/.kaggle NVARC_WATCH_STATE=$WORKDIR/leftover_8x8_watch.json NVARC_SINGLE_STATE=$WORKDIR/leftover_8x8_submit_state.json NVARC_WATCH_LOCK=/tmp/nvarc_leftover_8x8_watch.lock NVARC_WATCH_LABEL=leftover_8x8 /usr/bin/flock -n $WATCH_LOCK $VENV/bin/python $ROOT/scripts/kaggle/watch_submission.py --once --kaggle $VENV/bin/kaggle >> $WATCH_LOG 2>&1  # $WATCH_MARK" >> "$TMP"
+printf '%s\n' "*/30 * * * * KAGGLE_CONFIG_DIR=/root/.kaggle NVARC_WATCH_STATE=$WORKDIR/leftover_8x8_watch.json NVARC_SINGLE_STATE=$WORKDIR/leftover_8x8_submit_state.json NVARC_WATCH_LOCK=/tmp/nvarc_leftover_8x8_watch.lock NVARC_WATCH_LABEL=leftover_8x8 /usr/bin/flock -n $WATCH_LOCK /bin/bash -lc '$VENV/bin/python $ROOT/scripts/kaggle/refresh_kaggle_oauth.py >> $WATCH_LOG 2>&1 && $VENV/bin/python $ROOT/scripts/kaggle/watch_submission.py --once --kaggle $VENV/bin/kaggle >> $WATCH_LOG 2>&1'  # $WATCH_MARK" >> "$TMP"
 crontab "$TMP"
 rm -f "$TMP"
 echo "crontab:"

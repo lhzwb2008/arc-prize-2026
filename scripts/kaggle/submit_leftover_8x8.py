@@ -196,6 +196,11 @@ def main() -> int:
         log("another submit poll holds the lock; skip")
         return 0
     try:
+        try:
+            from refresh_kaggle_oauth import main as refresh_oauth
+            refresh_oauth()
+        except Exception as e:
+            log(f"oauth refresh skipped: {type(e).__name__}: {e}")
         st = load_json(STATE, {"runs": {}})
         if (st.get("runs") or {}).get(RUN_ID, {}).get("submitted_utc"):
             log("scheduled leftover_8x8 submit already done; nothing to do")

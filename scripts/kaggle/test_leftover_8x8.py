@@ -16,6 +16,7 @@ INSTALL = ROOT / "scripts/kaggle/install_leftover_8x8_cron.sh"
 SUBMIT = ROOT / "scripts/kaggle/submit_leftover_8x8.py"
 WATCH = ROOT / "scripts/kaggle/watch_submission.py"
 PUSH = ROOT / "scripts/kaggle/push_leftover_8x8.py"
+REFRESH = ROOT / "scripts/kaggle/refresh_kaggle_oauth.py"
 
 
 def notebook_src() -> str:
@@ -84,6 +85,9 @@ class LockSplitTests(unittest.TestCase):
         self.assertIn("2026-09-20T00:00:00Z", sh)
         self.assertIn("leftover_unc auto-submit", sh)
         self.assertIn("RUN_ID = \"leftover_8x8\"", submit)
+        self.assertIn("refresh_kaggle_oauth.py", sh)
+        self.assertTrue(REFRESH.is_file())
+        self.assertIn("Does not print tokens", REFRESH.read_text())
 
 
 class DryRunScriptTests(unittest.TestCase):
