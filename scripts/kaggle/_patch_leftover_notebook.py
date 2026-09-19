@@ -9,19 +9,19 @@ ROOT = Path(__file__).resolve().parents[2]
 NB = ROOT / "notebooks/nvarc_2026/nvarc_qwen3_4b_ttt_2026.ipynb"
 QUEUE = ROOT / "scripts/nvarc/b_priority_queue.py"
 
-MD = """# ARC Prize 2026 — NVARC 8×6 leftover-B (v17)
+MD = """# ARC Prize 2026 — NVARC 8×8 leftover-B (v18)
 
-Fork of Ivan Sorokin's notebook (`sorokin/qwen3_4b_grids15_sft139`). **Two** 8 train-aug / 6 decode-view LoRA TTT passes.
+Fork of Ivan Sorokin's notebook (`sorokin/qwen3_4b_grids15_sft139`). **Two** 8 train-aug / 8 decode-view LoRA TTT passes.
 
 **Pass A** cheap-first (seed 42). **Pass B** leftover until **12h−2min**, queued by pass-A uncertainty per unit cost: `(1 - A top-1 vote share) / estimated_work`. No task ids. Pooling is **keep-primary**. One hard rewrite at **12h−5min** (plus after-A / start / end / signal). No 5-min live ticks — leftover-B keeps the GPU.
 
-**v17.** Driver `SCHEDULE` is leftover. Save Version smoke is still A-only (4 eval keys). Hidden rerun does A then leftover-B.
+**v18.** Same leftover-B strategy as v17, recipe lifted 8×6 → 8×8. Driver `SCHEDULE` is leftover. Save Version smoke is still A-only (4 eval keys). Hidden rerun does A then leftover-B.
 """
 
 DRIVER = r'''import os, sys, time, json, subprocess, threading, fcntl
 from pathlib import Path
 
-# v17: 8x6 leftover-B. A cheap-first; B ordered by A-uncertainty/cost.
+# v18: 8x8 leftover-B. A cheap-first; B ordered by A-uncertainty/cost.
 # Save Version (not hidden): A-only 4-key smoke. Hidden: A then leftover-B.
 # One hard write at 12h-5min. No live ticks. Workers stop at 12h-2min.
 SCHEDULE = "leftover"
@@ -40,10 +40,10 @@ COMMON = {
     "NVARC_POOL_MODE": "keep-primary",
 }
 COMMON["ARC_N_TRAIN_AUG"] = "8"
-COMMON["ARC_N_EVAL_GEOS"] = "6"
+COMMON["ARC_N_EVAL_GEOS"] = "8"
 os.environ.update(COMMON)
 print(
-    f"RECIPE v17 n_train={os.environ['ARC_N_TRAIN_AUG']} geos={os.environ['ARC_N_EVAL_GEOS']} "
+    f"RECIPE v18 n_train={os.environ['ARC_N_TRAIN_AUG']} geos={os.environ['ARC_N_EVAL_GEOS']} "
     f"eval_aug={os.environ['ARC_N_EVAL_AUG']} schedule={SCHEDULE} ranker=keep-primary "
     f"b_order=A-uncertainty/cost hard_merge_in={(hard_merge_time-time.time())/60:.1f}min",
     flush=True,
@@ -391,11 +391,8 @@ def main():
 
     last_i = find_cell(nb, "WALL hours=", cell_type="code")
     last = cell_src(nb["cells"][last_i])
-    last = last.replace(
-        'print(f"WALL hours={(time.time()-T0)/3600:.3f} schedule=single 8x6 A-only", flush=True)',
-        'print(f"WALL hours={(time.time()-T0)/3600:.3f} schedule=leftover 8x6 A+B-unc", flush=True)',
-    )
-    last = last.replace("schedule=single 8x6 A-only", "schedule=leftover 8x6 A+B-unc")
+    last = last.replace("schedule=single 8x6 A-only", "schedule=leftover 8x8 A+B-unc")
+    last = last.replace("schedule=leftover 8x6 A+B-unc", "schedule=leftover 8x8 A+B-unc")
     nb["cells"][last_i]["source"] = as_source(last)
 
     wall_i = find_cell(nb, "T0 = time.time()", cell_type="code")
@@ -423,6 +420,8 @@ def main():
     assert 'live_checkpoint("tick"' not in src
     assert "global_end_time = T0 + 12 * 3600 - 2 * 60" in src
     assert "global_end_time = T0 + 12 * 3600 - 20 * 60" not in src
+    assert 'COMMON["ARC_N_EVAL_GEOS"] = "8"' in src
+    assert 'COMMON["ARC_N_EVAL_GEOS"] = "6"' not in src
     print("patched", NB, "cells", len(nb["cells"]))
 
 
